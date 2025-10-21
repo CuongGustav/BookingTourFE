@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --blue600: #2563eb; 
 }
 
 @theme inline {
@@ -14,8 +15,38 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--background);
+    --foreground: var(--foreground);
+  }
+}
+
+/*box-shadow*/
+@layer utilities {
+  .shadow-custom {
+    box-shadow: 
+      0 -1px 2px rgba(0, 0, 0, 0.1),  
+      0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+/*animation*/
+@layer utilities {
+  /*animation text underline*/
+  .underline-animation {
+    position: relative;
+    display: inline-block;
+  }
+  .underline-animation::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--blue600);
+    transition: width 0.3s ease-in-out;
+  }
+  .underline-animation:hover::after {
+    width: 100%;
   }
 }
 
