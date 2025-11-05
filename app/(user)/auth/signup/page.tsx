@@ -5,23 +5,44 @@ import { useState, useEffect, useRef } from "react";
 
 //interface province
 interface Province {
-    code: number;
+    id: number;
     name: string;
-    division_type: string;
-    codename: string;
-    phone_code: number;
+}
+interface Gender{
+    id:number;
+    name:string;
+    value: string;
 }
 
 export default function Login () {
 
-    const [provinces, setProvinces] = useState<Province[]>([]); // Thêm type
+    const [provinces, setProvinces] = useState<Province[]>([]);
     const [selectedProvince, setSelectedProvince] = useState("");
     const [search, setSearch] = useState("");
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const [isOpenDropDownProvince, setIsOpenDropDownProvince] = useState(false);
+    const provinceRef = useRef<HTMLDivElement>(null);
+
+    const [genders, setGenders] = useState<Gender[]>([]);
+    const [selectGender, setSelectGender] = useState("");
+    const [isOpenDropDownGender, setIsOpenDropDownGender] = useState(false);
+    const genderRef = useRef<HTMLDivElement>(null);
+
+    const [selectDay, setSelectDay] = useState< number | null>(null)
+    const [days, setDays] = useState<number[]>([])
+    const [isOpenDropDownDay, setIsOpenDropDownDay] = useState(false)
+    const dayRef = useRef<HTMLDivElement>(null)
+
+    const [selectMonth, setSelectMonth] = useState< number | null>(null)
+    const [isOpenDropDownMonth, setIsOpenDropDownMomth] = useState(false)
+    const monthRef = useRef<HTMLDivElement>(null)
+
+    const [year, setYear] = useState< number | null >(null)
+
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
     const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
+    const [name, setName] = useState("");
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -29,26 +50,87 @@ export default function Login () {
             setPhone(value);
         }
     };
-
-    // Fetch danh sách tỉnh/thành
+    
+    // Dropdown Gender
     useEffect(() => {
-        fetch('https://provinces.open-api.vn/api/p/')
-            .then(res => res.json())
-            .then(data => setProvinces(data))
-            .catch(err => console.error(err));
+        const gendersData = [
+            { id: 1, name: "Trai", value:"Male"},
+            { id: 2, name: "Gái", value:"Female"},
+            { id: 3, name: "Khác", value:"Other"}
+        ]; setGenders(gendersData);
     }, []);
-
+    // Dropdown Province
+    useEffect(() => {
+        const provincesData = [
+            { id: 1, name: "An Giang" },
+            { id: 2, name: "Bắc Ninh" },
+            { id: 3, name: "Cà Mau" },
+            { id: 4, name: "Cao Bằng" },
+            { id: 5, name: "TP. Cần Thơ" },
+            { id: 6, name: "Điện Biên" },
+            { id: 7, name: "Đắk Lắk" },
+            { id: 8, name: "Đồng Nai" },
+            { id: 9, name: "Đồng Tháp" },
+            { id: 10, name: "TP. Đà Nẵng" },
+            { id: 11, name: "TP. Hà Nội" },
+            { id: 12, name: "TP. Hải Phòng" },
+            { id: 13, name: "TP. Hồ Chí Minh" },
+            { id: 14, name: "TP. Huế" },
+            { id: 15, name: "Gia Lai" },
+            { id: 16, name: "Hà Tĩnh" },
+            { id: 17, name: "Hưng Yên" },
+            { id: 18, name: "Khánh Hòa" },
+            { id: 19, name: "Lai Châu" },
+            { id: 20, name: "Lạng Sơn" },
+            { id: 21, name: "Lâm Đồng" },
+            { id: 22, name: "Lào Cai" },
+            { id: 23, name: "Nghệ An" },
+            { id: 24, name: "Ninh Bình" },
+            { id: 25, name: "Phú Thọ" },
+            { id: 26, name: "Quảng Ngãi" },
+            { id: 27, name: "Quảng Ninh" },
+            { id: 28, name: "Quảng Trị" },
+            { id: 29, name: "Sơn La" },
+            { id: 30, name: "Thái Nguyên" },
+            { id: 31, name: "Thanh Hóa" },
+            { id: 32, name: "Tây Ninh" },
+            { id: 33, name: "Tuyên Quang" },
+            { id: 34, name: "Vĩnh Long" },
+        ];
+        setProvinces(provincesData);
+    }, []);
+    //setup day, month, year
+    useEffect(() => {
+        if (selectMonth && year) {
+            const daysInMonth = new Date(year, selectMonth, 0).getDate();
+            const newDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+            setDays(newDays);
+            if (selectDay && selectDay > daysInMonth) setSelectDay(null);
+        } else {
+            setDays(Array.from({ length: 31 }, (_, i) => i + 1));
+        }
+    }, [selectMonth, year, selectDay]);
+    //close dropdown when click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
+            if (provinceRef.current && !provinceRef.current.contains(event.target as Node)) {
+                setIsOpenDropDownProvince(false);
             }
+            if (genderRef.current && !genderRef.current.contains(event.target as Node)) {
+                setIsOpenDropDownGender(false);
+            }
+             if (dayRef.current && !dayRef.current.contains(event.target as Node)) {
+                setIsOpenDropDownDay(false);
+            }
+            if (monthRef.current && !monthRef.current.contains(event.target as Node)){
+                setIsOpenDropDownMomth(false);
+            } 
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
     }, []);
-
     const filteredProvinces = provinces.filter(p => 
         p.name.toLowerCase().includes(search.toLowerCase())
     );
@@ -62,6 +144,17 @@ export default function Login () {
                 </div>
                 <div className="flex flex-col px-12">
                     <form className="flex flex-col mt-4 gap-2 text-lg ">
+                        <div className="grid grid-cols-[200px_1fr] items-center gap-4">
+                            <label htmlFor="username" className="flex gap-1 font-bold">
+                                Email <p className="text-red-600">(*)</p>
+                            </label>
+                            <input
+                                id="email"
+                                type="gmail"
+                                placeholder="Email"
+                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
+                            />
+                        </div>
                         <div className="grid grid-cols-[200px_1fr] items-center gap-4">
                             <label htmlFor="username" className="flex gap-1 font-bold">
                                 Họ và tên <p className="text-red-600">(*)</p>
@@ -113,6 +206,8 @@ export default function Login () {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 )}
+                                {/* Check Password and RePassword */}
+                                
                             </div>
                         </div>
                         <div className="relative grid grid-cols-[200px_1fr] items-center gap-4">
@@ -142,18 +237,154 @@ export default function Login () {
                                 )}
                             </div>
                         </div>
-                        <div className="grid grid-cols-[200px_1fr] items-center gap-4">
-                            <label htmlFor="dateOfBirth" className="flex gap-1 font-bold">
-                                Ngày Sinh <p className="text-red-600">(*)</p>
-                            </label>
-                            <input
-                                id="dateOfBirth"
-                                type="date"
-                                placeholder="mm/dd/yyyy"
-                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 date-input"
-                            />
+                        <div className="flex justify-between">
+                            {/* DateOfBirth */}
+                            <div className="flex items-center">
+                                <label htmlFor="dateOfBirth" className="flex gap-1 font-bold w-[200px] mr-4">
+                                    Ngày Sinh <p className="text-red-600">(*)</p>
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    {/* Day */}
+                                    <div className="relative" ref={dayRef}>
+                                        <input
+                                            id="day"
+                                            type="number"
+                                            placeholder="Ngày"
+                                            value={selectDay ?? ""}
+                                            onFocus={() => setIsOpenDropDownDay(true)}
+                                            onChange={(e)=>{
+                                                const val = parseInt(e.target.value);
+                                                if (!isNaN(val) && val>=1 && val <= (selectMonth && year ? new Date(year, selectMonth, 0).getDate(): 31)){
+                                                    setSelectDay(val);
+                                                } else if (e.target.value === "") {
+                                                    setSelectDay(null);
+                                                }
+                                            }}
+                                            className="w-20 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
+                                        />
+                                        {isOpenDropDownDay && (
+                                            <ul className="absolute z-50 w-20 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                            {days.map((day) => (
+                                                <li
+                                                key={day}
+                                                onClick={() => {
+                                                    setSelectDay(day);
+                                                    setIsOpenDropDownDay(false);
+                                                }}
+                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-center"
+                                                >
+                                                {day}
+                                                </li>
+                                            ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    {/* Month */}
+                                    <div className="relative" ref={monthRef}>
+                                        <input
+                                            id="month"
+                                            type="number"
+                                            placeholder="Tháng"
+                                            value={selectMonth ?? ""}
+                                            onFocus={()=>setIsOpenDropDownMomth(true)}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value);
+                                                if (!isNaN(val) && val>=1 && val<=12){
+                                                    setSelectMonth(val)
+                                                } else if (e.target.value === "") {
+                                                    setSelectMonth(null)
+                                                }
+                                            }}
+                                            className="w-20 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
+                                        />
+                                        {isOpenDropDownMonth && (
+                                            <ul className="absolute z-50 w-20 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                                {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                                                    <li
+                                                    key={month}
+                                                    onClick={() => {
+                                                        setSelectMonth(month);
+                                                        setIsOpenDropDownMomth(false);
+                                                    }}
+                                                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-center"
+                                                    >
+                                                    {month}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    {/* Year */}
+                                    <input
+                                        id="year"
+                                        type="number"
+                                        placeholder="Năm"
+                                        value={year ?? ""} 
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === "") {
+                                            setYear(null);
+                                            return;
+                                            }
+
+                                            const num = parseInt(val);
+                                            const currentYear = new Date().getFullYear();
+                                            if (!isNaN(num)) {
+                                            if (num <= currentYear) {
+                                                    setYear(num);
+                                                } else {
+                                                    
+                                                }
+                                            }
+                                        }}
+                                        onBlur={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            const currentYear = new Date().getFullYear();
+
+                                            if (isNaN(val) || val < 1900 || val > currentYear) {
+                                                setYear(null); 
+                                            }
+                                        }}
+                                        className="w-20 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
+                                    />
+                                </div>
+                            </div>
+                            {/*Gender*/}
+                            <div className="flex items-center gap-4" ref={genderRef}>
+                                <label htmlFor="gender" className="flex gap-1 font-bold">
+                                    Giới Tính <p className="text-red-600">(*)</p>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        id="gender"
+                                        type="text"
+                                        value={selectGender}
+                                        onClick={() => setIsOpenDropDownGender(!isOpenDropDownGender)}
+                                        readOnly
+                                        style={{ cursor: "pointer" }}
+                                        placeholder="Chọn giới tính ..."
+                                        className=" justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 day-input"
+                                    />    
+                                    {isOpenDropDownGender && (
+                                        <ul className="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                            {genders.map((g) =>(
+                                                <li
+                                                    key={g.id}
+                                                    onClick={() => {
+                                                        setSelectGender(g.name);
+                                                        setIsOpenDropDownGender(false)
+                                                    }}
+                                                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    {g.name}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}                        
+                                </div>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-[200px_1fr] items-center gap-4 relative" ref={dropdownRef}>
+                        <div className="grid grid-cols-[200px_1fr] items-center gap-4 relative" ref={provinceRef}>
                             <label htmlFor="province" className="flex gap-1 font-bold w-48">
                                 Tỉnh/Thành <p className="text-red-600">(*)</p>
                             </label>
@@ -164,24 +395,24 @@ export default function Login () {
                                     onChange={(e) => {
                                         setSearch(e.target.value);
                                         setSelectedProvince("");
-                                        setIsOpen(true);
+                                        setIsOpenDropDownProvince(true);
                                     }}
-                                    onFocus={() => setIsOpen(true)}
+                                    onFocus={() => setIsOpenDropDownProvince(true)}
                                     placeholder="Chọn tỉnh / thành..."
                                     className="w-full focus:ring-0 focus:outline-none border-b-1 border-gray-200 text-lg p-2 pr-8"
                                 />                              
                                
 
-                                {isOpen && (
+                                {isOpenDropDownProvince && (
                                     <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                                         {filteredProvinces.length > 0 ? (
                                             filteredProvinces.map((p) => (
                                                 <div
-                                                    key={p.code}
+                                                    key={p.id}
                                                     onClick={() => {
                                                         setSelectedProvince(p.name);
                                                         setSearch("");
-                                                        setIsOpen(false);
+                                                        setIsOpenDropDownProvince(false);
                                                     }}
                                                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-lg border-b border-gray-100 last:border-b-0"
                                                 >
