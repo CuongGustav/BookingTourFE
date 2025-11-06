@@ -2,19 +2,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { Province, Gender } from "../../../types/user";
+import { useRouter} from "next/navigation";
 
-//interface province
-interface Province {
-    id: number;
-    name: string;
-}
-interface Gender{
-    id:number;
-    name:string;
-    value: string;
-}
+const API_URL = process.env.NEXT_PUBLIC_URL_API
 
 export default function Login () {
+
+    const router = useRouter();
 
     const [provinces, setProvinces] = useState<Province[]>([]);
     const [selectedProvince, setSelectedProvince] = useState("");
@@ -40,16 +35,34 @@ export default function Login () {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
-    const [name, setName] = useState("");
 
+    const [phone, setPhone] = useState("");
+    const [phoneTouched, setPhoneTourched] = useState(false)
+    const [email, setEmail] = useState("");
+    const [emailTouched, setEmailTouched] = useState(false);
+    const [name, setName] = useState("");
+    const [nameTouched, setNameTouched] = useState(false)
+    const [password, setPassword] = useState("")
+    const [passwordTouched, setPasswordTouched] = useState(false)
+    const [rePassword, setRePassword] = useState("")
+    const [rePasswordTouched, setRePasswordTouched] = useState(false)
+
+    const handleEmailFocus = () => {
+        setEmailTouched(true)
+    }
+    const handleNameFocus = () => {
+        setNameTouched(true)
+    }
+    const handlePasswordFocus = () => {
+        setPasswordTouched(true)
+    }
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (/^\d*$/.test(value)) { //only number
             setPhone(value);
         }
     };
+    const isPhoneValid = phone === "" || /^0\d*$/.test(phone)
     
     // Dropdown Gender
     useEffect(() => {
@@ -135,6 +148,62 @@ export default function Login () {
         p.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    //check before Register
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        setEmailTouched(true);
+        setNameTouched(true);
+        setPasswordTouched(true);
+        setPhoneTourched(true);
+        setRePasswordTouched(true);
+
+        const valid = email.trim() !== "" && name.trim() !== "" && password.trim()!== "" && isPhoneValid && rePassword === password;
+
+        if (!valid){
+            return;
+        } 
+
+        let date_of_birth = null;
+        if (selectDay && selectMonth && year) {
+            const paddedMonth = String(selectMonth).padStart(2, "0");
+            const paddedDay = String(selectDay).padStart(2, "0");
+            date_of_birth = `${year}-${paddedMonth}-${paddedDay}`;
+        }
+        const payload = {
+            "email": email,
+            "full_name": name,
+            "phone": phone,
+            "password": password,
+            "date_of_birth": date_of_birth,
+            "gender": selectGender,
+            "address": selectedProvince,
+
+        }
+        try {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert("Đăng ký thành công!");
+                router.push("/auth/login");
+            } else {
+                alert(data.message || "Đăng ký thất bại!");
+            }
+
+        } catch (err) {
+            alert("Không thể kết nối đến server!");
+            console.error("Lỗi kết nối:", err);
+        }
+
+    }
+
     return (
         <div className="w-4/5 mx-auto flex flex-col justify-center">
             <div className="loginInfor flex flex-col mx-auto rounded-2xl px-8">
@@ -148,49 +217,79 @@ export default function Login () {
                             <label htmlFor="username" className="flex gap-1 font-bold">
                                 Email <p className="text-red-600">(*)</p>
                             </label>
-                            <input
-                                id="email"
-                                type="gmail"
-                                placeholder="Email"
-                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    id="email"
+                                    type="gmail"
+                                    value={email}
+                                    placeholder="Email"
+                                    className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
+                                    onBlur={handleEmailFocus}
+                                    onChange={(e)=>setEmail(e.target.value)}
+                                />
+                                {emailTouched && email === "" && (
+                                    <p className=" w-full text-red-600 text-sm">Thông tin bắt buộc</p>
+                                )}
+                            </div>
                         </div>
                         <div className="grid grid-cols-[200px_1fr] items-center gap-4">
                             <label htmlFor="username" className="flex gap-1 font-bold">
                                 Họ và tên <p className="text-red-600">(*)</p>
                             </label>
-                            <input
-                                id="email"
-                                type="text"
-                                placeholder="Họ và tên"
-                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    id="email"
+                                    type="text"
+                                    value={name}
+                                    placeholder="Họ và tên"
+                                    className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2"
+                                    onBlur={handleNameFocus}
+                                    onChange={(e)=>setName(e.target.value)}
+                                />
+                                {nameTouched && name === "" && (
+                                    <p className=" w-full text-red-600 text-sm">Thông tin bắt buộc</p>
+                                )}
+                            </div>
                         </div>
                         <div className="grid grid-cols-[200px_1fr] items-center gap-4">
                             <label htmlFor="phone" className="flex gap-1 font-bold">
                                 Số điện thoại <p className="text-red-600">(*)</p>
                             </label>
-                            <input
-                                id="phone"
-                                type="tel"
-                                value={phone}
-                                onChange={handlePhoneChange}
-                                placeholder="Số điện thoại"
-                                maxLength={10}
-                                pattern="[0-9]*"
-                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    id="phone"
+                                    type="tel"
+                                    value={phone}
+                                    onChange={handlePhoneChange}
+                                    onBlur={() => setPhoneTourched(true)}
+                                    placeholder="Số điện thoại"
+                                    maxLength={10}
+                                    pattern="[0-9]*"
+                                    className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
+                                />
+                                {phoneTouched && !isPhoneValid && (
+                                    <p className="text-red-600 text-sm">Số điện thoại phải bắt đầu bằng số 0</p>
+                                )}
+                            </div>
                         </div>
                         <div className="relative grid grid-cols-[200px_1fr] items-center gap-4">
                             <label htmlFor="password" className="flex gap-1 font-bold">
                                 Mật khẩu <p className="text-red-600">(*)</p>
                             </label>
-                            <input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Mật khẩu"
-                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    placeholder="Mật khẩu"
+                                    className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
+                                    onBlur={handlePasswordFocus}
+                                    onChange={(e)=>setPassword(e.target.value)}
+                                />
+                                {passwordTouched && password==="" && (
+                                    <p className=" w-full text-red-600 text-sm">Thông tin bắt buộc</p>
+                                )}
+                            </div>
                             {/*Toggle Password */}
                             <div 
                                 className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
@@ -214,12 +313,19 @@ export default function Login () {
                             <label htmlFor="rePassword" className="flex gap-1 font-bold">
                                 Nhập lại mật khẩu <p className="text-red-600">(*)</p>
                             </label>
-                            <input
-                                id="rePassword"
-                                type={showRePassword ? "text" : "password"}
-                                placeholder="Nhập lại mật khẩu"
-                                className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
-                            />
+                            <div className="flex flex-col">
+                                <input
+                                    id="rePassword"
+                                    type={showRePassword ? "text" : "password"}
+                                    onBlur={() => setRePasswordTouched(true) }
+                                    onChange={(e)=>setRePassword(e.target.value)}
+                                    placeholder="Nhập lại mật khẩu"
+                                    className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
+                                />
+                                {rePasswordTouched && rePassword !== password && (
+                                    <p className=" w-full text-red-600 text-sm">Mật khẩu nhập lại không khớp</p>
+                                )}
+                            </div>
                             {/*Toggle RePassword */}
                             <div 
                                 className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
@@ -433,7 +539,12 @@ export default function Login () {
                         <p className="font-bold">bạn đã có tài khoản?</p>
                         <Link href="/auth/login" className="text-main italic cursor-pointer">Đăng nhập ngay</Link>
                     </div>
-                    <button className="p-4 px-12 mt-4 button-blue ">ĐĂNG KÝ</button>
+                    <button 
+                        className="p-4 px-12 mt-4 button-blue"
+                        onClick={handleRegister}
+                    >
+                        ĐĂNG KÝ
+                    </button>
                     <p className="flex text-sm font-bold my-4 items-center justify-center">Hoặc</p>
                     <button className="p-4 px-8 bg-white border-2 border-gray-300 rounded-[10px] cursor-pointer hover:bg-gray-100">
                         <Image src="/google.png" alt="google-icon" width={20} height={20} className="inline-block mr-2 mb-1"/>
