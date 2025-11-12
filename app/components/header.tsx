@@ -1,13 +1,18 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Link from 'next/link';
+import { AccountLogin} from "../types/account";
+
+
+const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function Header() {
 
     const [isDropDownDestination, setIsDropDownDestination] = useState(false);
     const [activeSelectOption, setSelectOption] = useState<string | null>(null);
     const [selectedArea, setSelectedArea] = useState<'domestic' | 'asia'>('domestic');
+    const [account, setAccount] = useState<AccountLogin | null>(null);
 
     {/* Logic Click Menu */}
     const handleClickMenu = (option: string) => {
@@ -23,6 +28,37 @@ export default function Header() {
             }
         }
     };
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setAccount(JSON.parse(storedUser));
+        }
+
+        const fetchUser  = async () => {
+            try {
+                const res = await fetch(`${API_URL}/auth/whoami`, {
+                    method: "GET",
+                    credentials: "include", 
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const userData = data.identity || data;
+                    setAccount(userData);
+                    localStorage.setItem("user", JSON.stringify(userData));
+                } else {
+                    setAccount(null);
+                    localStorage.removeItem("user");
+                }
+            } catch (err) {
+                console.error('Lỗi fetch user: ', err);
+                setAccount(null);
+                localStorage.removeItem("user");
+            }
+        };
+        fetchUser();
+    }, [])
 
     return (
         <div className="flex w-full mx-auto ">
@@ -44,7 +80,13 @@ export default function Header() {
                             </div>
                         </div>
                         <div className="subHeaderRight">
-                            <Link href="/auth" className="cursor-pointer text-hover-blue">Đăng nhập / Đăng ký</Link>
+                            {account ? (
+                                <div className='flex'>
+                                    <p>Xin chào, {account.full_name}</p>
+                                </div>
+                            ):(
+                                <Link href="/auth" className="cursor-pointer text-hover-blue">Đăng nhập / Đăng ký</Link>
+                            )}
                         </div>
                     </div>
                 </div>

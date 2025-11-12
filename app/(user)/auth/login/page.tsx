@@ -1,7 +1,10 @@
 'use client';
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useRouter} from "next/navigation";
+
+const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function Login () {
 
@@ -10,6 +13,8 @@ export default function Login () {
     const [emailTouched, setEmailTouched] = useState(false);
     const [passwordTouched, setPasswordTouched] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const router = useRouter()
 
     const handleEmailFocus = () => {
         setEmailTouched(true);
@@ -17,6 +22,38 @@ export default function Login () {
     const handlePasswordFocus = () => {
         setPasswordTouched(true);
     };
+
+    // check before login
+    const handleLogin = async (e: React.FormEvent) =>{
+        e.preventDefault();
+
+        setEmailTouched(true);
+        setPasswordTouched(true);
+        setError('')
+
+        if (!email.trim() || !password.trim()) return;
+        try {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify({ email, password }), 
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                await fetch(`${API_URL}/auth/whoami`, { credentials: 'include' });
+                router.push("/");
+            } else {
+                setError(data.message || 'Đăng nhập thất bại!');
+            }
+        } catch (err){
+            setError('Không thể kết nối với máy chủ!');
+            console.log("Lỗi kết nối: ", err)
+        }
+    }
 
     return (
         <div className="w-4/5 mx-auto flex flex-col justify-center">
@@ -31,6 +68,7 @@ export default function Login () {
                         <input
                             id="email"
                             type="text"
+                            autoComplete="email"
                             value={email}
                             placeholder="Email hoặc Số điện thoại"
                             className="min-w-[400px] focus:ring-0 focus:outline-none border-b-1 border-gray-200 text-sm py-2 "
@@ -49,8 +87,9 @@ export default function Login () {
                         <input 
                             id="password"
                             type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
                             value={password}
-                            placeholder="Email hoặc Số điện thoại"
+                            placeholder="Nhập mật khẩu"
                             className=" min-w-[400px] focus:ring-0 focus:outline-none border-b-1 border-gray-200 text-sm py-2"
                             onChange={(e)=>setPassword(e.target.value)}
                             onBlur={handlePasswordFocus}
@@ -80,8 +119,14 @@ export default function Login () {
                     <p className="font-bold">chưa là thành viên?</p>
                     <Link href="/auth/signup" className="text-main italic cursor-pointer">Đăng ký ngay</Link>
                 </div>
-
-                    <button className="p-4 px-12 mt-6 button-blue">ĐĂNG NHẬP</button>
+                    {/* Error Message */}
+                    {error && <p className="text-red-600 text-sm mt-4">{error}</p>}
+                    <button 
+                        className="p-4 px-12 mt-6 button-blue"
+                        onClick={handleLogin}
+                    >
+                        ĐĂNG NHẬP
+                    </button>
                     <p className="text-sm font-bold my-4 ">Hoặc</p>
                     <button className="p-4 px-8 bg-white border-2 border-gray-200 rounded-[10px] cursor-pointer hover:bg-gray-100">
                         <Image src="/google.png" alt="google-icon" width={20} height={20} className="inline-block mr-2 mb-1"/>
