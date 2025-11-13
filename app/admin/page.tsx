@@ -1,7 +1,9 @@
 'use client';
 import React from "react";
 import { useState } from "react";
+import { useRouter} from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function AdminPage() {
 
@@ -10,12 +12,57 @@ export default function AdminPage() {
     const [password, setPassword] = useState("");
     const [passwordTourched, setPasswordTourched] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const router = useRouter()
 
     const handleEmailFocus = () => {
         setEmailTourched(true);
     }
     const handlePasswordFocus = () => {
         setPasswordTourched(true);
+    }
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            setEmailTourched(true);
+            setPasswordTourched(true);
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/auth/admin/login`,{
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify({email, password}),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                const whoamiRes = await fetch(`${API_URL}/auth/admin/whoami`, {
+                    credentials:'include',
+                });
+                if (whoamiRes.ok) {
+                    const userData = await whoamiRes.json();
+                    const accountData = userData.identity || userData; 
+
+                    localStorage.setItem('admin', JSON.stringify(accountData));
+                    window.dispatchEvent(new CustomEvent('accountUpdated', { 
+                        detail: accountData 
+                    }));
+                    router.push("/admin/dashboard");
+                } else {
+                    setError("Không thể xác thực phiên đăng nhập!")
+                }
+            } else {
+                setError(data.message || 'Đăng nhập thất bại!');
+            }
+        } catch (err) {
+            setError('Không thể kết nối với máy chủ!');
+            console.log("Lỗi kết nối: ", err)
+        }
     }
 
     return(
@@ -28,7 +75,12 @@ export default function AdminPage() {
                     <p className="text-3xl font-medium text-main">Welcome to the Admin Dashboard</p>
                 </div>
                 <div className="relative loginInfor flex flex-col items-center p-8 mt-4">
-                    <form> 
+                    <form
+                        onSubmit={(e) =>{
+                            e.preventDefault();
+                            handleLogin()
+                        }}
+                    > 
                         {/*Email*/}
                         <div>
                             <label htmlFor="email" className="flex gap-1 font-bold">
@@ -86,8 +138,11 @@ export default function AdminPage() {
                             >
                             </div>
                         </div>
+                        <div className="flex flex-col items-center">
+                            {error && <p className="text-red-600 text-sm mt-4">{error}</p>}
+                            <button className="p-4 px-12 mt-6 button-blue w-[200px]" type="submit" onClick={handleLogin}>ĐĂNG NHẬP</button> 
+                        </div>
                     </form>
-                    <button className="p-4 px-12 mt-6 button-blue">ĐĂNG NHẬP</button>
                 </div>
             </div>
         </div>
