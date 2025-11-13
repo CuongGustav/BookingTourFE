@@ -44,8 +44,22 @@ export default function Login () {
 
             const data = await res.json();
             if (res.ok) {
-                await fetch(`${API_URL}/auth/whoami`, { credentials: 'include' });
-                router.push("/");
+                const whoamiRes = await fetch(`${API_URL}/auth/whoami`, {
+                    credentials: 'include',
+                });
+                if (whoamiRes.ok) {
+                    const userData = await whoamiRes.json();
+                    const accountData = userData.identity || userData;
+                    
+                    localStorage.setItem('user', JSON.stringify(accountData));
+                    
+                    window.dispatchEvent(new CustomEvent('accountUpdated', { 
+                        detail: accountData 
+                    }));
+                    router.push("/");
+                } else {
+                    setError("Không thể xác thực phiên đăng nhập!");
+                }
             } else {
                 setError(data.message || 'Đăng nhập thất bại!');
             }

@@ -1,18 +1,21 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import Link from 'next/link';
-import { AccountLogin} from "../types/account";
+import { AccountLogin } from '../types/account';
 
+interface HeaderProps {
+  account: AccountLogin | null;
+}
 
-const API_URL = process.env.NEXT_PUBLIC_URL_API;
+// const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function Header() {
+export default function Header({ account: initialAccount }: HeaderProps) {
 
+    const [account, setAccount] = useState<AccountLogin | null>(initialAccount);
     const [isDropDownDestination, setIsDropDownDestination] = useState(false);
     const [activeSelectOption, setSelectOption] = useState<string | null>(null);
     const [selectedArea, setSelectedArea] = useState<'domestic' | 'asia'>('domestic');
-    const [account, setAccount] = useState<AccountLogin | null>(null);
 
     {/* Logic Click Menu */}
     const handleClickMenu = (option: string) => {
@@ -30,35 +33,35 @@ export default function Header() {
     };
 
     useEffect(() => {
+        // Check localStorage when component mount
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            setAccount(JSON.parse(storedUser));
+            try {
+                const userData = JSON.parse(storedUser);
+                setAccount(userData);
+            } catch (e) {
+                console.error('Error parsing stored user:', e);
+            }
         }
 
-        const fetchUser  = async () => {
-            try {
-                const res = await fetch(`${API_URL}/auth/whoami`, {
-                    method: "GET",
-                    credentials: "include", 
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    const userData = data.identity || data;
-                    setAccount(userData);
-                    localStorage.setItem("user", JSON.stringify(userData));
-                } else {
-                    setAccount(null);
-                    localStorage.removeItem("user");
-                }
-            } catch (err) {
-                console.error('Lỗi fetch user: ', err);
-                setAccount(null);
-                localStorage.removeItem("user");
-            }
+        // Listen custom event for login page
+        const handleAccountUpdate = (event: CustomEvent) => {
+            setAccount(event.detail);
         };
-        fetchUser();
-    }, [])
+
+        window.addEventListener('accountUpdated', handleAccountUpdate as EventListener);
+        
+        return () => {
+            window.removeEventListener('accountUpdated', handleAccountUpdate as EventListener);
+        };
+    }, []);
+
+    // Update account when prop changed
+    useEffect(() => {
+        if (initialAccount) {
+            setAccount(initialAccount);
+        }
+    }, [initialAccount]);
 
     return (
         <div className="flex w-full mx-auto ">
@@ -82,7 +85,14 @@ export default function Header() {
                         <div className="subHeaderRight">
                             {account ? (
                                 <div className='flex'>
-                                    <p>Xin chào, {account.full_name}</p>
+                                    <Link 
+                                        href={"/account"}
+                                        className='cursor-pointer text-hover-blue hover:bg-white/80 hover:rounded-full'
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 hover:font-medium">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </Link>
                                 </div>
                             ):(
                                 <Link href="/auth" className="cursor-pointer text-hover-blue">Đăng nhập / Đăng ký</Link>

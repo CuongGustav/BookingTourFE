@@ -27,6 +27,13 @@
   color: var(--blue800);
 }
 /*text-hover-blue*/
+.text-hover-red {
+  transition: color 0.2s ease;
+}
+.text-hover-red:hover {
+  color: var(--red600);
+}
+/*text-hover-red*/
 .text-hover-blue {
   transition: color 0.2s ease;
 }
