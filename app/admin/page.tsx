@@ -22,12 +22,16 @@ export default function AdminPage() {
         setPasswordTourched(true);
     }
 
-    const handleLogin = async () => {
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+
         if (!email || !password) {
             setEmailTourched(true);
             setPasswordTourched(true);
             return;
         }
+
+        setError('');
 
         try {
             const res = await fetch(`${API_URL}/auth/admin/login`,{
@@ -41,21 +45,7 @@ export default function AdminPage() {
 
             const data = await res.json();
             if (res.ok) {
-                const whoamiRes = await fetch(`${API_URL}/auth/admin/whoami`, {
-                    credentials:'include',
-                });
-                if (whoamiRes.ok) {
-                    const userData = await whoamiRes.json();
-                    const accountData = userData.identity || userData; 
-
-                    localStorage.setItem('admin', JSON.stringify(accountData));
-                    window.dispatchEvent(new CustomEvent('accountUpdated', { 
-                        detail: accountData 
-                    }));
-                    router.push("/admin/dashboard");
-                } else {
-                    setError("Không thể xác thực phiên đăng nhập!")
-                }
+                router.push("/admin/dashboard");
             } else {
                 setError(data.message || 'Đăng nhập thất bại!');
             }
@@ -75,12 +65,7 @@ export default function AdminPage() {
                     <p className="text-3xl font-medium text-main">Welcome to the Admin Dashboard</p>
                 </div>
                 <div className="relative loginInfor flex flex-col items-center p-8 mt-4">
-                    <form
-                        onSubmit={(e) =>{
-                            e.preventDefault();
-                            handleLogin()
-                        }}
-                    > 
+                    <form onSubmit={handleLogin}> 
                         {/*Email*/}
                         <div>
                             <label htmlFor="email" className="flex gap-1 font-bold">
@@ -140,7 +125,12 @@ export default function AdminPage() {
                         </div>
                         <div className="flex flex-col items-center">
                             {error && <p className="text-red-600 text-sm mt-4">{error}</p>}
-                            <button className="p-4 px-12 mt-6 button-blue w-[200px]" type="submit" onClick={handleLogin}>ĐĂNG NHẬP</button> 
+                            <button 
+                                className="p-4 px-12 mt-6 button-blue w-[200px]" 
+                                type="submit" 
+                            >
+                               ĐĂNG NHẬP
+                            </button> 
                         </div>
                     </form>
                 </div>

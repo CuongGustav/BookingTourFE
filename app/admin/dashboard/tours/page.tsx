@@ -1,5 +1,5 @@
 export default function AdminPage () {
     return (
-        <div>Thống kê</div>
+        <div>Quản lý tour</div>
     )
 }
