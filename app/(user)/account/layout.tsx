@@ -42,7 +42,7 @@ export default async function AccountLayout({
 
     return (
         <>
-            <NavbarAccount />
+            <NavbarAccount account={account} />
             <main>{children}</main>
         </>
     );

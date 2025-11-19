@@ -1,56 +1,143 @@
 'use client'
 
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { AccountLogin } from "../types/account";
+
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function NavbarAccount() {
+export default function NavbarAccount({ account }: { account: AccountLogin }) {
+    const pathname = usePathname();
+
+    // --- Cấp 1 ---
+    const isAccountParentActive = pathname.startsWith("/account/information") || pathname.startsWith("/account/password") || pathname.startsWith("/account/delete");
+    const isBookingActive = pathname.startsWith("/account/booking");
+    const isReviewActive = pathname.startsWith("/account/review");
+    const isFavoriteActive = pathname.startsWith("/account/favorite");
+
+    // --- Cấp 2 ---
+    const isInfoActive = pathname === "/account/information" || pathname === "/account"; // <-- mặc định highlight
+    const isPasswordActive = pathname === "/account/password";
+    const isDeleteActive = pathname === "/account/delete";
 
     const logoutHandled = async () => {
-        try{
+        try {
             const res = await fetch(`${API_URL}/auth/logout`, {
                 method: "POST",
                 credentials: 'include',
             });
             if (res.ok) {
-                localStorage.removeItem('user')
+                localStorage.removeItem('user');
                 window.location.href = "/";
             } else {
                 const errorData = await res.json();
                 alert(errorData.message || 'Đăng xuất thất bại');
             }
-        } catch  (err){
+        } catch (err) {
             console.error('Lỗi kết nối server:', err);
         }
     }
 
     return (
         <div className="flex flex-col border-2 border-gray-300 rounded-sm p-2 gap-2 min-w-[200px]">
+            {/* User info */}
             <div className="flex flex-col border-b-2 border-gray-300">
-                <p className="font-bold">username</p>
-                <p className="overflow-hidden w-[200px]">emailádsdasdasdasdasdasdasdasdasdasdasdasdasd</p>
+                <p className="font-bold">{account.full_name}</p>
+                <p className="overflow-hidden w-[200px]">{account.email}</p>
             </div>
-            {/* RUD account */}
+
+            {/* Tài khoản (cha) */}
             <div className="flex flex-col">
-                <div className="flex gap-2 items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                    </svg>
-                    <p className="text-xl">
+                <div className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}>
+                    <Image
+                        src="/account.png"
+                        alt="account-icon"
+                        width={28}
+                        height={28}
+                        className={`transition-all ${isAccountParentActive ? 'icon-active' : ''}`}
+                    />
+                    <p className={`text-lg font-bold ${isAccountParentActive ? 'text-main' : ''}`}>
                         Tài khoản
                     </p>
                 </div>
-                <ul className="pl-8">
-                    <li>Thông tin tài khoản</li>
-                    <li>Đổi mật khẩu</li>
+
+                {/* Cấp 2 */}
+                <ul className="flex flex-col p-2 gap-4 pl-10">
+                    <Link
+                        href="/account/information"
+                        className={`hover:cursor-pointer ${isInfoActive ? 'text-main' : ''}`}
+                    >
+                        Thông tin tài khoản
+                    </Link>
+                    <Link
+                        href="/account/password"
+                        className={`hover:cursor-pointer ${isPasswordActive ? 'text-main' : ''}`}
+                    >
+                        Đổi mật khẩu
+                    </Link>
+                    <li
+                        className={`hover:cursor-pointer ${isDeleteActive ? 'text-main' : ''}`}
+                    >
+                        Yêu cầu xóa tài khoản
+                    </li>
                     <button
-                        className="cursor-pointer text-hover-red" 
-                        onClick={logoutHandled}  
+                        className="cursor-pointer text-hover-red"
+                        onClick={logoutHandled}
                     >
                         Đăng xuất
                     </button>
-                    <li>Yêu cầu xóa tài khoản</li>
                 </ul>
-
             </div>
+
+            {/* Các mục cấp 1 khác */}
+            <Link
+                href="/account/booking"
+                className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}
+            >
+                <Image
+                    src="/booking.png"
+                    alt="booking-icon"
+                    width={28}
+                    height={28}
+                    className={`transition-all ${isBookingActive ? 'icon-active' : ''}`}
+                />
+                <p className={`text-lg font-bold ${isBookingActive ? 'text-main' : ''}`}>
+                    Đơn đã đặt
+                </p>
+            </Link>
+
+            <Link
+                href="/account/review"
+                className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}
+            >
+                <Image
+                    src="/review.png"
+                    alt="review-icon"
+                    width={28}
+                    height={28}
+                    className={`transition-all ${isReviewActive ? 'icon-active' : ''}`}
+                />
+                <p className={`text-lg font-bold ${isReviewActive ? 'text-main' : ''}`}>
+                    Đánh giá của quý khách
+                </p>
+            </Link>
+
+            <Link
+                href="/account/favorite"
+                className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}
+            >
+                <Image
+                    src="/heart.png"
+                    alt="heart-icon"
+                    width={28}
+                    height={28}
+                    className={`transition-all ${isFavoriteActive ? 'icon-active' : ''}`}
+                />
+                <p className={`text-lg font-bold ${isFavoriteActive ? 'text-main' : ''}`}>
+                    Yêu thích tour đã lưu
+                </p>
+            </Link>
         </div>
     )
 }
