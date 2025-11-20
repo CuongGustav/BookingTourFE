@@ -1,6 +1,5 @@
 'use client';
 import Link from "next/link";
-import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { Province, Gender } from "../../../types/user";
 import { useRouter} from "next/navigation";
@@ -544,12 +543,7 @@ export default function Login () {
                         onClick={handleRegister}
                     >
                         ĐĂNG KÝ
-                    </button>
-                    <p className="flex text-sm font-bold my-4 items-center justify-center">Hoặc</p>
-                    <button className="p-4 px-8 bg-white border-2 border-gray-300 rounded-[10px] cursor-pointer hover:bg-gray-100">
-                        <Image src="/google.png" alt="google-icon" width={20} height={20} className="inline-block mr-2 mb-1"/>
-                        Đăng ký với Google
-                    </button>
+                    </button>                
                 </div>
             </div>
         </div>

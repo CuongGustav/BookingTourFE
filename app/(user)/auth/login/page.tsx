@@ -69,6 +69,23 @@ export default function Login () {
         }
     }
 
+    // Login with google
+    const handleGoogleLogin = async () => {
+        try {
+            const res = await fetch(`${API_URL}/auth/google/login`);
+            const data = await res.json();
+            if (res.ok && data.auth_url) {
+                window.location.href = data.auth_url;
+            } else {
+                setError("Không thể lấy URL đăng nhập Google");
+            }
+        } catch (err) {
+            setError("Lỗi khi kết nối Google OAuth");
+            console.log(err);
+        }
+    };
+
+
     return (
         <div className="w-4/5 mx-auto flex flex-col justify-center">
             <div className="relative loginInfor flex flex-col items-center mx-auto rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.2)] p-8 mt-10">
@@ -142,7 +159,10 @@ export default function Login () {
                         ĐĂNG NHẬP
                     </button>
                     <p className="text-sm font-bold my-4 ">Hoặc</p>
-                    <button className="p-4 px-8 bg-white border-2 border-gray-200 rounded-[10px] cursor-pointer hover:bg-gray-100">
+                    <button 
+                        onClick={handleGoogleLogin}
+                        className="p-4 px-8 bg-white border-2 border-gray-200 rounded-[10px] cursor-pointer hover:bg-gray-100"
+                    >
                         <Image src="/google.png" alt="google-icon" width={20} height={20} className="inline-block mr-2 mb-1"/>
                         Đăng nhập với Google
                     </button>

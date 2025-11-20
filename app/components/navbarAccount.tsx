@@ -9,15 +9,13 @@ const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function NavbarAccount({ account }: { account: AccountLogin }) {
     const pathname = usePathname();
-
-    // --- Cấp 1 ---
+    
     const isAccountParentActive = pathname.startsWith("/account/information") || pathname.startsWith("/account/password") || pathname.startsWith("/account/delete");
     const isBookingActive = pathname.startsWith("/account/booking");
     const isReviewActive = pathname.startsWith("/account/review");
     const isFavoriteActive = pathname.startsWith("/account/favorite");
 
-    // --- Cấp 2 ---
-    const isInfoActive = pathname === "/account/information" || pathname === "/account"; // <-- mặc định highlight
+    const isInfoActive = pathname === "/account/information" || pathname === "/account"; 
     const isPasswordActive = pathname === "/account/password";
     const isDeleteActive = pathname === "/account/delete";
 
@@ -40,49 +38,48 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
     }
 
     return (
-        <div className="flex flex-col border-2 border-gray-300 rounded-sm p-2 gap-2 min-w-[200px]">
+        <div className="flex flex-col border-2 border-gray-300 rounded-sm p-2 gap-2">
             {/* User info */}
-            <div className="flex flex-col border-b-2 border-gray-300">
+            <div className="flex flex-col border-b-2 border-gray-300 pb-2">
                 <p className="font-bold">{account.full_name}</p>
-                <p className="overflow-hidden w-[200px]">{account.email}</p>
+                <p className="overflow-hidden w-[240px]">{account.email}</p>
             </div>
 
-            {/* Tài khoản (cha) */}
+            {/* Account */}
             <div className="flex flex-col">
-                <div className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}>
+                <Link 
+                    href="/account/information"
+                    className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}
+                >
                     <Image
-                        src="/account.png"
-                        alt="account-icon"
-                        width={28}
-                        height={28}
+                        src="/account.png" alt="account-icon" width={28} height={28}
                         className={`transition-all ${isAccountParentActive ? 'icon-active' : ''}`}
                     />
                     <p className={`text-lg font-bold ${isAccountParentActive ? 'text-main' : ''}`}>
                         Tài khoản
                     </p>
-                </div>
+                </Link>
 
-                {/* Cấp 2 */}
                 <ul className="flex flex-col p-2 gap-4 pl-10">
                     <Link
                         href="/account/information"
-                        className={`hover:cursor-pointer ${isInfoActive ? 'text-main' : ''}`}
+                        className={`hover:cursor-pointer hover:scale-105 ${isInfoActive ? 'text-main' : ''}`}
                     >
                         Thông tin tài khoản
                     </Link>
                     <Link
                         href="/account/password"
-                        className={`hover:cursor-pointer ${isPasswordActive ? 'text-main' : ''}`}
+                        className={`hover:cursor-pointer hover:scale-105 ${isPasswordActive ? 'text-main' : ''}`}
                     >
                         Đổi mật khẩu
                     </Link>
                     <li
-                        className={`hover:cursor-pointer ${isDeleteActive ? 'text-main' : ''}`}
+                        className={`hover:cursor-pointer hover:scale-105 ${isDeleteActive ? 'text-main' : ''}`}
                     >
                         Yêu cầu xóa tài khoản
                     </li>
                     <button
-                        className="cursor-pointer text-hover-red"
+                        className="cursor-pointer text-hover-red hover:scale-105 text-left"
                         onClick={logoutHandled}
                     >
                         Đăng xuất
@@ -90,7 +87,6 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
                 </ul>
             </div>
 
-            {/* Các mục cấp 1 khác */}
             <Link
                 href="/account/booking"
                 className={`flex gap-2 items-center hover:cursor-pointer transition-transform hover:scale-105`}
