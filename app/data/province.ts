@@ -1,0 +1,41 @@
+export interface Province {
+    id: number;
+    name: string;
+}
+
+export const provincesData: Province[] = [
+    { id: 1, name: "An Giang" },
+    { id: 2, name: "Bắc Ninh" },
+    { id: 3, name: "Cà Mau" },
+    { id: 4, name: "Cao Bằng" },
+    { id: 5, name: "TP. Cần Thơ" },
+    { id: 6, name: "Điện Biên" },
+    { id: 7, name: "Đắk Lắk" },
+    { id: 8, name: "Đồng Nai" },
+    { id: 9, name: "Đồng Tháp" },
+    { id: 10, name: "TP. Đà Nẵng" },
+    { id: 11, name: "TP. Hà Nội" },
+    { id: 12, name: "TP. Hải Phòng" },
+    { id: 13, name: "TP. Hồ Chí Minh" },
+    { id: 14, name: "TP. Huế" },
+    { id: 15, name: "Gia Lai" },
+    { id: 16, name: "Hà Tĩnh" },
+    { id: 17, name: "Hưng Yên" },
+    { id: 18, name: "Khánh Hòa" },
+    { id: 19, name: "Lai Châu" },
+    { id: 20, name: "Lạng Sơn" },
+    { id: 21, name: "Lâm Đồng" },
+    { id: 22, name: "Lào Cai" },
+    { id: 23, name: "Nghệ An" },
+    { id: 24, name: "Ninh Bình" },
+    { id: 25, name: "Phú Thọ" },
+    { id: 26, name: "Quảng Ngãi" },
+    { id: 27, name: "Quảng Ninh" },
+    { id: 28, name: "Quảng Trị" },
+    { id: 29, name: "Sơn La" },
+    { id: 30, name: "Thái Nguyên" },
+    { id: 31, name: "Thanh Hóa" },
+    { id: 32, name: "Tây Ninh" },
+    { id: 33, name: "Tuyên Quang" },
+    { id: 34, name: "Vĩnh Long" },
+];

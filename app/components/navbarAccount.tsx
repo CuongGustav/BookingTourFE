@@ -73,11 +73,12 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
                     >
                         Đổi mật khẩu
                     </Link>
-                    <li
+                    <Link
+                        href="/account/delete"
                         className={`hover:cursor-pointer hover:scale-105 ${isDeleteActive ? 'text-main' : ''}`}
                     >
                         Yêu cầu xóa tài khoản
-                    </li>
+                    </Link>
                     <button
                         className="cursor-pointer text-hover-red hover:scale-105 text-left"
                         onClick={logoutHandled}

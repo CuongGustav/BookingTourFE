@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Province, Gender } from "../../../types/user";
 import { useRouter} from "next/navigation";
+import { provincesData } from "@/app/data/province";
+import { gendersData } from "@/app/data/gender";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
@@ -27,7 +29,7 @@ export default function Login () {
     const dayRef = useRef<HTMLDivElement>(null)
 
     const [selectMonth, setSelectMonth] = useState< number | null>(null)
-    const [isOpenDropDownMonth, setIsOpenDropDownMomth] = useState(false)
+    const [isOpenDropDownMonth, setIsOpenDropDownMonth] = useState(false)
     const monthRef = useRef<HTMLDivElement>(null)
 
     const [year, setYear] = useState< number | null >(null)
@@ -37,6 +39,8 @@ export default function Login () {
 
     const [phone, setPhone] = useState("");
     const [phoneTouched, setPhoneTourched] = useState(false)
+    const [cccd, setCCCD] = useState("");
+    const [cccdTouched, setCCCDTourched] = useState(false)
     const [email, setEmail] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
     const [name, setName] = useState("");
@@ -55,6 +59,9 @@ export default function Login () {
     const handlePasswordFocus = () => {
         setPasswordTouched(true)
     }
+    const handleCCCDFocus = () => {
+        setCCCDTourched(true)
+    }
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (/^\d*$/.test(value)) { //only number
@@ -65,50 +72,10 @@ export default function Login () {
     
     // Dropdown Gender
     useEffect(() => {
-        const gendersData = [
-            { id: 1, name: "Trai", value:"Male"},
-            { id: 2, name: "Gái", value:"Female"},
-            { id: 3, name: "Khác", value:"Other"}
-        ]; setGenders(gendersData);
+        setGenders(gendersData);
     }, []);
     // Dropdown Province
     useEffect(() => {
-        const provincesData = [
-            { id: 1, name: "An Giang" },
-            { id: 2, name: "Bắc Ninh" },
-            { id: 3, name: "Cà Mau" },
-            { id: 4, name: "Cao Bằng" },
-            { id: 5, name: "TP. Cần Thơ" },
-            { id: 6, name: "Điện Biên" },
-            { id: 7, name: "Đắk Lắk" },
-            { id: 8, name: "Đồng Nai" },
-            { id: 9, name: "Đồng Tháp" },
-            { id: 10, name: "TP. Đà Nẵng" },
-            { id: 11, name: "TP. Hà Nội" },
-            { id: 12, name: "TP. Hải Phòng" },
-            { id: 13, name: "TP. Hồ Chí Minh" },
-            { id: 14, name: "TP. Huế" },
-            { id: 15, name: "Gia Lai" },
-            { id: 16, name: "Hà Tĩnh" },
-            { id: 17, name: "Hưng Yên" },
-            { id: 18, name: "Khánh Hòa" },
-            { id: 19, name: "Lai Châu" },
-            { id: 20, name: "Lạng Sơn" },
-            { id: 21, name: "Lâm Đồng" },
-            { id: 22, name: "Lào Cai" },
-            { id: 23, name: "Nghệ An" },
-            { id: 24, name: "Ninh Bình" },
-            { id: 25, name: "Phú Thọ" },
-            { id: 26, name: "Quảng Ngãi" },
-            { id: 27, name: "Quảng Ninh" },
-            { id: 28, name: "Quảng Trị" },
-            { id: 29, name: "Sơn La" },
-            { id: 30, name: "Thái Nguyên" },
-            { id: 31, name: "Thanh Hóa" },
-            { id: 32, name: "Tây Ninh" },
-            { id: 33, name: "Tuyên Quang" },
-            { id: 34, name: "Vĩnh Long" },
-        ];
         setProvinces(provincesData);
     }, []);
     //setup day, month, year
@@ -135,7 +102,7 @@ export default function Login () {
                 setIsOpenDropDownDay(false);
             }
             if (monthRef.current && !monthRef.current.contains(event.target as Node)){
-                setIsOpenDropDownMomth(false);
+                setIsOpenDropDownMonth(false);
             } 
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -156,8 +123,9 @@ export default function Login () {
         setPasswordTouched(true);
         setPhoneTourched(true);
         setRePasswordTouched(true);
+        setCCCDTourched(true);
 
-        const valid = email.trim() !== "" && name.trim() !== "" && password.trim()!== "" && isPhoneValid && rePassword === password;
+        const valid = email.trim() !== "" && name.trim() !== "" && password.trim()!== "" && cccd.trim() !== "" && isPhoneValid && rePassword === password;
 
         if (!valid){
             return;
@@ -177,7 +145,7 @@ export default function Login () {
             "date_of_birth": date_of_birth,
             "gender": selectGender,
             "address": selectedProvince,
-
+            "cccd": cccd
         }
         try {
             const res = await fetch(`${API_URL}/auth/register`, {
@@ -237,7 +205,7 @@ export default function Login () {
                             </label>
                             <div className="flex flex-col">
                                 <input
-                                    id="email"
+                                    id="name"
                                     type="text"
                                     value={name}
                                     placeholder="Họ và tên"
@@ -268,6 +236,27 @@ export default function Login () {
                                 />
                                 {phoneTouched && !isPhoneValid && (
                                     <p className="text-red-600 text-sm">Số điện thoại phải bắt đầu bằng số 0</p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-[200px_1fr] items-center gap-4">
+                            <label htmlFor="phone" className="flex gap-1 font-bold">
+                                CCCD/CMND <p className="text-red-600">(*)</p>
+                            </label>
+                            <div className="flex flex-col">
+                                <input
+                                    id="cccd"
+                                    type="text"
+                                    value={cccd}
+                                    onBlur={handleCCCDFocus}
+                                    onChange={(e)=>setCCCD(e.target.value)}
+                                    placeholder="CCCD/CMND"
+                                    maxLength={12}
+                                    pattern="[0-9]*"
+                                    className=" flex-1 justify-center focus:ring-0 focus:outline-none border-b-1 border-gray-300 text-lg p-2 "
+                                />
+                                {cccdTouched && cccd==="" && (
+                                    <p className=" w-full text-red-600 text-sm">Thông tin bắt buộc</p>
                                 )}
                             </div>
                         </div>
@@ -304,8 +293,6 @@ export default function Login () {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 )}
-                                {/* Check Password and RePassword */}
-                                
                             </div>
                         </div>
                         <div className="relative grid grid-cols-[200px_1fr] items-center gap-4">
@@ -391,7 +378,7 @@ export default function Login () {
                                             type="number"
                                             placeholder="Tháng"
                                             value={selectMonth ?? ""}
-                                            onFocus={()=>setIsOpenDropDownMomth(true)}
+                                            onFocus={()=>setIsOpenDropDownMonth(true)}
                                             onChange={(e) => {
                                                 const val = parseInt(e.target.value);
                                                 if (!isNaN(val) && val>=1 && val<=12){
@@ -409,7 +396,7 @@ export default function Login () {
                                                     key={month}
                                                     onClick={() => {
                                                         setSelectMonth(month);
-                                                        setIsOpenDropDownMomth(false);
+                                                        setIsOpenDropDownMonth(false);
                                                     }}
                                                     className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-center"
                                                     >

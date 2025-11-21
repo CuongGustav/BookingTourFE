@@ -41,9 +41,9 @@ export default async function AccountLayout({
     }
 
     return (
-        <>
+        <div className="flex gap-4 w-screen">
             <NavbarAccount account={account} />
-            <main>{children}</main>
-        </>
+            <main className="flex-1 px-2">{children}</main>
+        </div>
     );
 }
