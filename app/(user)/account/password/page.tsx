@@ -1,6 +1,8 @@
 'use client';
 import { useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_URL_API;
+
 export default function ChangePasswordPage() {
  
     const [password, setPassword] = useState('');
@@ -10,24 +12,52 @@ export default function ChangePasswordPage() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleChangePassword = () => {
+    const handleChangePassword = async () => {
         setError('');
 
         if ( password.trim()  === "" || newPassword.trim() === "" || confirmNewPassword.trim() === "" ) {
+            setSuccess('');
             setError('Vui lòng điền đầy đủ thông tin');
             return;
         }
-
-        if ( newPassword !== confirmNewPassword ) {
+        else if ( newPassword !== confirmNewPassword ) {
+            setSuccess('');
             setError('Mật khẩu mới không khớp');
             return;
         }
-
-        if ( newPassword.trim() === password.trim() ) {
+        else if ( newPassword.trim() === password.trim() ) {
+            setSuccess('');
             setError('Mật khẩu mới không được trùng với mật khẩu cũ');
             return;
+        } 
+        else {
+            try {
+                const res = await fetch(`${API_URL}/account/changepassword`,{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        "password": password,
+                        "new_password": newPassword
+                    }),
+                })
+                const data = await res.json();
+                if( res.ok) {
+                    setError('');
+                    setSuccess('Đổi mật khẩu thành công');
+                } else{
+                    setSuccess('');
+                    setError(data.message || 'Đổi mật khẩu thất bại');
+                }
+            } catch (err) {
+                setError('Đã có lỗi xảy ra. Vui lòng thử lại sau.' + err);
+            }
         }
+
     }
 
     return (
@@ -131,6 +161,9 @@ export default function ChangePasswordPage() {
                 <div className="flex justify-between m-auto">
                     {error && (
                             <p className="text-red-600 ml-4">{error}</p>
+                    )}
+                    {success && (
+                            <p className="text-green-600 ml-4">{success}</p>
                     )}
                 </div>
             </div>
