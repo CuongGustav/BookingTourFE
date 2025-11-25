@@ -181,7 +181,7 @@ export default function Login () {
                 <div className="flex flex-col px-12">
                     <form className="flex flex-col mt-4 gap-2 text-lg ">
                         <div className="grid grid-cols-[200px_1fr] items-center gap-4">
-                            <label htmlFor="username" className="flex gap-1 font-bold">
+                            <label htmlFor="email" className="flex gap-1 font-bold">
                                 Email <p className="text-red-600">(*)</p>
                             </label>
                             <div className="flex flex-col">
@@ -200,7 +200,7 @@ export default function Login () {
                             </div>
                         </div>
                         <div className="grid grid-cols-[200px_1fr] items-center gap-4">
-                            <label htmlFor="username" className="flex gap-1 font-bold">
+                            <label htmlFor="name" className="flex gap-1 font-bold">
                                 Họ và tên <p className="text-red-600">(*)</p>
                             </label>
                             <div className="flex flex-col">
@@ -240,7 +240,7 @@ export default function Login () {
                             </div>
                         </div>
                         <div className="grid grid-cols-[200px_1fr] items-center gap-4">
-                            <label htmlFor="phone" className="flex gap-1 font-bold">
+                            <label htmlFor="cccd" className="flex gap-1 font-bold">
                                 CCCD/CMND <p className="text-red-600">(*)</p>
                             </label>
                             <div className="flex flex-col">
@@ -356,18 +356,18 @@ export default function Login () {
                                         />
                                         {isOpenDropDownDay && (
                                             <ul className="absolute z-50 w-20 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                            {days.map((day) => (
-                                                <li
-                                                key={day}
-                                                onClick={() => {
-                                                    setSelectDay(day);
-                                                    setIsOpenDropDownDay(false);
-                                                }}
-                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-center"
-                                                >
-                                                {day}
-                                                </li>
-                                            ))}
+                                                {days.map((day) => (
+                                                    <li
+                                                    key={day}
+                                                    onClick={() => {
+                                                        setSelectDay(day);
+                                                        setIsOpenDropDownDay(false);
+                                                    }}
+                                                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-center"
+                                                    >
+                                                    {day}
+                                                    </li>
+                                                ))}
                                             </ul>
                                         )}
                                     </div>

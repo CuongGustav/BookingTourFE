@@ -5,7 +5,7 @@ export interface Gender {
 }
 
 export const gendersData: Gender[] = [
-    { id: 1, name: "Nam", value: "Male" },
-    { id: 2, name: "Nữ", value: "Female" },
-    { id: 3, name: "Khác", value: "Other" }
+    { id: 1, name: "Nam", value: "MALE" },
+    { id: 2, name: "Nữ", value: "FEMALE" },
+    { id: 3, name: "Khác", value: "OTHER" }
 ];

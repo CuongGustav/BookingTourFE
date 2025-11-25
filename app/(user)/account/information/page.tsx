@@ -1,42 +1,57 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useEffect, useState} from "react"
 import { AccountInfo } from "../../../types/account"
+import ModalUpdateAccount from "@/app/components/account.modalUpdateAccount";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function InformationAccoutPage () {
 
-    const [isEditing, setIsEditing] =  useState(false);
     const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
     const [day, setDay] = useState("");
     const [month, setMonth] = useState("");
     const [year, setYear] = useState("");
+    const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false)
+
+    const getGenderName = (value: string) => {
+        switch (value.toLowerCase()) {
+            case "male":
+                return "Nam";
+            case "female":
+                return "Nữ";
+            case "other":
+                return "Khác";
+            default:
+                return value; 
+        }
+    };
+
+    const fetchAccountInfo = async () => {
+        try {
+            const res = await fetch(`${API_URL}/account/information`, {
+                method: "GET",
+                credentials: 'include', // Thêm JWT token từ cookie
+            })
+            if (res.ok) {
+                const data = await res.json();
+                setAccountInfo(data);
+
+                if (data.date_of_birth) {
+                    const [y,m,d] = data.date_of_birth.split('-');
+                    setDay(d);
+                    setMonth(m);
+                    setYear(y);
+                }
+            } else {
+                console.error("Lấy thông tin thất bại.");
+            }
+        } catch (err){
+            console.error("Lỗi khi kết nối tới server.", err);
+        }
+    };
 
     useEffect(() => {
-        const fetchAccountInfo = async () => {
-            try {
-                const res = await fetch(`${API_URL}/account/information`, {
-                    method: "GET",
-                    credentials: 'include', // Thêm JWT token từ cookie
-                })
-                if (res.ok) {
-                    const data = await res.json();
-                    setAccountInfo(data);
-
-                    if (data.date_of_birth) {
-                        const [y,m,d] = data.date_of_birth.split('-');
-                        setDay(d);
-                        setMonth(m);
-                        setYear(y);
-                    }
-                } else {
-                    console.error("Lấy thông tin thất bại.");
-                }
-            } catch (err){
-                console.error("Lỗi khi kết nối tới server.", err);
-            }
-        };
         fetchAccountInfo();
     }, []);
 
@@ -58,88 +73,37 @@ export default function InformationAccoutPage () {
                 <div className="flex border-b-2 border-gray-300 pb-2 gap-2">
                     <div className="flex w-1/2 items-center gap-2 ">
                         <p className="w-[120px] font-medium">Họ Tên:</p>
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{accountInfo.full_name}</span>
-                        )}     
+                        <span>{accountInfo.full_name}</span>    
                     </div>
                     <div className="flex w-1/2 items-center gap-2">
-                        <p className="w-[120px] font-medium">Email:</p>
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{accountInfo.email}</span>
-                        )}
+                        <p className="w-[120px] font-medium">Email:</p>               
+                        <span>{accountInfo.email}</span> 
                     </div>
                 </div>
                 <div className="flex border-b-2 border-gray-300 pb-2 gap-2">
                     <div className="flex w-1/2 items-center gap-2">
                         <p className="w-[120px] font-medium">Ngày Sinh:</p> 
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{formatDate()}</span>
-                        )}
+                        <span>{formatDate()}</span>
                     </div>
                     <div className="flex w-1/2 items-center gap-2">
                         <p className="w-[120px] font-medium">Điện Thoại:</p>
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                value={accountInfo.phone}
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{accountInfo.phone}</span>
-                        )}
+                        <span>{accountInfo.phone}</span>
                     </div>
                 </div>
                 <div className="flex border-b-2 border-gray-300 pb-2 gap-2 ">
                     <div className="flex w-1/2 items-center gap-2">
                         <p className="w-[120px] font-medium">Địa Chỉ:</p>
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{accountInfo.address}</span>
-                        )}
+                        <span>{accountInfo.address}</span>
                     </div>
                     <div className="flex w-1/2 items-center gap-2">
                         <p className="w-[120px] font-medium">CMND/CCCD:</p>
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{accountInfo.cccd}</span>
-                        )}
+                        <span>{accountInfo.cccd}</span>
                     </div>
                 </div>
                 <div className="flex border-b-2 border-gray-300 pb-2 gap-2">
                     <div className="flex w-1/2 items-center gap-2">
                         <p className="w-[120px] font-medium">Giới Tính:</p>
-                        {isEditing ? (
-                            <input 
-                                type="text" 
-                                className="flex-1 outline-none focus:outline-none"
-                            />
-                        ) : (
-                            <span>{accountInfo.gender}</span>
-                        )}
-
+                        <span>{getGenderName(accountInfo.gender)}</span>
                     </div>
                     <div className="flex w-1/2 items-center gap-2">
                         <p className="font-medium">Tổng Số Tour Đã Đi:</p>
@@ -147,27 +111,22 @@ export default function InformationAccoutPage () {
                     </div>
                 </div>
                 <div className="float-left ">
-                    {isEditing ? (
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setIsEditing(false)}
-                                className="p-4 px-8 cursor-pointer button-red"
-                            >
-                                Hủy
-                            </button>
-                            <button 
-                                className="p-4 px-8 cursor-pointer button-blue"
-                            >
-                                Cập Nhật
-                            </button>
-                        </div>
-                    ) : (
-                        <button 
-                            className="p-4 px-8 cursor-pointer button-blue"
-                            onClick={() => setIsEditing(true)}    
-                        >
-                            Chỉnh Sửa Thông Tin
-                        </button>
+                    <button 
+                        className="p-4 px-8 cursor-pointer button-blue" 
+                        onClick={() => setIsModalUpdateOpen(true)}
+                    >
+                        Chỉnh Sửa Thông Tin
+                    </button>
+
+                    {isModalUpdateOpen && (
+                        <ModalUpdateAccount
+                            accountInfo={accountInfo}
+                            onClose={() => setIsModalUpdateOpen(false)}
+                            onUpdated={() => {
+                                fetchAccountInfo()
+                                setIsModalUpdateOpen(false)
+                            }}
+                        />
                     )}
                 </div>
             </div>
