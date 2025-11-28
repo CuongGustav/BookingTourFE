@@ -41,9 +41,9 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="flex gap-4 h-screen">
+        <div className="flex h-screen">
             <NavbarAdmin account={account}/>
-            <main>{children}</main>
+            <main className="flex-1">{children}</main>
         </div>
     );
 }

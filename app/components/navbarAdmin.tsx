@@ -3,7 +3,7 @@
 import { AccountLogin } from "../types/account";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface NavbarAdminProps {
     account: AccountLogin;
@@ -13,11 +13,9 @@ const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function NavbarAdmin({ account }: NavbarAdminProps) {
 
-    const [activeSelectOption, setSelectOption] = useState<string | null>('statics');
+    const pathname = usePathname();
 
-    const handleClickOption = (option: string) => {
-            setSelectOption(option)    
-    }
+    const isActive = (slug: string) => pathname.includes(slug);
 
     const logoutHandled = async () => {
         try{
@@ -37,110 +35,102 @@ export default function NavbarAdmin({ account }: NavbarAdminProps) {
     }
 
     return (
-        <div className="flex flex-col justify-between border-r-2 border-gray-300 p-2">
+        <div className="flex flex-col justify-between border-r-2 border-gray-300 p-2 lg:min-w-[248px]">
             <div className="flex">
                 <ul className="flex flex-col p-2 gap-4">
                     <Link 
-                        onClick={() => handleClickOption('accounts')}
                         href="/admin/dashboard/accounts"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'accounts' ? 'text-main' : ''}  
+                            ${isActive('accounts') ? 'text-main' : ''}  
                         `}   
                     >
                         <Image 
                             src="/account.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'accounts' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('accounts') ? 'icon-active' : ''}`}
                         /> 
                         Quản Lý Tài Khoản
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('destinations')}
                         href="/admin/dashboard/destinations"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'destinations' ? 'text-main' : ''}   
+                            ${isActive('destinations') ? 'text-main' : ''}   
                         `} 
                     >     
                         <Image 
                             src="/destination.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'destinations' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('destinations') ? 'icon-active' : ''}`}
                         />                   
                         Quản Lý Điểm Đến
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('tours')}
                         href="/admin/dashboard/tours"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'tours' ? 'text-main' : ''}   
+                            ${isActive('tours') ? 'text-main' : ''}   
                         `} 
                     >
                         <Image 
                             src="/tour.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'tours' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('tours') ? 'icon-active' : ''}`}
                         /> 
                         Quản Lý Chuyến Du Lịch
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('coupons')}
                         href="/admin/dashboard/coupons"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'coupons' ? 'text-main' : ''}   
+                            ${isActive('coupons') ? 'text-main' : ''}   
                         `} 
                     >
                         <Image 
                             src="/coupon.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'coupons' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('coupons') ? 'icon-active' : ''}`}
                         /> 
                         Quản Lý Mã Giảm Giá
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('bookings')}
                         href="/admin/dashboard/bookings"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'bookings' ? 'text-main' : ''}   
+                            ${isActive('bookings') ? 'text-main' : ''}   
                         `}
                     >
                         <Image 
                             src="/booking.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'bookings' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('bookings') ? 'icon-active' : ''}`}
                         /> 
                         Quản Lý Đặt Vé
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('payments')}
                         href="/admin/dashboard/payments"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'payments' ? 'text-main' : ''}   
+                            ${isActive('payments') ? 'text-main' : ''}   
                         `}
                     >
                         <Image 
                             src="/payment.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'payments' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('payments') ? 'icon-active' : ''}`}
                         /> 
                         Quản Lý Thanh Toán
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('reviews')}
                         href="/admin/dashboard/reviews"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'reviews' ? 'text-main' : ''}   
+                            ${isActive('reviews') ? 'text-main' : ''}   
                         `}
                     >
                         <Image 
                             src="/review.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'reviews' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('reviews') ? 'icon-active' : ''}`}
                         /> 
                         Quản Lý Đánh Giá
                     </Link>
                     <Link 
-                        onClick={() => handleClickOption('statics')}
                         href="/admin/dashboard/statics"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'statics' ? 'text-main' : ''}   
+                            ${isActive('statics') ? 'text-main' : ''}   
                         `}
                     >
                         <Image 
                             src="/static.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'statics' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('statics') ? 'icon-active' : ''}`}
                         /> 
                         Thống Kê
                     </Link>
@@ -149,15 +139,14 @@ export default function NavbarAdmin({ account }: NavbarAdminProps) {
             <div className="flex">
                 <ul className="flex flex-col p-2 gap-4 w-full">
                     <Link 
-                        onClick={() => handleClickOption('account')}
                         href="/admin/dashboard/account"
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${activeSelectOption === 'account' ? 'text-main' : ''}   
+                            ${isActive('account') ? 'text-main' : ''}   
                         `}
                     >
                         <Image 
                             src="/account.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${activeSelectOption === 'account' ? 'icon-active' : ''}`}
+                            className={`transition-all ${isActive('account') ? 'icon-active' : ''}`}
                         />  
                         <p className="">
                             {account.full_name}

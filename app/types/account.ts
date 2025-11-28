@@ -26,3 +26,17 @@ export interface AccountInfoUpdate {
     cccd: string;
     gender: string
 }
+
+export interface AccountInforListAdmin {
+  account_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  cccd: string | null;
+  gender: "MALE" | "FEMALE" | "OTHER" | null;
+  address: string | null;
+  date_of_birth: string | null;
+  role: "qcuser" | "qcadmin";
+  is_active: boolean;
+  created_at: string;
+}
