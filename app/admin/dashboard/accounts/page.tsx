@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { AccountInforListAdmin } from "@/app/types/account"
+import ModalReadAccountAdmin from "./account.modalReadAccountAdmin"
+import ModalUpdateAccountAdmin from "./account.modalUpdateAccountAdmin"
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
@@ -34,8 +36,11 @@ export default function AccountsPage () {
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [page, setPage] = useState(1);
     const pageSize = 8;
+    const [isModalReadOpen, setIsModalReadOpen] = useState(false)
+    const [selectedAccount, setSelectedAccount] = useState<AccountInforListAdmin | null> (null)
+    const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false)
 
-    useEffect(() => {
+    const fetchListAccount = async () => {
         fetch(`${API_URL}/account/admin/allaccount`, { credentials: "include" })
             .then(r => r.json())
             .then(res => {
@@ -48,6 +53,10 @@ export default function AccountsPage () {
                 alert("Lỗi tải dữ liệu");
                 setLoading(false);
             });
+    }
+
+    useEffect(() => {
+        fetchListAccount()
     }, []);
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
@@ -112,6 +121,27 @@ export default function AccountsPage () {
         }
     };
 
+    //handle open modal read
+    const openReadModal = (acc: AccountInforListAdmin) =>{
+        setSelectedAccount(acc)
+        setIsModalReadOpen(true);
+    }
+    //handle close modal read
+    const closeReadModal = () => {
+        setSelectedAccount(null)
+        setIsModalReadOpen(false);
+    }
+    //handle open modal update
+    const openUpdateModal = (acc: AccountInforListAdmin) => {
+        setSelectedAccount(acc)
+        setIsModalUpdateOpen(true);
+    }
+    //handle close modal update
+    const closeUpdateModal = () => {
+        setSelectedAccount(null)
+        setIsModalUpdateOpen(false);
+    }
+
     if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách tài khoản...</div>;
 
     return (
@@ -134,6 +164,10 @@ export default function AccountsPage () {
                     <table className="w-full min-w-max">
                         <thead className="bg-gray-50 border-b">
                             <tr>
+                                <th className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition">
+                                    <div className="flex items-center gap-2">                                      
+                                    </div>
+                                </th>
                                 <th 
                                     onClick={() => handleSort("full_name")} 
                                     className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
@@ -191,10 +225,10 @@ export default function AccountsPage () {
                                         <SortIcon isActive={sortBy === "address"} direction={sortBy === "address" ? sortOrder : null} />
                                     </div>
                                 </th>
-                                <th onClick={() => handleSort("role")} className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition">
+                                <th onClick={() => handleSort("role_account")} className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition">
                                     <div className="flex items-center gap-2">
                                         Vai trò 
-                                        <SortIcon isActive={sortBy === "role"} direction={sortBy === "role" ? sortOrder : null} />
+                                        <SortIcon isActive={sortBy === "role_account"} direction={sortBy === "role_account" ? sortOrder : null} />
                                     </div>
                                 </th>
                                 <th 
@@ -220,7 +254,29 @@ export default function AccountsPage () {
                         <tbody className="divide-y">
                             {paginated.map(acc => (
                             <tr key={acc.account_id} className="hover:bg-gray-50 transition">
-                                <td className="px-6 py-4 font-medium">{acc.full_name}</td>
+                                <td className="px-2 py-4 font-medium flex gap-2">
+                                    <button 
+                                        className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-blue-600"
+                                        onClick={() => openUpdateModal(acc)}                                   
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                        </svg>
+                                    </button>
+                                    <button className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                    </button>
+                                </td>
+                                <td className="px-6 py-4 font-medium">
+                                    <a 
+                                        onClick={()=> openReadModal(acc)}
+                                        className="cursor-pointer hover:text-blue-600"
+                                    >
+                                        {acc.full_name}
+                                    </a>
+                                </td>
                                 <td className="px-6 py-4 text-gray-600">{acc.email}</td>
                                 <td className="px-6 py-4">{acc.phone || "—"}</td>
                                 <td className="px-6 py-4">{acc.cccd || "—"}</td>
@@ -230,8 +286,8 @@ export default function AccountsPage () {
                                 {acc.address || "—"}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${acc.role === "qcadmin" ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"}`}>
-                                        {acc.role === "qcadmin" ? "Quản trị viên" : "Người dùng"}
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${acc.role_account === "QCADMIN" ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"}`}>
+                                        {acc.role_account === "QCADMIN" ? "Quản trị viên" : "Người dùng"}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
@@ -311,6 +367,24 @@ export default function AccountsPage () {
                     )}
                 </div>
             </div>
+            {/* modal read */}
+            {isModalReadOpen && (
+                <ModalReadAccountAdmin
+                    account = {selectedAccount}
+                    onClose = {closeReadModal}
+                />
+            )}
+            {/* modal update */}
+            {isModalUpdateOpen && (
+                <ModalUpdateAccountAdmin
+                    account = {selectedAccount}
+                    onClose= {closeUpdateModal}
+                    onUpdated = {() => {
+                        fetchListAccount()
+                        setIsModalUpdateOpen(false)
+                    }}
+                />
+            )}
         </div>
     )
 }

@@ -39,11 +39,13 @@ export default async function AdminLayout({
     if (!account) {
         redirect("/");
     }
-
-    return (
-        <div className="flex h-screen">
-            <NavbarAdmin account={account}/>
-            <main className="flex-1">{children}</main>
-        </div>
-    );
+    else {
+        return (
+            <div className="flex h-screen">
+                <NavbarAdmin account={account}/>
+                <main className="flex-1">{children}</main>
+            </div>
+        );
+    }
+    
 }

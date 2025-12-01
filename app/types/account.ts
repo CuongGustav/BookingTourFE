@@ -36,7 +36,7 @@ export interface AccountInforListAdmin {
   gender: "MALE" | "FEMALE" | "OTHER" | null;
   address: string | null;
   date_of_birth: string | null;
-  role: "qcuser" | "qcadmin";
+  role_account: "QCUSER" | "QCADMIN";
   is_active: boolean;
   created_at: string;
 }

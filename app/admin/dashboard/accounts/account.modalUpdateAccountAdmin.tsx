@@ -1,75 +1,69 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from "react";
-import { AccountInfo } from "../types/account";
-import { gendersData} from "@/app/data/gender";
+import { AccountInforListAdmin } from "@/app/types/account";
+import { useState, useRef, useEffect } from "react";
+import { gendersData } from "@/app/data/gender";
 import { provincesData } from "@/app/data/province";
 
-interface ModalUpdateAccountProps {
-    accountInfo: AccountInfo;
+interface ModalUpdateAccountAdminProps {
+    account: AccountInforListAdmin | null;
     onClose: () => void;
     onUpdated: () => void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: ModalUpdateAccountProps) {
+export default function ModalUpdateAccountAdmin ({account, onClose, onUpdated} : ModalUpdateAccountAdminProps) {
 
-    const getGenderName = (value: string) => {
-        switch (value.toLowerCase()) {
-            case "male":
-                return "Nam";
-            case "female":
-                return "Nữ";
-            case "other":
-                return "Khác";
-            default:
-                return value; 
-        }
-    };
-
-    const [fullName, setFullName] = useState(accountInfo.full_name || "");
-    const [email, setEmail] = useState(accountInfo.email || "");
-    const [phone, setPhone] = useState(accountInfo.phone || "");
-    const [cccd, setCCCD] = useState(accountInfo.cccd || "");
+    const uuid = account?.account_id || ""
+    const [fullName, setFullName] = useState(account?.full_name || "" )
+    const [email, setEmail] = useState(account?.email || "")
+    const [phone, setPhone] = useState(account?.phone || "")
+    const [cccd, setCCCD] = useState(account?.cccd || "")
+    const [days, setDays] = useState<number[]>([]);
+    const [selectDay, setSelectDay] = useState<number | null>(null);
+    const [isOpenDay, setIsOpenDay] = useState(false);
+    const dayRef = useRef<HTMLDivElement>(null);
+    const [selectMonth, setSelectMonth] = useState<number | null>(null);
+    const [isOpenMonth, setIsOpenMonth] = useState(false);
+    const monthRef = useRef<HTMLDivElement>(null);
+    const [year, setYear] = useState<string>("");
+    const yearNum = parseInt(year)
+    const [isActive, setIsActive] = useState<boolean | null>(null);
+    const [isOpenActive, setIsOpenActive] = useState(false);
+    const activeRef = useRef<HTMLDivElement>(null);
     
-    const [selectGender, setSelectGender] = useState(
-        accountInfo.gender ? getGenderName(accountInfo.gender) : ""
-    );
-    const [genderValue, setGenderValue] = useState(
-        accountInfo.gender ? accountInfo.gender.toLowerCase() : ""
-    );
-
+    const [selectGender, setSelectGender] = useState<string>("");      
+    const [genderValue, setGenderValue] = useState<string>("");         
     const [isOpenGender, setIsOpenGender] = useState(false);
     const genderRef = useRef<HTMLDivElement>(null);
-
-    const [selectedProvince, setSelectedProvince] = useState(accountInfo.address || "");
+    const [selectedProvince, setSelectedProvince] = useState(account?.address || "");
     const [provinceSearch, setProvinceSearch] = useState("");
     const [isOpenProvince, setIsOpenProvince] = useState(false);
     const provinceRef = useRef<HTMLDivElement>(null);
 
-    const [selectDay, setSelectDay] = useState<number | null>(null);
-    const [selectMonth, setSelectMonth] = useState<number | null>(null);
-    const [year, setYear] = useState<string>("");
-    const [days, setDays] = useState<number[]>([]);
-    
-    const [isOpenDay, setIsOpenDay] = useState(false);
-    const [isOpenMonth, setIsOpenMonth] = useState(false);
-    const dayRef = useRef<HTMLDivElement>(null);
-    const monthRef = useRef<HTMLDivElement>(null);
-
     const [loading, setLoading] = useState(false);
-
+    
     useEffect(() => {
-        if (accountInfo.date_of_birth) {
-            const [y, m, d] = accountInfo.date_of_birth.split("-").map(Number);
+        // set d,m,y when open modal
+        if (account?.date_of_birth) {
+            const [y, m, d] = account?.date_of_birth.split("-").map(Number);
             setYear(String(y));
             setSelectMonth(m);
             setSelectDay(d);
         }
-    }, [accountInfo]);
+        // set gender when open modal
+        if (account?.gender) {
+            const map: Record<string, string> = { MALE: "Nam", FEMALE: "Nữ", OTHER: "Khác" };
 
-    const yearNum = parseInt(year)
+            setSelectGender(map[account.gender] || "");
+            setGenderValue(account.gender); 
+        }
+        // set active when open modal
+        if (account?.is_active !== undefined) {
+            setIsActive(account.is_active);
+        }
+    }, [account]);
     useEffect(() => {
         if (selectMonth && year) {
             const daysInMonth = new Date(yearNum, selectMonth, 0).getDate();
@@ -83,20 +77,32 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
         }
     }, [selectDay, selectMonth, year, yearNum]);
 
+    //convert date before display
+    const formatDate = (dateStr: string | null | undefined) => {
+        if (!dateStr) return <span className="text-gray-400">—</span>;
+        try {
+            return new Date(dateStr).toLocaleDateString("vi-VN");
+        } catch {
+            return dateStr;
+        }
+    };
+
+    const filteredProvinces = provincesData.filter(p =>
+        p.name.toLowerCase().includes(provinceSearch.toLowerCase())
+    );
+
+    //click outside
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (genderRef.current && !genderRef.current.contains(e.target as Node)) setIsOpenGender(false);
             if (provinceRef.current && !provinceRef.current.contains(e.target as Node)) setIsOpenProvince(false);
             if (dayRef.current && !dayRef.current.contains(e.target as Node)) setIsOpenDay(false);
             if (monthRef.current && !monthRef.current.contains(e.target as Node)) setIsOpenMonth(false);
+            if (activeRef.current && !activeRef.current.contains(e.target as Node)) setIsOpenActive(false);
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-
-    const filteredProvinces = provincesData.filter(p =>
-        p.name.toLowerCase().includes(provinceSearch.toLowerCase())
-    );
 
     const handleUpdate = async () => {
         if (!fullName || !email || !phone || !cccd || !selectGender || !selectedProvince || !selectDay || !selectMonth || !year) {
@@ -109,6 +115,7 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
         }
 
         const payload = {
+            account_id: uuid,
             full_name: fullName,
             email,
             phone,
@@ -116,11 +123,12 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
             gender: genderValue,
             address: selectedProvince,
             date_of_birth: `${yearNum}-${String(selectMonth).padStart(2, "0")}-${String(selectDay).padStart(2, "0")}`,
+            is_active: isActive,
         };
 
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/account/update`, {
+            const res = await fetch(`${API_URL}/account/admin/update`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -142,13 +150,14 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
             setLoading(false);
         }
     };
+
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50" onClick={onClose}>
             <div
-                className="bg-white rounded-xl p-8 w-full max-w-2xl mx-4 relative shadow-2xl"
+                className="bg-white rounded-xl p-6 w-auto mx-4 relative shadow-2xl h-98/100"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-2xl font-bold text-blue-600 mb-6 text-center">Cập nhật thông tin tài khoản</h2>
+                <h1 className="text-2xl font-bold mb-2 text-main">Cập nhật tài khoản</h1>
                 <button
                     onClick={onClose}
                     className="absolute top-6 right-6 cursor-pointer hover:text-red-600 transition"
@@ -157,7 +166,9 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <div className="flex flex-col pb-2 gap-2">
+                {/* information */}
+                <div className="flex flex-col my-2 gap-[6px] px-2 ">
+                    {/* full name */}
                     <div className="flex items-center gap-2 border-b-2 border-gray-300">
                         <label className="w-[120px] font-medium">Họ Tên:</label>
                         <input
@@ -181,12 +192,11 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                     </div>
                     {/* Phone */}
                     <div className="flex items-center gap-2 border-b-2 border-gray-300">
-                        <label className="w-[120px] font-medium">Số điện thoại:</label>
+                        <label className="w-[120px] font-medium">Phone:</label>
                         <input
                             type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                            maxLength={11}
                             className="flex-1 p-3 rounded focus:outline-none"
                             placeholder="Nhập số điện thoại"
                         />
@@ -202,10 +212,11 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                             className="flex-1 p-3 rounded focus:outline-none"
                         />
                     </div>
-                    {/* Ngày sinh */}
+                    {/* date of birth */}
                     <div className="flex items-center gap-2 border-b-2 border-gray-300 pb-2">
                         <label className="w-[120px] font-medium">Ngày Sinh:</label>
                         <div className="flex gap-3 flex-1">
+                            {/* day */}
                             <div className="relative" ref={dayRef}>
                                 <input
                                     type="text"
@@ -233,7 +244,7 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                                     </div>
                                 )}
                             </div>
-
+                            {/* month */}
                             <div className="relative" ref={monthRef}>
                                 <input
                                     type="text"
@@ -261,7 +272,7 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                                     </div>
                                 )}
                             </div>
-
+                            {/* year */}
                             <input
                                 type="text"
                                 placeholder="Năm"
@@ -274,7 +285,7 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                             />
                         </div>
                     </div>
-                    {/* Gender */}
+                    {/*gender*/} 
                     <div className="flex items-center gap-2 border-b-2 border-gray-300 pb-2">
                         <label className="w-[120px] font-medium">Giới tính:</label>
                         <div className="flex-1 relative" ref={genderRef}>
@@ -305,7 +316,7 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div> 
                     {/* Province */}
                     <div className="flex items-center gap-2 border-b-2 border-gray-300 pb-2">
                         <label className="w-[120px] font-medium">Tỉnh Thành:</label>
@@ -345,25 +356,78 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                                 </div>
                             )}
                         </div>
+                    </div> 
+                    {/* is active */}
+                    <div className="flex items-center gap-2 border-b-2 border-gray-300 pb-2">
+                        <label className="w-[120px] font-medium">Trạng thái:</label>
+                        <div className="flex-1 relative" ref={activeRef}>
+                            <input
+                                type="text"
+                                readOnly
+                                value={
+                                    isActive === null
+                                        ? ""
+                                        : isActive
+                                        ? "Hoạt động"
+                                        : "Khóa"
+                                }
+                                placeholder="Chọn trạng thái"
+                                onClick={() => setIsOpenActive(!isOpenActive)}
+                                className="w-full p-3 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                            />
+                            {isOpenActive && (
+                                <div className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                                    <div
+                                        onClick={() => {
+                                            setIsActive(true);
+                                            setIsOpenActive(false);
+                                        }}
+                                        className="px-4 py-3 hover:bg-green-50 cursor-pointer text-green-700"
+                                    >
+                                        Hoạt động
+                                    </div>
+
+                                    <div
+                                        onClick={() => {
+                                            setIsActive(false);
+                                            setIsOpenActive(false);
+                                        }}
+                                        className="px-4 py-3 hover:bg-red-50 cursor-pointer text-red-700"
+                                    >
+                                        Khóa
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
+                    {/* role */}
+                    <div className="flex items-center gap-2 border-b-2 border-gray-300">
+                        <label className="w-[120px] font-medium">Vai trò:</label>
+                        <span className="p-3 cursor-not-allowed flex-1">{account?.role_account === "QCADMIN" ? "Quản trị viên" : "Người dùng"}</span>  
+                    </div> 
+                    {/* created_at */}
+                    <div className="flex items-center gap-2 border-b-2 border-gray-300">
+                        <label className="w-[120px] font-medium">Ngày tạo:</label>
+                        <span className="p-3 cursor-not-allowed flex-1">{formatDate(account?.created_at)}</span> 
+                    </div>  
                 </div>
                 {/* button */}
-                <div className="flex justify-end gap-4 mt-8">
-                    <button
-                        onClick={onClose}
-                        className="px-6 py-3 border border-gray-400 rounded-lg hover:bg-gray-100 transition"
+                <div className="float-right flex gap-2">
+                    <button 
+                        className="p-2 border-1 border-gray-400 rounded cursor-pointer hover:bg-gray-400"
+                        onClick={onClose}                                   
                     >
                         Hủy
                     </button>
-                    <button
+                    <button 
+                        className="p-2 border-1 border-gray-400 rounded cursor-pointer hover:bg-blue-600"
                         onClick={handleUpdate}
                         disabled={loading}
-                        className={`px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                         {loading ? "Đang cập nhật..." : "Cập nhật"}
                     </button>
                 </div>
             </div>
         </div>
-    );
+    )
 }
