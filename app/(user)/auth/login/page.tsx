@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useRouter} from "next/navigation";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -15,6 +17,7 @@ export default function Login () {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter()
+    const searchParams = useSearchParams();
 
     const handleEmailFocus = () => {
         setEmailTouched(true);
@@ -84,6 +87,12 @@ export default function Login () {
             console.log(err);
         }
     };
+    useEffect(() => {
+        const errorParam = searchParams.get('error');
+        if (errorParam === 'locked') {
+            setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.');
+        }
+    }, [searchParams]);
 
 
     return (

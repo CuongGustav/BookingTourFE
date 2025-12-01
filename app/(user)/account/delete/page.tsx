@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 
+const API_URL = process.env.NEXT_PUBLIC_URL_API;
+
 export default function DeleteAccountPage () { 
     
     const [isOpenModal, setIsOpenModal] =  useState(false);
@@ -12,9 +14,29 @@ export default function DeleteAccountPage () {
     const closeModal = () => {
         setIsOpenModal(false);
     }
-
-    const handelDeleteAccount = () => {
+    const handelDeleteAccount = async () => {
         closeModal();
+        try{
+            const res = await fetch(`${API_URL}/account/delete_soft`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify({ "is_active": false }), 
+            });
+            if (res.ok){
+                localStorage.removeItem('user');
+                window.location.href = "/";
+            } else {
+                const errorData = await res.json();
+                alert(errorData.message || 'Xóa tài khoản thất bại');
+            }
+
+        } catch (err){
+            alert("Lỗi kết nối")
+            console.log("Lỗi kết nối: ", err)
+        }
     }
 
     return (
@@ -44,13 +66,13 @@ export default function DeleteAccountPage () {
                         <p className="mb-6">Bạn có chắc chắn muốn xóa tài khoản của mình? Hành động này không thể hoàn tác.</p>
                         <div className="flex justify-center gap-4">
                             <button
-                                className="py-2 px-4 border rounded hover:bg-gray-100"
+                                className="py-2 px-4 border rounded hover:bg-gray-100 cursor-pointer"
                                 onClick={closeModal}
                             >
                                 Không
                             </button>
                             <button
-                                className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600"
+                                className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
                                 onClick={handelDeleteAccount}
                             >
                                 Có
