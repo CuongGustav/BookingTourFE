@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { destinationInfo } from "@/app/types/destination";
 import { useState, useEffect, useMemo } from "react";
+import ModalReadDestinationAdmin from "./destination.modalReadAdmin";
+import ModalDeleteDestinationAdmin from "./destination.modalDeleteAdmin";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
@@ -35,7 +37,10 @@ export default function DestinationsPage () {
     const [sortBy, setSortBy] = useState<keyof destinationInfo>("created_at");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [page, setPage] = useState(1);
-    const pageSize = 8;
+    const pageSize = 6;
+    const [isOpenReadModal, setIsOpenReadModal] = useState(false);
+    const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
+    const [selectDestination, setSelectDestination] = useState<destinationInfo | null>(null)
 
     const fetchListAccount = async () => {
         try {
@@ -102,7 +107,30 @@ export default function DestinationsPage () {
         setPage(1);
     };
 
-     if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách điểm đến...</div>;
+    //handle open modal read
+    const openReadModal = (des: destinationInfo) => {
+        setSelectDestination(des)
+        setIsOpenReadModal(true)
+    }
+    const closeReadModal = () => {
+        setSelectDestination(null)
+        setIsOpenReadModal(false)
+    }
+    //handle update
+    const handleUpdate = (des: destinationInfo) => {
+        router.push(`/admin/dashboard/destinations/update/${des.destination_id}`);
+    };
+    //handle open modal delete
+    const openDeleteModal = (des: destinationInfo) => {
+        setSelectDestination(des)
+        setIsOpenDeleteModal(true)
+    }
+    const closeDeleteModal = () => {
+        setSelectDestination(null)
+        setIsOpenDeleteModal(false)
+    }
+    
+    if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách điểm đến...</div>;
 
     return (
         <div className="py-2 max-w-7xl mx-auto h-screen relative">
@@ -186,6 +214,15 @@ export default function DestinationsPage () {
                                         </div>
                                     </th>
                                     <th 
+                                        onClick={() => handleSort("image_url")} 
+                                        className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Link ảnh
+                                            <SortIcon isActive={sortBy === "image_url"} direction={sortBy === "image_url" ? sortOrder : null} />
+                                        </div>
+                                    </th>
+                                    <th 
                                         onClick={() => handleSort("created_at")} 
                                         className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
                                     >
@@ -198,11 +235,11 @@ export default function DestinationsPage () {
                             </thead>
                             <tbody className="divide-y">
                                 {paginated.map(des => (
-                                    <tr key={des.destination_id} className="hover:bg-gray-50 transition">
-                                        <td className="px-2 py-4 font-medium flex gap-2">
+                                    <tr key={des.destination_id} className="hover:bg-gray-50 transition items-center">
+                                        <td className="px-2 py-4 font-medium flex gap-2 items-center">
                                             <button 
                                                 className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-blue-800 hover:text-white"
-                                                                              
+                                                onClick={()=>handleUpdate(des)}                             
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -210,17 +247,16 @@ export default function DestinationsPage () {
                                             </button>
                                             <button 
                                                 className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
-                                                   
+                                                  onClick={()=> openDeleteModal(des)} 
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                                 </svg>
-
                                             </button>
                                         </td>
                                         <td className="px-6 py-4 font-medium">
                                             <a 
-                                                
+                                                onClick={() => openReadModal(des)}
                                                 className="cursor-pointer hover:text-blue-600"
                                             >
                                                 {des.name}
@@ -228,12 +264,17 @@ export default function DestinationsPage () {
                                         </td>
                                         <td className="px-6 py-4">{des.country}</td>
                                         <td className="px-6 py-4">{des.region || "—"}</td>
-                                        <td className="px-6 py-4 w-[380px]">{des.description || "—"}</td>
+                                        <td className="px-6 py-4 w-[380px]">
+                                            <p className="line-clamp-2 text-sm text-gray-700">
+                                                {des.description || "—"}
+                                            </p>
+                                        </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${des.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                                                 {des.is_active ? "Hoạt động" : "Bị khóa"}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-4 w-[100px]">{des.image_url || "—"}</td>
                                         <td className="px-6 py-4 text-sm text-gray-500">
                                             {new Date(des.created_at).toLocaleDateString("vi-VN")}
                                         </td>
@@ -307,6 +348,21 @@ export default function DestinationsPage () {
                     )}
                 </div>
             </div>
+            {/* modal read */}
+            {isOpenReadModal && (
+                <ModalReadDestinationAdmin
+                    onClose={closeReadModal}
+                    des = {selectDestination}
+                />
+            )}
+            {/* modal delete */}
+            {isOpenDeleteModal && (
+                <ModalDeleteDestinationAdmin
+                    onClose={closeDeleteModal}
+                    des = {selectDestination}
+                    onDeleted={fetchListAccount}
+                />
+            )}
         </div>
     )
     

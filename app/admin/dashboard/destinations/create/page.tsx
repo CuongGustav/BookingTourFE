@@ -13,7 +13,8 @@ export default function CreateDestinationPage() {
     const [description, setDescription] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>("");
-     const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const setImage = (file: File) => {
         setImageFile(file);
@@ -80,7 +81,7 @@ export default function CreateDestinationPage() {
                 alert("Tạo điểm đến thành công!");
                 router.push("/admin/dashboard/destinations");
             } else {
-                alert(data.message || "Lỗi khi tạo điểm đến");
+                setErrorMessage(data.message || "Lỗi khi tạo điểm đến");
             }
         } catch (err) {
             console.error(err);
@@ -108,17 +109,25 @@ export default function CreateDestinationPage() {
                     <div className="flex flex-col gap-2 w-1/2 h-full">
                         {/* NAME */}
                         <div>
-                            <label className="block font-medium mb-1">Tên điểm đến *</label>
+                            <label className="block font-medium mb-1">Tên điểm đến:</label>
                             <input
                                 type="text"
                                 className="w-full border px-4 py-2 rounded-lg"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => {
+                                    setName(e.target.value)
+                                    setErrorMessage(null)
+                                }}
                             />
+                            {errorMessage && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {errorMessage}
+                                </p>
+                            )}
                         </div>
                         {/* COUNTRY */}
                         <div>
-                            <label className="block font-medium mb-1">Quốc gia *</label>
+                            <label className="block font-medium mb-1">Quốc gia:</label>
                             <input
                                 type="text"
                                 className="w-full border px-4 py-2 rounded-lg"
@@ -128,7 +137,7 @@ export default function CreateDestinationPage() {
                         </div>
                         {/* REGION */}
                         <div>
-                            <label className="block font-medium mb-1">Khu vực *</label>
+                            <label className="block font-medium mb-1">Khu vực:</label>
                             <input
                                 type="text"
                                 className="w-full border px-4 py-2 rounded-lg"
@@ -138,7 +147,7 @@ export default function CreateDestinationPage() {
                         </div>
                     </div>
                     <div className="w-1/2 h-full">
-                        <label className="block font-medium mb-1">Mô tả</label>
+                        <label className="block font-medium mb-1">Mô tả:</label>
                         <div className="h-full">
                             <textarea
                                 className="w-full border px-4 py-2 rounded-lg h-full min-h-[160px]"
@@ -151,7 +160,7 @@ export default function CreateDestinationPage() {
             </div>
             {/* IMAGE UPLOAD */}
             <div className="mb-8">
-                <label className="block font-medium mt-10 mb-2">Hình ảnh</label>
+                <label className="block font-medium mt-10 mb-2">Hình ảnh:</label>
 
                 <div
                     onDrop={handleDrop}
@@ -168,14 +177,15 @@ export default function CreateDestinationPage() {
                         className="hidden"
                         id="fileUpload"
                     />
-
-                    <label htmlFor="fileUpload" className="cursor-pointer">
-                        <p className="text-gray-600">Chọn file hoặc kéo thả ảnh vào</p>
-                        <p className="text-gray-400 mt-1">Hoặc Ctrl+V để dán ảnh</p>
-                    </label>
+                    {!preview && (
+                        <label htmlFor="fileUpload" className="cursor-pointer">
+                            <p className="text-gray-600">Chọn file hoặc kéo thả ảnh vào</p>
+                            <p className="text-gray-400 mt-1">Hoặc Ctrl+V để dán ảnh</p>
+                        </label>
+                    )}
                     <div className="flex justify-center">
                         {preview && (
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 relative">
                                 <Image
                                     src={preview}
                                     alt="Preview"
@@ -187,16 +197,16 @@ export default function CreateDestinationPage() {
                                 {preview && (
                                     <button
                                         onClick={handleRemoveImage}
-                                        className="cursor-pointer px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 h-[40px]"
+                                        className="absolute top-0 right-4 cursor-pointer p-2 text-red-600"
                                     >
-                                        Xóa ảnh
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
                                     </button>
                                 )}
                             </div>
                         )}
                     </div>
-                    
-                    
                 </div>
             </div>
             {/* SUBMIT BUTTON */}
