@@ -211,10 +211,15 @@ export default function CreateDestinationPage() {
             </div>
             {/* SUBMIT BUTTON */}
             <button
-                className={`w-full cursor-pointer py-3 rounded-lg ${
-                                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-800'
-                            } text-white`}
-                onClick={handleSubmit}
+                className={`w-full py-3 rounded-lg text-white ${
+                    loading
+                    ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                    : 'bg-blue-600 hover:bg-blue-800'
+                }`}
+                onClick={() => {
+                    if (loading) return; 
+                    handleSubmit();
+                }}
                 disabled={loading}
             >
                 {loading ? 'Đang tạo...' : 'Tạo điểm đến'}

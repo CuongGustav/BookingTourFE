@@ -39,7 +39,7 @@ export default function ModalDeleteDestinationAdmin ({onClose,des, onDeleted}: M
                 className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 relative shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h1 className="text-2xl font-bold mb-2 text-main">Xóa mềm tài khoản</h1>
+                <h1 className="text-2xl font-bold mb-2 text-main">Xóa điểm đến</h1>
                 <p>Bạn muốn xóa mềm tài khoản {des?.name}</p>
                 <button
                     onClick={onClose}
