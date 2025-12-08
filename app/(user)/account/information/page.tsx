@@ -2,7 +2,7 @@
 
 import { useEffect, useState} from "react"
 import { AccountInfo } from "../../../types/account"
-import ModalUpdateAccount from "@/app/components/account.modalUpdateAccount";
+import ModalUpdateAccount from "./account.modalUpdateAccount";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
