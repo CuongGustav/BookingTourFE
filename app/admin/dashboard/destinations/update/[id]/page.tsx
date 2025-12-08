@@ -36,7 +36,7 @@ export default function UpdateDestinationPage() {
                     setRegion(data.region || "");
                     setDescription(data.description || "");
                     setPreview(data.image_url || "");
-                    setIsActive(data.is_active || "")
+                    setIsActive(Boolean(data.is_active));
                     setOriginalImageUrl(data.image_url || "")
                 } else {
                     alert("Không tải được thông tin điểm đến");
@@ -85,6 +85,7 @@ export default function UpdateDestinationPage() {
         formData.append("name", name);
         formData.append("country", country);
         formData.append("region", region);
+        formData.append("is_active", isActive ? "1" : "0");
         if (description.trim()) formData.append("description", description.trim());
         
         const userDeletedImage = !preview && originalImageUrl;
@@ -179,12 +180,12 @@ export default function UpdateDestinationPage() {
                         <div>
                             <label className="block font-medium mb-1">Trạng thái:</label>
                             <select
-                                value={isActive ? "Hoạt động" : "Bị Khóa"}
-                                onChange={(e) => setIsActive(e.target.value === "true")}
+                                value={isActive ? "1" : "0"}
+                                onChange={(e) => setIsActive(e.target.value === "1")}
                                 className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
                             >
-                                <option value="true">Hoạt động</option>
-                                <option value="false">Bị khóa</option>
+                                <option value="1" className="px-2 py-4">Hoạt động</option>
+                                <option value="0"className="px-2 py-4">Bị khóa</option>
                             </select>
                         </div>
                     </div> 
