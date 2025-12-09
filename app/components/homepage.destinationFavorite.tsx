@@ -62,7 +62,6 @@ export default function DestinationFavourite () {
                     <span className="text-white font-bold text-xl drop-shadow-lg">
                         {title}
                     </span>
-
                     {/* Button */}
                     <button
                         className="px-6 py-2 bg-blue-900 text-white font-semibold rounded-lg opacity-0

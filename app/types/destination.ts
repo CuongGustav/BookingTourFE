@@ -18,3 +18,8 @@ export interface destinationFavourite{
     image_public_id: string,
     image_local_path: string,
 }
+
+export interface destinationCreateTour{
+    destination_id: string,
+    name: string,
+}
