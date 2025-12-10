@@ -16,6 +16,7 @@ export default function CreateTourPage () {
     const [durationError, setDurationError]=useState<string|null>(null)
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [priceError, setPriceError] = useState<string|null>(null)
+    const [loading, setLoading] = useState(false);
 
     const [title, setTitle] = useState("")
     const [slug, setSlug] = useState("")
@@ -29,7 +30,7 @@ export default function CreateTourPage () {
     const [infantPrice, setInfantPrice] = useState<number>(0)
     const [hightlight, setHightlight] = useState("")
     const [attractions, setAttractions] = useState("")
-    const [cuision, setCuisine] = useState("")
+    const [cuisine, setCuisine] = useState("")
     const [idealTime, setIdealTime] = useState("")
     const [suitableFor, setSuitableFor] = useState("")
     const [transportation, setTransportation] = useState("")
@@ -182,6 +183,13 @@ export default function CreateTourPage () {
         };
         setSchedules([...schedules, newSchedule]);
     };
+    // calculate ReturnDate
+    const calculateReturnDate = (departureDate: string, durationNights: number): string => {
+        if (!departureDate || !durationNights) return '';
+        const depDate = new Date(departureDate);
+        depDate.setDate(depDate.getDate() + durationNights);
+        return depDate.toISOString().split('T')[0];
+    };
     //update schedule
     const updateSchedule = <K extends keyof TourSchedule>(
         index: number,
@@ -190,6 +198,10 @@ export default function CreateTourPage () {
     ) => {
         const updated = [...schedules];
         updated[index] = { ...updated[index], [field]: value };
+        if (field === 'departure_date' && value && durationNights > 0) {
+            const returnDate = calculateReturnDate(value as string, durationNights);
+            updated[index].return_date = returnDate;
+        }
         setSchedules(updated);
         validateSchedule(index, updated);
     };
@@ -204,23 +216,46 @@ export default function CreateTourPage () {
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const depDate = new Date(schedule.departure_date);
-        const retDate = new Date(schedule.return_date);
-        if (schedule.departure_date && depDate < today) {
-            setScheduleError('Ngày khởi hành phải là ngày trong tương lai');
-            return false;
+        
+        if (schedule.departure_date) {
+            const depDate = new Date(schedule.departure_date);
+            depDate.setHours(0, 0, 0, 0);
+            if (depDate < today) {
+                setScheduleError('Ngày khởi hành phải là ngày trong tương lai');
+                return false;
+            }
         }
-        if (schedule.return_date && depDate && retDate <= depDate) {
-            setScheduleError('Ngày kết thúc phải sau ngày khởi hành');
-            return false;
+        if (schedule.departure_date && schedule.return_date) {
+            const depDate = new Date(schedule.departure_date);
+            const retDate = new Date(schedule.return_date);
+            depDate.setHours(0, 0, 0, 0);
+            retDate.setHours(0, 0, 0, 0);
+            if (retDate <= depDate) {
+                setScheduleError('Ngày kết thúc phải sau ngày khởi hành');
+                return false;
+            }
+            if (durationNights > 0) {
+                const diffTime = retDate.getTime() - depDate.getTime();
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                if (diffDays !== durationNights) {
+                    setScheduleError(
+                        `Tour ${durationDays} ngày ${durationNights} đêm: ngày kết thúc phải sau ngày khởi hành ${durationNights} ngày (hiện tại: ${diffDays} ngày)`
+                    );
+                    return false;
+                }
+            }
         }
-        if (schedule.price_child >= schedule.price_adult) {
-            setScheduleError('Giá trẻ em phải nhỏ hơn giá người lớn');
-            return false;
+        if (schedule.price_adult && schedule.price_child) {
+            if (schedule.price_child >= schedule.price_adult) {
+                setScheduleError('Giá trẻ em phải nhỏ hơn giá người lớn');
+                return false;
+            }
         }
-        if (schedule.price_infant >= schedule.price_child) {
-            setScheduleError('Giá em bé phải nhỏ hơn giá trẻ em');
-            return false;
+        if (schedule.price_child && schedule.price_infant) {
+            if (schedule.price_infant >= schedule.price_child) {
+                setScheduleError('Giá em bé phải nhỏ hơn giá trẻ em');
+                return false;
+            }
         }
         setScheduleError(null);
         return true;
@@ -288,6 +323,182 @@ export default function CreateTourPage () {
                 <button onClick={(e) => { e.stopPropagation(); removeImage(image.display_order); }}>Xóa</button>
             </div>
     ))}
+    //handle submit
+    const handleSubmit = async () => {
+        //tour
+        if(!title || !durationDays || !durationNights || !departDestination || !basePrice || !imageMainFile){
+            alert("Tiêu đề, số ngày, số đêm, điểm khởi hành, giá góc, ảnh chính là bắt buộc");
+            return;
+        }
+        //tour_destinations
+        if (selectedDestinations.length === 0){
+            alert("Vui lòng chọn ít nhất 1 điểm đến");
+            return;
+        }
+        //tour_itineraries
+        if (itineraries.length === 0){
+            alert("Vui lòng tạo ít nhất 1 lịch trình chi tiết");
+            return;
+        }
+        for (let i = 0; i < itineraries.length; i++) {
+            const  itinerary = itineraries[i];
+            if (!itinerary.title?.trim() || !itinerary.description?.trim() || !itinerary.meals?.trim()) {
+                alert("Các trường trong lịch trình chi tiết là bắt buộc");
+                return;
+            }
+        }
+        //tour_schedules
+        if (schedules.length === 0) {
+            alert("Vui lòng tạo ít nhất 1 lịch khởi hành");
+            return;
+        }
+        for (let i = 0; i < schedules.length; i++) {
+            const  schedule = schedules[i];
+            if (!schedule.departure_date?.trim() || !schedule.return_date?.trim() || !schedule.price_adult 
+                || !schedule.price_child || !schedule.price_infant || !schedule.available_seats) {
+                alert("Các trường trong lịch trình chi tiết là bắt buộc");
+                return;
+            }
+        }
+        //tour_images
+        if (tourImages.length === 0) {
+            alert("Vui lòng tải lên ít nhất 1 ảnh chi tiết");
+            return;
+        }
+
+        setLoading(true);
+        setErrorMessage(null);
+        try {
+            //tour_form_data
+            const tourFormData = new FormData();
+            tourFormData.append("title", title);
+            tourFormData.append("slug", slug);
+            tourFormData.append("duration_days", durationDays.toString());
+            tourFormData.append("duration_nights", durationNights.toString());
+            tourFormData.append("highlights", hightlight);
+            tourFormData.append("included_services", includedServices);
+            tourFormData.append("excluded_services", excludedServices);
+            tourFormData.append("attractions", attractions);
+            tourFormData.append("cuisine", cuisine);
+            tourFormData.append("suitable_for", suitableFor);
+            tourFormData.append("ideal_time", idealTime);
+            tourFormData.append("transportation", transportation);
+            tourFormData.append("promotions", promotion);
+            tourFormData.append("depart_destination", departDestination);
+            tourFormData.append("base_price", basePrice.toString());
+            tourFormData.append("child_price", childPrice.toString());
+            tourFormData.append("infant_price", infantPrice.toString());
+            tourFormData.append("is_featured", isFeatured ? "1" : "0");
+            if (imageMainFile) {
+                tourFormData.append("main_image", imageMainFile);
+            }
+            //tour_schedules data
+            const formattedSchedules = schedules.map(s => ({
+                departure_date: s.departure_date,
+                return_date: s.return_date,
+                available_seats: s.available_seats,
+                price_adult: s.price_adult.toFixed(2),    
+                price_child: s.price_child?.toFixed(2), 
+                price_infant: s.price_infant?.toFixed(2),
+            }));
+            //fetchTour
+            const tourRes = await fetch(`${API_URL}/tour/admin/add`, {
+                method: "POST",
+                credentials: "include",
+                body: tourFormData
+            })
+            const tourData = await tourRes.json()
+            if (!tourRes.ok) {
+                setErrorMessage(tourData.message || "Tạo tour thất bại");
+                setLoading(false);
+                return;
+            }
+
+            const tourId = tourData.tour_id
+            if (!tourId) {
+                setErrorMessage("Không nhận được tour_id từ server");
+                setLoading(false);
+                return;
+            }
+            console.log("Tour đã tạo thành công với ID:", tourId);
+            //fetch tour_destinations
+            if (selectedDestinations.length > 0) {
+                const destRes = await fetch(`${API_URL}/tour_destinations/admin/add`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        tour_id: tourId,
+                        destination_ids: selectedDestinations
+                    })
+                });
+                if (!destRes.ok) {
+                    setErrorMessage(tourData.message || "Tạo tour và các điểm đến thất bại");
+                    return;
+                }
+            }
+            //fetch tour_itineraries
+            if (itineraries.length > 0) {
+                const itineraryRes = await fetch(`${API_URL}/tour_itineraries/admin/add`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        tour_id: tourId,
+                        itineraries: itineraries
+                    })
+                });
+                if (!itineraryRes.ok) {
+                    setErrorMessage(tourData.message || "Tạo lịch trình chi tiết thất bại");
+                    return;
+                }
+            }
+            //fetch tour_schedules
+            if (schedules.length > 0) {
+                const scheduleRes = await fetch(`${API_URL}/tour_schedules/admin/add`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        tour_id: tourId,
+                        schedules: formattedSchedules
+                    })
+                });
+                if (!scheduleRes.ok) {
+                    setErrorMessage(tourData.message || "Tạo lịch khởi hành thất bại");
+                    return;
+                }
+            }
+            //fetch tour_images
+            if (tourImages.length > 0) {
+                const imagesFormData = new FormData();
+                imagesFormData.append("tour_id", tourId);
+                tourImages
+                    .sort((a, b) => a.display_order - b.display_order)
+                    .forEach((img) => {
+                        imagesFormData.append("images", img.file);                   
+                        imagesFormData.append("display_orders", img.display_order.toString());
+                    });
+                const imagesRes = await fetch(`${API_URL}/tour_images/admin/add`, {
+                    method: "POST",
+                    credentials: "include",
+                    body: imagesFormData
+                });
+                if (!imagesRes.ok) {
+                    const err = await imagesRes.json();
+                    setErrorMessage(err.message || "Upload ảnh thất bại");
+                    return;
+                }
+            }
+            alert("Tạo tour thành công!");
+            router.push("/admin/dashboard/tours");
+        }   catch (err) {
+            console.error(err);
+            alert("Không thể kết nối server");
+        } finally {
+            setLoading(false); 
+        }
+    }
 
     return(
         <div className="min-w-100 px-8 mx-auto py-6 h-98/100 overflow-y-auto relative">
@@ -303,7 +514,7 @@ export default function CreateTourPage () {
             <div className="flex justify-center">
                 <h1 className="text-3xl font-bold mb-6 text-main">Tạo tour mới</h1>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 pb-16">
                 {/* title */}
                 <div className="flex w-full">
                     <div className="flex w-full items-center">
@@ -316,11 +527,6 @@ export default function CreateTourPage () {
                                 onChange={handleTitleChange}
                             />
                         </div>
-                        {errorMessage && (
-                            <p className="text-red-600 text-sm mt-1">
-                                {errorMessage}
-                            </p>
-                        )}
                     </div>
                 </div>
                 {/* slug */}
@@ -394,6 +600,7 @@ export default function CreateTourPage () {
                                 onChange={(e) => setDepartDestination(e.target.value)}
                                 className="flex-1 border px-2 py-1 rounded-lg"
                             >
+                                <option value="Hà Nội">-- Chọn điểm xuất phát --</option>
                                 <option value="Hà Nội">Hà Nội</option>
                                 <option value="Hồ Chí Minh">Hồ Chí Minh</option>
                                 <option value="Đà Nẵng">Đà Nẵng</option>
@@ -487,7 +694,7 @@ export default function CreateTourPage () {
                         <div className="flex items-center">
                             <label className="font-medium w-[120px]">Ẩm thực:</label>
                             <textarea   
-                                value={cuision}
+                                value={cuisine}
                                 className="flex-1 border px-2 py-1 rounded-lg"
                                 onChange={(e) => {setCuisine(e.target.value)}}
                             />
@@ -673,7 +880,7 @@ export default function CreateTourPage () {
                                     <button
                                         type="button"
                                         onClick={() => removeItinerary(index)}
-                                        className="text-red-500 hover:text-red-700 p-1"
+                                        className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
                                     >
                                         Xóa
                                     </button>
@@ -746,6 +953,7 @@ export default function CreateTourPage () {
                                             Xóa
                                         </button>
                                     </div>
+                                    <p className=" items-center mb-3 text-red-600">Chú ý định dạng ngày tháng là tháng/ngày/năm</p>
                                     <div className="flex gap-2">
                                         <div className="flex flex-col w-1/2 gap-2">
                                             {/* departure_date */}
@@ -1055,10 +1263,32 @@ export default function CreateTourPage () {
                         </div>
                     )}
                 </div>
-                <div className="flex w-full mt-4">
-                    <button className="w-full py-4 bg-blue-900 hover:bg-blue-600 cursor-pointer text-white text-xl rounded-2xl">
-                        TẠO MỚI TOUR
-                    </button>
+                <div className={`
+                    fixed bottom-0 p-4 border-t shadow-2xl z-20 
+                    flex justify-center bg-white 
+                    left-[248px] right-0
+                `}>
+                    <div className="w-full">
+                        {errorMessage && (
+                            <p className="text-red-600 text-sm mt-1">
+                                {errorMessage}
+                            </p>
+                        )}
+                        <button
+                            className={`w-full py-3 rounded-lg text-white cursor-pointer ${
+                                loading
+                                ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                                : 'bg-blue-900 hover:bg-blue-600'
+                            }`}
+                            onClick={() => {
+                                if (loading) return; 
+                                handleSubmit();
+                            }}
+                            disabled={loading}
+                        >
+                            {loading ? 'Đang tạo...' : 'Tạo tour'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
