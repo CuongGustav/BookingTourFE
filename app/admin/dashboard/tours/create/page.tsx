@@ -600,7 +600,7 @@ export default function CreateTourPage () {
                                 onChange={(e) => setDepartDestination(e.target.value)}
                                 className="flex-1 border px-2 py-1 rounded-lg"
                             >
-                                <option value="Hà Nội">-- Chọn điểm xuất phát --</option>
+                                <option >-- Chọn điểm xuất phát --</option>
                                 <option value="Hà Nội">Hà Nội</option>
                                 <option value="Hồ Chí Minh">Hồ Chí Minh</option>
                                 <option value="Đà Nẵng">Đà Nẵng</option>

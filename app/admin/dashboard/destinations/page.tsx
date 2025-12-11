@@ -42,7 +42,7 @@ export default function DestinationsPage () {
     const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
     const [selectDestination, setSelectDestination] = useState<destinationInfo | null>(null)
 
-    const fetchListAccount = async () => {
+    const fetchListDestination = async () => {
         try {
             const res = await  fetch(`${API_URL}/destination/admin/all`, { credentials: "include" })
             const data = await res.json()
@@ -59,7 +59,7 @@ export default function DestinationsPage () {
     }
 
     useEffect(() => {
-        fetchListAccount()
+        fetchListDestination()
     }, []);
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
@@ -360,7 +360,7 @@ export default function DestinationsPage () {
                 <ModalDeleteDestinationAdmin
                     onClose={closeDeleteModal}
                     des = {selectDestination}
-                    onDeleted={fetchListAccount}
+                    onDeleted={fetchListDestination}
                 />
             )}
         </div>
