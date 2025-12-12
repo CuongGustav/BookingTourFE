@@ -5,7 +5,7 @@ import { useState, useEffect, DragEvent } from "react";
 import Image from "next/image";
 import { destinationCreateTour } from "@/app/types/destination";
 import { ItineraryInforFE } from "@/app/types/tour_itinerary";
-import { TourSchedule } from "@/app/types/tour_schedule";
+import { TourCreateSchedule } from "@/app/types/tour_schedule";
 import { CreateImageTourFE } from "@/app/types/tour_images";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
@@ -40,7 +40,7 @@ export default function CreateTourPage () {
     const [destinations, setDestinations] = useState<destinationCreateTour[]>([])
     const [selectedDestinations, setSelectedDestinations] = useState<string[]>([])
     const [itineraries, setItineraries] = useState<ItineraryInforFE[]>([])
-    const [schedules, setSchedules] = useState<TourSchedule[]>([]);
+    const [schedules, setSchedules] = useState<TourCreateSchedule[]>([]);
     const [scheduleError, setScheduleError] = useState<string | null>(null);
     const [tourImages, setTourImages] = useState<CreateImageTourFE[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
@@ -171,7 +171,7 @@ export default function CreateTourPage () {
     };
     // add schedule
     const addSchedule = () => {
-        const newSchedule: TourSchedule = {
+        const newSchedule: TourCreateSchedule = {
             departure_date: '',
             return_date: '',
             available_seats: 30,
@@ -191,10 +191,10 @@ export default function CreateTourPage () {
         return depDate.toISOString().split('T')[0];
     };
     //update schedule
-    const updateSchedule = <K extends keyof TourSchedule>(
+    const updateSchedule = <K extends keyof TourCreateSchedule>(
         index: number,
         field: K,
-        value: TourSchedule[K]
+        value: TourCreateSchedule[K]
     ) => {
         const updated = [...schedules];
         updated[index] = { ...updated[index], [field]: value };
@@ -210,7 +210,7 @@ export default function CreateTourPage () {
         setSchedules(schedules.filter((_, i) => i !== index));
     };
     //validate schedule
-    const validateSchedule = (index: number, schedulesList: TourSchedule[]) => {
+    const validateSchedule = (index: number, schedulesList: TourCreateSchedule[]) => {
         const schedule = schedulesList[index];
         if (!schedule) return false;
 

@@ -35,7 +35,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
     return (
         <>
             <Header account={account} />
-            <main className="pt-[100px] flex">{children}</main>
+            <main className="pt-[90px] flex">{children}</main>
             <Footer />
         </>
   );
