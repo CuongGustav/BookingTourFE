@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { TourInfo } from "../types/tour";
 import Image from "next/image";
 
@@ -8,6 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function ListTour ()  {
 
+    const router = useRouter()
     const [tours, setTours] = useState<TourInfo[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -140,7 +142,12 @@ export default function ListTour ()  {
             </div>
             {/* button */}
             <div className="w-full flex justify-center mt-4">
-                <button className="px-8 py-4 text-xl border-2 border-blue-900 text-blue-900 font-bold rounded-2xl cursor-pointer hover:bg-blue-900 hover:text-white">Xem tất cả</button>
+                <button 
+                    className="px-8 py-4 text-xl border-2 border-blue-900 text-blue-900 font-bold rounded-2xl cursor-pointer hover:bg-blue-900 hover:text-white"
+                    onClick={()=>router.push("/tours")}
+                >
+                    Xem tất cả
+                </button>
             </div>
         </div>
     )

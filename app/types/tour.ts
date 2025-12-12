@@ -15,5 +15,7 @@ export interface TourInfo {
     is_featured: 1 | 0;
     is_active: 1 | 0
     created_at: string;
+    transportation: string;
+    slug: string;
     upcoming_schedules: TourSchedule[];
 }

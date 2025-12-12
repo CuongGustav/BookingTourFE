@@ -16,17 +16,11 @@ export default function HomePage() {
                     <FilterHomePage/>
                 </div>
             </div>
-            <div className="h-[1000px]"></div>
-                
-            <div>
-            
-
-            </div>
-            {/* <div className="bg-blue-100">
+            <div className="bg-blue-100 pt-[70px]">
                 <div className="w-4/5 m-auto">
                     <ListTour/>
                 </div>
-            </div> */}
+            </div>
             {/* <div className="w-4/5 m-auto">
                 <DestinationFavourite/>
             </div> */}
