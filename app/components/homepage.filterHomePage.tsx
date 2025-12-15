@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { provincesData } from "@/app/data/province";
+import { ChevronDown } from "lucide-react"; 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function FilterHomePage() {
@@ -8,6 +10,8 @@ export default function FilterHomePage() {
     const [departureDay, setDepartDay] = useState(""); 
     const [budget, setBudget] = useState("");
     const [loading, setLoading] = useState(false);
+    const destinationRef = useRef<HTMLDivElement>(null);
+    const [openDestination, setOpenDestination] = useState(false);
 
     const handleFilter = async () => {
         if (!destination.trim() && !departureDay && !budget) {
@@ -52,15 +56,38 @@ export default function FilterHomePage() {
                             <label className="block text-sm font-medium">
                                 Bạn muốn đi đâu? <span className="text-red-500">*</span>
                             </label>
-                            <input
-                            type="text"
-                            value={destination}
-                            onChange={(e) => setDestination(e.target.value)}
-                            placeholder="Ví dụ: Bắc Ninh, Hà Nội..."
-                            className="w-full h-12 pl-4 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+                            {/* Điểm đến (destination) */}
+                            <div ref={destinationRef} className="relative">
+                                <p className="font-semibold mb-2">Điểm đến</p>
+                                <button
+                                    onClick={() => setOpenDestination(!openDestination)}
+                                    className="border rounded p-2 w-full text-left flex justify-between items-center hover:border-gray-500"
+                                >
+                                    <span className={destination ? "" : "text-gray-500"}>
+                                        {destination || "-- Chọn điểm đến --"}
+                                    </span>
+                                    <ChevronDown className={`w-5 h-5 transition ${openDestination ? "rotate-180" : ""}`} />
+                                </button>
+
+                                {openDestination && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
+                                        {provincesData.map((p) => (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => {
+                                                    setDestination(p.name);
+                                                    setOpenDestination(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 hover:bg-blue-50 transition"
+                                            >
+                                                {p.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        {/* departure day */}
+                        {/* destination day */}
                         <div className="flex-1 min-w-[200px] flex flex-col gap-2">
                             <label className="block text-sm font-medium">
                                 Ngày đi <span className="text-red-500">*</span>
