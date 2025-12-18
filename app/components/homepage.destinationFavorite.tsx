@@ -3,12 +3,14 @@
 import Image from "next/image"
 import axios from "axios"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation";
 import { destinationFavourite } from "../types/destination"
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function DestinationFavourite () {
 
+    const router = useRouter()
     const regionList = ["Miền Bắc", "Miền Trung", "Miền Nam"];
     const [region, setRegion]= useState("Miền Bắc")
     const [destinations, setDestinations] = useState<destinationFavourite[]>([])
@@ -66,6 +68,9 @@ export default function DestinationFavourite () {
                     <button
                         className="px-6 py-2 bg-blue-900 text-white font-semibold rounded-lg opacity-0
                             group-hover:opacity-100 transition-opacity duration-300 hover:bg-blue-800 cursor-pointer"
+                        onClick={() => {
+                            router.push(`/tours?destination=${title}`);
+                        }}
                     >
                         Khám phá
                     </button>

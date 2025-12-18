@@ -2,30 +2,34 @@
 
 import { useState, useRef } from "react";
 import { provincesData } from "@/app/data/province";
+import { useRouter } from "next/navigation";
+
 import { ChevronDown } from "lucide-react"; 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function FilterHomePage() {
+    const router = useRouter();
+
     const [destination, setDestination] = useState("");
-    const [departureDay, setDepartDay] = useState(""); 
+    const [date, setDate] = useState(""); 
     const [budget, setBudget] = useState("");
     const [loading, setLoading] = useState(false);
     const destinationRef = useRef<HTMLDivElement>(null);
     const [openDestination, setOpenDestination] = useState(false);
 
     const handleFilter = async () => {
-        if (!destination.trim() && !departureDay && !budget) {
+        if (!destination.trim() && !date && !budget) {
             alert("Vui lòng chọn ít nhất một tiêu chí tìm kiếm");
             return;
         }
         setLoading(true);
         const payload = {
             destination: destination,
-            departure_day: departureDay,
+            date: date,
             budget: budget
         };
         try {
-            const res = await fetch(`${API_URL}/tour/filterTourHomepage`, {
+            const res = await fetch(`${API_URL}/tour/filterTour`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",
@@ -34,7 +38,9 @@ export default function FilterHomePage() {
             });
             const data = await res.json();
             if (res.ok) {
-                alert("Thanh công")
+                router.push(
+                    `/tours?destination=${destination}&date=${date}&budget=${budget}`
+                );
             } else {
                 alert(data.message || "Có lỗi xảy ra");
             }
@@ -94,8 +100,8 @@ export default function FilterHomePage() {
                             </label>
                             <input
                                 type="date"
-                                value={departureDay}
-                                onChange={(e) => setDepartDay(e.target.value)}
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
                                 className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                         </div>
@@ -110,10 +116,10 @@ export default function FilterHomePage() {
                                 className="w-full h-12 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                             >
                                 <option value="">Chọn mức giá</option>
-                                <option value="under-5">Dưới 5 triệu</option>
+                                <option value="<5">Dưới 5 triệu</option>
                                 <option value="5-10">Từ 5 - 10 triệu</option>
                                 <option value="10-20">Từ 10 - 20 triệu</option>
-                                <option value="over-20">Trên 20 triệu</option>
+                                <option value=">20">Trên 20 triệu</option>
                             </select>
                         </div>
                         {/* button search */}
