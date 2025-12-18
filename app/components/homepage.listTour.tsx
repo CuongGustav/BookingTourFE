@@ -82,7 +82,7 @@ export default function ListTour ()  {
                         <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col hover:scale-105">
                             <div className="relative h-64">
                                 <Image
-                                    src={tour.main_image_url || tour.main_image_local_path}
+                                    src={tour.main_image_url}
                                     alt={tour.title}
                                     fill
                                     className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -90,7 +90,10 @@ export default function ListTour ()  {
                             </div>   
                             <div className="p-2 flex flex-col">
                                 <div className="mb-1 cursor-pointer">
-                                    <p className="font-bold line-clamp-2">{tour.title}</p>
+                                    <p 
+                                        className="font-bold line-clamp-2"
+                                        onClick={()=>router.push(`/tours/${tour.tour_id}`)}  
+                                    >{tour.title}</p>
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex gap-1">
@@ -130,7 +133,10 @@ export default function ListTour ()  {
                                             <span className="text-sm">Giá: </span>
                                             <p className="font-bold">{formatPrice(tour.base_price)}</p>
                                         </div>
-                                        <button className="px-4 py-2 border-1 border-red-600 text-red-600 cursor-pointer rounded font-bold">
+                                        <button 
+                                            className="px-4 py-2 border-1 border-red-600 text-red-600 cursor-pointer rounded font-bold"
+                                            onClick={()=>router.push(`/tours/${tour.tour_id}`)}    
+                                        >
                                             Đặt Ngay
                                         </button>
                                     </div>

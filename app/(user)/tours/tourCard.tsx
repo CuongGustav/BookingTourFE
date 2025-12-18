@@ -1,7 +1,11 @@
+'use client'
+
 import { TourInfo } from "@/app/types/tour";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function TourCard ({tour}:{tour:TourInfo}){
+    const router = useRouter();
 
     //format price
     const formatPrice = (price: number | string | null | undefined): string => {
@@ -35,20 +39,24 @@ export default function TourCard ({tour}:{tour:TourInfo}){
         <div
             key={tour.tour_id}
             className="bg-white rounded-2xl shadow-black shadow-sm overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1 flex cursor-pointer"
-        >
+            onClick={()=>router.push(`/tours/${tour.tour_id}`)} 
+       >
             {/* IMAGE BLOCK */}
             <div className="w-3/10 flex-shrink-0">
                 <Image
-                src={tour.main_image_url || tour.main_image_local_path}
-                alt={tour.title}
-                width={400}
-                height={300}
-                className="object-cover w-full h-full"
+                    src={tour.main_image_url}
+                    alt={tour.title}
+                    width={400}
+                    height={300}
+                    className="object-cover w-full h-full"
                 />
             </div>
             <div className="flex-1 p-4 flex flex-col justify-between gap-2">
                 <div>
-                    <p className="text-base font-bold text-blue-900 line-clamp-2">
+                    <p 
+                        className="text-base font-bold text-blue-900 line-clamp-2"
+                        onClick={()=>router.push(`/tours/${tour.tour_id}`)}     
+                    >
                         {tour.title}
                     </p>
                 </div>    
@@ -87,7 +95,10 @@ export default function TourCard ({tour}:{tour:TourInfo}){
                         <span className="text-sm">Giá: </span>
                         <p className="font-bold">{formatPrice(tour.base_price)}</p>
                     </div>
-                    <button className="px-4 py-2 border-1 bg-blue-900 text-white cursor-pointer rounded-xl font-bold">
+                    <button 
+                        className="px-4 py-2 border-1 bg-blue-900 text-white cursor-pointer rounded-xl font-bold"
+                        onClick={()=>router.push(`/tours/${tour.tour_id}`)} 
+                    >
                         Xem chi tiết
                     </button>
                 </div>

@@ -55,7 +55,6 @@ export default function ToursPage () {
         setTours(sorted);
     };
 
-
     useEffect(() => {
     const fetchTours = async () => {
         setLoading(true);

@@ -7,7 +7,6 @@ export interface destinationInfo{
     is_active: boolean,
     image_url: string,
     image_public_id: string,
-    image_local_path: string,
     created_at: string,
 }
 
@@ -16,7 +15,6 @@ export interface destinationFavourite{
     name: string,
     image_url: string,
     image_public_id: string,
-    image_local_path: string,
 }
 
 export interface destinationCreateTour{

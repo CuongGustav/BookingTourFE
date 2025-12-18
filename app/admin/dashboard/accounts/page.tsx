@@ -36,7 +36,7 @@ export default function AccountsPage () {
     const [sortBy, setSortBy] = useState<keyof AccountInforListAdmin>("created_at");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [page, setPage] = useState(1);
-    const pageSize = 8;
+    const pageSize = 7;
     const [isModalReadOpen, setIsModalReadOpen] = useState(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountInforListAdmin | null> (null)
     const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false)

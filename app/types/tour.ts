@@ -1,4 +1,5 @@
-import { TourSchedule } from "./tour_schedule";
+import { ReadTourSchedule, TourSchedule } from "./tour_schedule";
+import { ReadTourImages } from "./tour_images";
 
 export interface TourInfo {
     tour_id: string;
@@ -9,7 +10,6 @@ export interface TourInfo {
     depart_destination: string;
     base_price: number;
     main_image_url: string;
-    main_image_local_path: string;
     rating_average: number;
     total_reviews: number;
     is_featured: 1 | 0;
@@ -18,4 +18,9 @@ export interface TourInfo {
     transportation: string;
     slug: string;
     upcoming_schedules: TourSchedule[];
+}
+
+export interface TourDetailInfo {
+    images: ReadTourImages[];
+    schedules: ReadTourSchedule[];
 }

@@ -38,9 +38,6 @@ export default function DestinationFavourite () {
         if (item.image_url && item.image_url.trim() !== "")
             return item.image_url
 
-        if (item.image_local_path && item.image_local_path.trim() !== "")
-            return `${API_URL}/${item.image_local_path}`
-
         return null
     }
 
