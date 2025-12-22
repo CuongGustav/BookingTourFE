@@ -263,7 +263,7 @@ export default function AdminPage () {
                                         </td>
                                         <td className="px-6 py-4 font-medium">
                                             <a 
-                                                
+                                                onClick={() => router.push(`/admin/dashboard/tours/read/${tour.tour_id}`)}
                                                 className="cursor-pointer hover:text-blue-600"
                                             >
                                                 {tour.tour_code}

@@ -19,8 +19,6 @@ export default function CreateTourPage () {
     const [loading, setLoading] = useState(false);
 
     const [title, setTitle] = useState("")
-    const [slug, setSlug] = useState("")
-    const [slugEdited, setSlugEdited] = useState(false)
     const [attractionsEdited, setattractionsEdited] = useState(false)
     const [durationDays, setDurationDays] = useState<number>(0)
     const [durationNights, setDurationNights] = useState<number>(0)
@@ -51,11 +49,6 @@ export default function CreateTourPage () {
     const [imageMainFile, setImageFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>("");
         
-    //slug
-    const slugify = (text: string) =>
-        text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/đ/g, "d").replace(/[^a-z0-9\s-]/g, "").trim()
-            .replace(/\s+/g, "-").replace(/-+/g, "-");
     //attraction
     const generateAttractions = (text: string) => {
         return text
@@ -68,9 +61,6 @@ export default function CreateTourPage () {
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTitle(value);
-        if (!slugEdited) {
-            setSlug(slugify(value));
-        }
         if (!attractionsEdited) {
             setAttractions(generateAttractions(value));
         }
@@ -372,7 +362,6 @@ export default function CreateTourPage () {
             //tour_form_data
             const tourFormData = new FormData();
             tourFormData.append("title", title);
-            tourFormData.append("slug", slug);
             tourFormData.append("duration_days", durationDays.toString());
             tourFormData.append("duration_nights", durationNights.toString());
             tourFormData.append("highlights", hightlight);
@@ -527,21 +516,6 @@ export default function CreateTourPage () {
                                 onChange={handleTitleChange}
                             />
                         </div>
-                    </div>
-                </div>
-                {/* slug */}
-                <div className="flex w-full">
-                    <div className="flex items-center w-full">
-                        <label className="font-medium w-[120px]">Slug tour:</label>
-                        <input
-                            type="text"
-                            value={slug}
-                            className="flex-1 border px-2 py-1 rounded-lg"
-                            onChange={(e) => {
-                                setSlug(e.target.value)
-                                setSlugEdited(true)
-                            }}
-                        />
                     </div>
                 </div>
                 <div className="flex gap-8 ">

@@ -36,3 +36,9 @@ export const formatPriceK = (price: number | string | null | undefined): string 
         return `${formatted} k`;
 
     };
+
+export const formatDateVN = (dateStr: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("vi-VN");
+};
