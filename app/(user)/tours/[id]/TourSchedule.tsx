@@ -1,58 +1,37 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ReadTourSchedule } from "@/app/types/tour_schedule"
+import { ReadTourSchedule } from '@/app/types/tour_schedule'
 import { formatPriceK } from '@/app/common'
 
 interface TourScheduleProps {
     schedules: ReadTourSchedule[]
+    onScheduleSelect: (schedule: ReadTourSchedule | null) => void
+    selectedSchedule: ReadTourSchedule | null
 }
 
-export default function TourSchedule({ schedules }: TourScheduleProps) {
+export default function TourSchedule({ schedules, onScheduleSelect, selectedSchedule }: TourScheduleProps) {
     const today = new Date()
 
     const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1)
     const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear())
-    const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
     const monthYearList = useMemo(() => {
         const map = new Map<string, { month: number; year: number }>()
-
         schedules.forEach(item => {
             const d = new Date(item.departure_date)
-            const month = d.getMonth() + 1
-            const year = d.getFullYear()
-            const key = `${month}-${year}`
-
-            if (!map.has(key)) {
-                map.set(key, { month, year })
-            }
+            const key = `${d.getMonth() + 1}-${d.getFullYear()}`
+            if (!map.has(key)) map.set(key, { month: d.getMonth() + 1, year: d.getFullYear() })
         })
-
         return Array.from(map.values()).sort((a, b) => {
             if (a.year !== b.year) return a.year - b.year
             return a.month - b.month
         })
     }, [schedules])
 
-    const minMonthYear = monthYearList[0]
-    const maxMonthYear = monthYearList[monthYearList.length - 1]
-
-    const isMin =
-        minMonthYear &&
-        selectedMonth === minMonthYear.month &&
-        selectedYear === minMonthYear.year
-
-    const isMax =
-        maxMonthYear &&
-        selectedMonth === maxMonthYear.month &&
-        selectedYear === maxMonthYear.year
-
     const scheduleByDate = useMemo(() => {
         const map = new Map<string, ReadTourSchedule>()
-        schedules.forEach(item => {
-            map.set(item.departure_date, item)
-        })
+        schedules.forEach(s => map.set(s.departure_date, s))
         return map
     }, [schedules])
 
@@ -61,151 +40,135 @@ export default function TourSchedule({ schedules }: TourScheduleProps) {
     const calendarDays = useMemo(() => {
         const firstDay = new Date(selectedYear, selectedMonth - 1, 1)
         const lastDay = new Date(selectedYear, selectedMonth, 0)
-
         const daysInMonth = lastDay.getDate()
         const startDay = (firstDay.getDay() + 6) % 7 
 
         const days: { date: Date | null }[] = []
-
-        for (let i = 0; i < startDay; i++) {
-            days.push({ date: null })
-        }
-
+        for (let i = 0; i < startDay; i++) days.push({ date: null })
         for (let d = 1; d <= daysInMonth; d++) {
             days.push({ date: new Date(selectedYear, selectedMonth - 1, d) })
         }
-
         return days
     }, [selectedMonth, selectedYear])
 
+    const minMonthYear = monthYearList[0]
+    const maxMonthYear = monthYearList[monthYearList.length - 1]
+
+    const isMin = minMonthYear && selectedMonth === minMonthYear.month && selectedYear === minMonthYear.year
+    const isMax = maxMonthYear && selectedMonth === maxMonthYear.month && selectedYear === maxMonthYear.year
+
     return (
-        <div className="flex gap-6 items-start">
+        <div className="flex flex-col gap-6">
+            <h1 className='font-medium mx-auto text-xl'>LỊCH KHỞI HÀNH</h1>
 
-            <div className="flex flex-col rounded-xl shadow-black shadow-sm gap-4 p-4 min-w-[160px]">
-                <span className="font-semibold mx-auto">Chọn tháng</span>
+            <div className="flex flex-col lg:flex-row gap-6">
+                <div className="lg:w-48 bg-white rounded-xl shadow-lg p-5 border border-gray-200">
+                    <h3 className="font-semibold text-center mb-4 text-gray-800">Chọn tháng</h3>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {monthYearList.map(({ month, year }) => {
+                            const active = month === selectedMonth && year === selectedYear
+                            return (
+                                <button
+                                    key={`${month}-${year}`}
+                                    onClick={() => {
+                                        setSelectedMonth(month)
+                                        setSelectedYear(year)
+                                    }}
+                                    className={`w-full py-3 rounded-lg font-medium transition
+                                        ${active ? "bg-blue-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-blue-100"}`}
+                                >
+                                    {month.toString().padStart(2, '0')}/{year}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </div>
 
-                {monthYearList.map(({ month, year }) => {
-                    const active = month === selectedMonth && year === selectedYear
-
-                    return (
+                {/* Calendar*/}
+                <div className="flex-1 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <div className="flex items-center justify-between mb-6">
                         <button
-                            key={`${month}-${year}`}
+                            disabled={isMin}
                             onClick={() => {
-                                setSelectedMonth(month)
-                                setSelectedYear(year)
+                                if (isMin) return
+                                if (selectedMonth === 1) {
+                                    setSelectedMonth(12)
+                                    setSelectedYear(y => y - 1)
+                                } else {
+                                    setSelectedMonth(m => m - 1)
+                                }
                             }}
-                            className={`
-                                px-4 py-2 rounded-xl font-bold transition cursor-pointer text-blue-900 border-1 border-white
-                                ${active
-                                    ? "bg-blue-900 text-white"
-                                    : "border hover:border-blue-900 "}
-                            `}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center 
+                                ${isMin ? "opacity-40 cursor-not-allowed" : "hover:bg-blue-100 cursor-pointer"}`}
                         >
-                            {month}-{year}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-blue-900">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
                         </button>
-                    )
-                })}
-            </div>
 
-            {/* calendar */}
-            <div className="w-[650px] rounded-xl shadow-black shadow-sm p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                    <button
-                        disabled={isMin}
-                        onClick={() => {
-                            if (isMin) return
-                            if (selectedMonth === 1) {
-                                setSelectedMonth(12)
-                                setSelectedYear(y => y - 1)
-                            } else {
-                                setSelectedMonth(m => m - 1)
-                            }
-                        }}
-                        className={`
-                            w-8 h-8 rounded-full shadow flex items-center justify-center cursor-pointer
-                            ${isMin ? "opacity-40 cursor-not-allowed" : "hover:bg-blue-100"}
-                        `}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
-                        </svg>
-                    </button>
+                        <h2 className="text-xl font-bold text-blue-900">
+                            THÁNG {selectedMonth}/{selectedYear}
+                        </h2>
 
-                    <h2 className="text-blue-900 font-bold text-lg">
-                        THÁNG {selectedMonth}/{selectedYear}
-                    </h2>
+                        <button
+                            disabled={isMax}
+                            onClick={() => {
+                                if (isMax) return
+                                if (selectedMonth === 12) {
+                                    setSelectedMonth(1)
+                                    setSelectedYear(y => y + 1)
+                                } else {
+                                    setSelectedMonth(m => m + 1)
+                                }
+                            }}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center 
+                                ${isMax ? "opacity-40 cursor-not-allowed" : "hover:bg-blue-100 cursor-pointer"}`}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-blue-900">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </button>
+                    </div>
 
-                    <button
-                        disabled={isMax}
-                        onClick={() => {
-                            if (isMax) return
-                            if (selectedMonth === 12) {
-                                setSelectedMonth(1)
-                                setSelectedYear(y => y + 1)
-                            } else {
-                                setSelectedMonth(m => m + 1)
-                            }
-                        }}
-                        className={`
-                            w-8 h-8 rounded-full shadow flex items-center justify-center cursor-pointer
-                            ${isMax ? "opacity-40 cursor-not-allowed" : "hover:bg-blue-100"}
-                        `}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                        </svg>
-                    </button>
-                </div>
+                    <div className="grid grid-cols-7 text-center font-semibold text-gray-600 mb-3">
+                        {daysOfWeek.map(d => <div key={d}>{d}</div>)}
+                    </div>
 
-                <div className="grid grid-cols-7 text-center font-semibold mb-2">
-                    {daysOfWeek.map((d, i) => (
-                        <div key={d} className={i >= 5 ? "text-blue-900" : ""}>
-                            {d}
-                        </div>
-                    ))}
-                </div>
+                    <div className="grid grid-cols-7 gap-2 text-center">
+                        {calendarDays.map((item, index) => {
+                            if (!item.date) return <div key={index} className="h-24" />
 
-                <div className="grid grid-cols-7 gap-2 text-center">
-                    {calendarDays.map((item, index) => {
-                        if (!item.date) {
-                            return <div key={index} className="h-[72px]" />
-                        }
+                            const dateStr = item.date.toISOString().split('T')[0]
+                            const schedule = scheduleByDate.get(dateStr)
+                            const isWeekend = item.date.getDay() === 0 || item.date.getDay() === 6
+                            const isActive = selectedSchedule?.departure_date === dateStr
 
-                        const yyyyMmDd = item.date.toISOString().split("T")[0]
-                        const schedule = scheduleByDate.get(yyyyMmDd)
-                        const isWeekend =
-                            item.date.getDay() === 0 || item.date.getDay() === 6
-                        const isActive = selectedDate === yyyyMmDd
-
-                        return (
-                            <div
-                                key={index}
-                                onClick={() => schedule && setSelectedDate(yyyyMmDd)}
-                                className={`
-                                    h-[72px] flex flex-col items-center justify-center
-                                    rounded-lg transition border-1
-                                    ${schedule ? "cursor-pointer hover:border-blue-900 " : "text-gray-400"}
-                                    ${isActive ? "border-blue-900" : "border-white"}
-                                `}
-                            >
-                                <div className={`font-semibold ${isWeekend ? "text-blue-900" : ""}`}>
-                                    {item.date.getDate()}
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() => schedule && onScheduleSelect(schedule)}
+                                    className={`h-24 flex flex-col items-center justify-center rounded-xl transition-all border-2 cursor-pointer
+                                        ${schedule ? "hover:border-blue-600 border-gray-200" : "border-transparent text-gray-400 cursor-not-allowed"}
+                                        ${isActive ? "border-blue-900 bg-blue-50" : ""}
+                                    `}
+                                >
+                                    <div className={`font-bold text-lg ${isWeekend ? "text-red-600" : "text-gray-800"}`}>
+                                        {item.date.getDate()}
+                                    </div>
+                                    {schedule && (
+                                        <div className="text-sm font-semibold text-blue-900 mt-1">
+                                            {formatPriceK(Number(schedule.price_adult))}
+                                        </div>
+                                    )}
                                 </div>
+                            )
+                        })}
+                    </div>
 
-                                <div className="h-[18px] text-sm font-semibold text-blue-900">
-                                    {schedule
-                                        ? `${formatPriceK(schedule.price_adult)}`
-                                        : ""}
-                                </div>
-                            </div>
-                        )
-                    })}
+                    <p className="mt-6 text-sm text-red-600 italic text-center">
+                        Quý khách vui lòng chọn ngày khởi hành phù hợp
+                    </p>
                 </div>
-
-                <p className="text-red-600 italic mt-4 text-sm">
-                    Quý khách vui lòng chọn ngày phù hợp
-                </p>
             </div>
         </div>
     )

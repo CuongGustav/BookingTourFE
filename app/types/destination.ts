@@ -21,3 +21,10 @@ export interface destinationCreateTour{
     destination_id: string,
     name: string,
 }
+
+export interface destinationByTourID{
+    destination_id: string,
+    name: string,
+    region: string,
+    country: string,
+}

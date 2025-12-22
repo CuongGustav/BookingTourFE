@@ -3,8 +3,13 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState, useCallback } from "react";
 import { TourDetailInfo } from "@/app/types/tour";
+import { ReadTourSchedule } from "@/app/types/tour_schedule";
 import TourGallery from "./TourGallery";
 import TourSchedule from "./TourSchedule";
+import TourAdditionalInfo from "./TourAdditionalInfo";
+import TourItinerary from "./TourItinerary";
+import TourInfoNote from "./TourInfoNote";
+import BookingBar from "./bookingBar";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -15,6 +20,10 @@ export default function TourDetailPage () {
 
     const [loading, setLoading] = useState(true);
     const [tourInfo, setTourInfo] = useState<TourDetailInfo | null>(null);
+    const [selectedSchedule, setSelectedSchedule] = useState<ReadTourSchedule | null>(null);
+    const handleClearSchedule = () => {
+        setSelectedSchedule(null)
+    }
     
     const fetchTourDetail = useCallback(async () => {
         if (!tour_id) {
@@ -55,16 +64,40 @@ export default function TourDetailPage () {
     } 
 
     return (
-        <div className="flex flex-col gap-4 w-8/10 mx-auto">
-            <div className="flex flex-col gap-4 w-75/100">
-                <h1>aaaaaaaaaaa</h1>
-                {/* <TourGallery images={tourInfo.images || []} /> */}
-                <TourSchedule schedules={tourInfo.schedules || []} />
-
-                
-            </div>
-            <div>
-
+        <div className="w-8/10 mx-auto">
+            {/* title */}
+            <h1 className="text-2xl font-bold">{tourInfo.title}</h1>
+            <div className="flex gap-4">
+                <div className="flex flex-col gap-8 w-75/100">
+                    {/* <TourGallery images={tourInfo.images || []} /> */}
+                    <TourSchedule 
+                        schedules={tourInfo.schedules || []} 
+                        onScheduleSelect={setSelectedSchedule}
+                        selectedSchedule={selectedSchedule}
+                    />
+                    {/* hight light */}
+                    { tourInfo.hightlights && (
+                        <div className="bg-blue-100">
+                            <h2 className="font-semibold text-lg p-4">Điểm nhấn chương trình</h2>
+                            <p>{tourInfo.hightlights}</p>
+                        </div>
+                    )}
+                    {/* attractions, cuisine, suitable_for, ideal_time, transportation, promotions */}
+                    <TourAdditionalInfo tour={tourInfo} />
+                    {/* tour itinerary */}
+                    <TourItinerary itineraries={tourInfo.itineraries} />
+                    {/* Information to note */}
+                    <TourInfoNote included_service={tourInfo.included_services} excluded_service={tourInfo.excluded_services} />
+                </div>
+                <div className="hidden lg:block">
+                    <div className="sticky top-24">
+                        <BookingBar 
+                            tourInfo={tourInfo}
+                            selectedSchedule={selectedSchedule}
+                            onClearSchedule={handleClearSchedule}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     )
