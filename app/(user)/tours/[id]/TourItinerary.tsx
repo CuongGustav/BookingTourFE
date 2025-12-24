@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import AudioReader from './AudioReader'
 
 
 interface ItineraryDay {
@@ -17,7 +18,7 @@ interface TourItineraryProps {
 }
 
 export default function TourItinerary({ itineraries }: TourItineraryProps) {
-    const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([0]))
+    const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([]))
 
     const toggleDay = (index: number) => {
         setExpandedDays(prev => {
@@ -31,9 +32,17 @@ export default function TourItinerary({ itineraries }: TourItineraryProps) {
         })
     }
 
+    const fullSpeech = itineraries.map(day => (
+        `Ngày ${day.display_order}, ${day.title}. Bữa ăn bao gồm ${day.meals}. Lịch trình chi tiết bao gồm: ${day.description}`
+    )).join(". Tiếp theo, ");
+
+
     return (
         <div className="flex flex-col gap-2">
-            <h1 className='font-medium mx-auto text-xl'>LỊCH TRÌNH</h1>
+            <div className="flex items-center justify-center gap-3">
+                <h1 className='font-medium text-xl'>LỊCH TRÌNH</h1>
+                <AudioReader text={fullSpeech} />
+            </div>
 
             <div className="flex flex-col gap-2">
                 {itineraries.map((day, index) => (

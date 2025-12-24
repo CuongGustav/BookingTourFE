@@ -77,9 +77,9 @@ export default function TourDetailPage () {
                     />
                     {/* hight light */}
                     { tourInfo.highlights && (
-                        <div className="bg-blue-100">
-                            <h2 className="font-semibold text-lg p-4">Điểm nhấn chương trình</h2>
-                            <p>{tourInfo.highlights}</p>
+                        <div className="bg-blue-100 rounded-2xl p-4">
+                            <h2 className="font-semibold text-lg">Điểm nhấn chương trình</h2>
+                            <p className="px-6">{tourInfo.highlights}</p>
                         </div>
                     )}
                     {/* attractions, cuisine, suitable_for, ideal_time, transportation, promotions */}

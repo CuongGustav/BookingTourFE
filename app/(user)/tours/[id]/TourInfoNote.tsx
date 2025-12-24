@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import AudioReader from './AudioReader';
 
 interface TourPolicyAccordionProps {
     included_service: string;
@@ -79,9 +80,16 @@ export default function TourInforNote({ included_service = '', excluded_service 
         },
     ];
 
+    const allItems = [...leftColumnItems, ...rightColumnItems];
+    const fullNoteSpeech = "Sau đây là những thông tin cần lưu ý cho chuyến đi. " + 
+        allItems.map(item => `${item.title}: ${item.content}`).join(". Tiếp theo ");
+
     return (
-        <div className='flex flex-col gap-4'>
-            <h1 className='font-medium mx-auto text-xl'>NHỮNG THÔNG TIN CẦN LƯU Ý</h1>
+        <div className='flex flex-col gap-2'>
+            <div className="flex items-center justify-center gap-3">
+                <h1 className='font-medium text-xl'>NHỮNG THÔNG TIN CẦN LƯU Ý</h1>
+                <AudioReader text={fullNoteSpeech} />
+            </div>
             <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                     {leftColumnItems.map(item => {
