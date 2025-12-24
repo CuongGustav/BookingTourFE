@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from "react";
-import { AccountInfo } from "../types/account";
+import { AccountInfo } from "@/app/types/account";
 import { gendersData} from "@/app/data/gender";
 import { provincesData } from "@/app/data/province";
 

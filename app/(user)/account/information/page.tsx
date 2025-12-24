@@ -15,6 +15,7 @@ export default function InformationAccoutPage () {
     const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false)
 
     const getGenderName = (value: string) => {
+        if (!value) return "Chưa xác định";
         switch (value.toLowerCase()) {
             case "male":
                 return "Nam";

@@ -1,9 +1,12 @@
 import DestinationFavourite from "../components/homepage.destinationFavorite";
 import ListTour from "../components/homepage.listTour";
 import FilterHomePage from "../components/homepage.filterHomePage";
+import { cookies } from "next/headers"
 
+export default async function HomePage() {
 
-export default function HomePage() {
+    const cookieStore = await cookies();
+    const isLoggedIn = !!(cookieStore.get('access_token_cookie'));
 
     return(
         <div className="w-full">
@@ -18,7 +21,7 @@ export default function HomePage() {
             </div>
             <div className="bg-blue-100 pt-[70px]">
                 <div className="w-4/5 m-auto">
-                    <ListTour/>
+                    <ListTour isLoggedIn={isLoggedIn}/>
                 </div>
             </div>
             {/* <div className="w-4/5 m-auto">

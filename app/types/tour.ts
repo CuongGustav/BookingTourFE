@@ -1,7 +1,7 @@
 import { ReadTourSchedule, TourSchedule } from "./tour_schedule";
 import { ReadTourImages } from "./tour_images";
 import { destinationByTourID } from "./destination";
-import {ItineraryUpdate} from "./tour_itinerary";
+import {ItineraryInforFE} from "./tour_itinerary";
 
 export interface TourInfo {
     tour_id: string;
@@ -20,6 +20,7 @@ export interface TourInfo {
     transportation: string;
     slug: string;
     upcoming_schedules: TourSchedule[];
+    is_like?: boolean;
 }
 
 export interface TourDetailInfo {
@@ -49,5 +50,5 @@ export interface TourDetailInfo {
     images: ReadTourImages[];
     schedules: ReadTourSchedule[];
     destinations: destinationByTourID[];
-    itineraries: ItineraryUpdate[];
+    itineraries: ItineraryInforFE[];
 }

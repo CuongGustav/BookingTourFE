@@ -3,8 +3,9 @@
 import { TourInfo } from "@/app/types/tour";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { FavoriteButton } from "../favorite_tours/FavoriteButton";
 
-export default function TourCard ({tour}:{tour:TourInfo}){
+export default function TourCard ({tour, isLoggedIn}:{tour:TourInfo, isLoggedIn?: boolean}){
     const router = useRouter();
 
     //format price
@@ -42,7 +43,7 @@ export default function TourCard ({tour}:{tour:TourInfo}){
             onClick={()=>router.push(`/tours/${tour.tour_id}`)} 
        >
             {/* IMAGE BLOCK */}
-            <div className="w-3/10 flex-shrink-0">
+            <div className="w-3/10 flex-shrink-0 relative">
                 <Image
                     src={tour.main_image_url}
                     alt={tour.title}
@@ -50,6 +51,11 @@ export default function TourCard ({tour}:{tour:TourInfo}){
                     height={300}
                     className="object-cover w-full h-full"
                 />
+                {isLoggedIn && (
+                    <div className="absolute top-2 left-2 cursor-pointer z-5">
+                        <FavoriteButton tourId={tour.tour_id} initialIsFavorite={tour.is_like ?? false} />
+                    </div>
+                )}
             </div>
             <div className="flex-1 p-4 flex flex-col justify-between gap-2">
                 <div>

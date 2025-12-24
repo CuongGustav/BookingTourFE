@@ -41,7 +41,7 @@ export default async function AccountLayout({
     }
 
     return (
-        <div className="flex gap-4 w-screen">
+        <div className="flex gap-4 w-8/10 mx-auto py-8">
             <NavbarAccount account={account} />
             <main className="flex-1 px-2">{children}</main>
         </div>

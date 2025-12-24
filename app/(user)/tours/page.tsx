@@ -19,6 +19,24 @@ export default function ToursPage () {
     const [sortOption, setSortOption] = useState<string>("");
     const [openSort, setOpenSort] = useState(false);
 
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                setIsLoggedIn(data.isLoggedIn);
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                setIsLoggedIn(false);
+            }
+        };
+        checkLoginStatus();
+    }, []);
+
     const sortOptions = [
         { label: "Mới nhất", value: "newest" },
         { label: "Ngày khởi hành gần nhất", value: "departure_asc" },
@@ -185,10 +203,9 @@ export default function ToursPage () {
                             )}
                         </div>
                     </div>
-                    <TourList tours={tours} />
+                    <TourList tours={tours} isLoggedIn={isLoggedIn}/>
                 </div>
             </div>
         </div>
-        
     );
 }

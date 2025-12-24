@@ -1,7 +1,7 @@
 import { TourInfo } from "@/app/types/tour";
 import TourCard from "./tourCard";
 
-export default function TourList({ tours }: { tours: TourInfo[] }) {
+export default function TourList({ tours, isLoggedIn }: { tours: TourInfo[], isLoggedIn? : boolean }) {
     if (!tours || tours.length === 0) {
         return (
             <div className="text-center text-gray-500 text-xl py-20">
@@ -13,7 +13,7 @@ export default function TourList({ tours }: { tours: TourInfo[] }) {
     return (
         <div className="flex flex-col gap-4">
             {tours.map((tour) => (
-                <TourCard key={tour.tour_id} tour={tour} />
+                <TourCard key={tour.tour_id} tour={tour} isLoggedIn={isLoggedIn}/>
             ))}
         </div>
     );

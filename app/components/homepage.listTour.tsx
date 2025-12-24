@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TourInfo } from "../types/tour";
 import Image from "next/image";
+import { FavoriteButton } from "../(user)/favorite_tours/FavoriteButton";
+interface ListTourProps {
+    isLoggedIn: boolean;
+}
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function ListTour ()  {
+export default function ListTour ({ isLoggedIn }: ListTourProps)  {
 
     const router = useRouter()
     const [tours, setTours] = useState<TourInfo[]>([])
@@ -84,10 +88,17 @@ export default function ListTour ()  {
                                 <Image
                                     src={tour.main_image_url}
                                     alt={tour.title}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                    width={400}
+                                    height={300}
+                                    className="object-cover group-hover:scale-110 transition-transform duration-500 h-full"
                                 />
-                            </div>   
+                                {isLoggedIn && (
+                                    <div className="absolute top-2 left-2 cursor-pointer z-5">
+                                        <FavoriteButton tourId={tour.tour_id} initialIsFavorite={tour.is_like ?? false} />
+                                    </div>
+                                )}
+                            </div>  
+
                             <div className="p-2 flex flex-col">
                                 <div className="mb-1 cursor-pointer">
                                     <p 
