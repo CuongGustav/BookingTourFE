@@ -93,7 +93,7 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
                                     className="object-cover group-hover:scale-110 transition-transform duration-500 h-full"
                                 />
                                 {isLoggedIn && (
-                                    <div className="absolute top-2 left-2 cursor-pointer z-5">
+                                    <div className="absolute top-2 left-2 cursor-pointer z-1">
                                         <FavoriteButton tourId={tour.tour_id} initialIsFavorite={tour.is_like ?? false} />
                                     </div>
                                 )}

@@ -24,7 +24,7 @@ export default async function HomePage() {
                     <ListTour isLoggedIn={isLoggedIn}/>
                 </div>
             </div>
-            {/* <div className="w-4/5 m-auto">
+            {/* <div className="w-4/5 m-auto pt-8">
                 <DestinationFavourite/>
             </div> */}
         </div>

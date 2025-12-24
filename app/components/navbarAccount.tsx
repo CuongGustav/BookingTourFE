@@ -38,7 +38,7 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
     }
 
     return (
-        <div className="flex flex-col border-2 border-gray-300 rounded-sm p-2 gap-2">
+        <div className="flex flex-col border-2 border-gray-300 rounded-lg p-2 gap-2 h-[380px]">
             {/* User info */}
             <div className="flex flex-col border-b-2 border-gray-300 pb-2">
                 <p className="font-bold">{account.full_name}</p>
