@@ -42,3 +42,8 @@ export const formatDateVN = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("vi-VN");
 };
+
+export const parseFormattedNumber = (value: string): number => {
+    const cleanValue = value.replace(/\D/g, ""); 
+    return cleanValue ? parseInt(cleanValue, 10) : 0;
+}

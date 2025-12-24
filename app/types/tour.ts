@@ -1,7 +1,7 @@
 import { ReadTourSchedule, TourSchedule } from "./tour_schedule";
 import { ReadTourImages } from "./tour_images";
 import { destinationByTourID } from "./destination";
-import {ItineraryInforFE} from "./tour_itinerary";
+import {ItineraryUpdate} from "./tour_itinerary";
 
 export interface TourInfo {
     tour_id: string;
@@ -27,7 +27,7 @@ export interface TourDetailInfo {
     title: string;
     duration_days: number;
     duration_nights: number;
-    hightlights: string;
+    highlights: string;
     included_services: string;
     excluded_services: string;
     base_price: number;
@@ -38,6 +38,7 @@ export interface TourDetailInfo {
     rating_average: number;
     total_reviews: number;
     is_featured: 1 | 0;
+    is_active: 1 | 0;
     attractions: string;
     cuisine: string;
     suitable_for: string;
@@ -48,5 +49,5 @@ export interface TourDetailInfo {
     images: ReadTourImages[];
     schedules: ReadTourSchedule[];
     destinations: destinationByTourID[];
-    itineraries: ItineraryInforFE[];
+    itineraries: ItineraryUpdate[];
 }

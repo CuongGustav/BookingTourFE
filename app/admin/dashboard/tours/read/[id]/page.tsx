@@ -19,7 +19,7 @@ export default function ReadTourDetail() {
     useEffect(() => {
         const fetchTour = async () => {
             try {
-                const res = await fetch(`${API_URL}/tour/${id}`, {
+                const res = await fetch(`${API_URL}/tour/admin/${id}`, {
                     credentials: "include"
                 });
                 const result = await res.json();
@@ -96,17 +96,18 @@ export default function ReadTourDetail() {
                             <label className="font-medium w-[120px]">Tour hot:</label>
                             <label className="flex-1 border px-2 py-1 rounded-lg">{tour.is_featured ? "Có" : "Không"}</label>
                         </div>
-                        {/* depart_destination */}
+                        {/* tour active */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Điểm xuất phát:</label>
-                            <label className="flex-1 border px-2 py-1 rounded-lg">{tour.depart_destination}</label>
+                            <label className="font-medium w-[120px]">Hoạt động:</label>
+                            <label className="flex-1 border px-2 py-1 rounded-lg">{tour.is_active ? "Có" : "Không"}</label>
                         </div>
+                        
                     </div>
                     {/* price */}
                     <div className="flex flex-1 flex-col gap-2">
                         {/* base price */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Giá gốc:</label>
+                            <label className="font-medium w-[140px]">Giá gốc:</label>
                             <div className="flex border rounded-lg w-full justify-between items-center">
                                 <label className="flex-1 px-2 py-1">{formatPrice(tour.base_price)}</label>
                                 <label className="font-bold px-4">VND</label>
@@ -114,7 +115,7 @@ export default function ReadTourDetail() {
                         </div>
                         {/* child price */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Giá trẻ em:</label>
+                            <label className="font-medium w-[140px]">Giá trẻ em:</label>
                             <div className="flex border rounded-lg w-full justify-between items-center">
                                 <label className="flex-1 px-2 py-1">{formatPrice(tour.child_price)}</label>
                                 <label className="font-bold px-4">VND</label>
@@ -122,19 +123,25 @@ export default function ReadTourDetail() {
                         </div>
                         {/* infant price */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Giá sơ sinh:</label>
+                            <label className="font-medium w-[140px]">Giá sơ sinh:</label>
                             <div className="flex border rounded-lg w-full justify-between items-center">
                                 <label className="flex-1 px-2 py-1">{formatPrice(tour.infant_price)}</label>
                                 <label className="font-bold px-4">VND</label>
                             </div>
                         </div>
+                        {/* depart_destination */}
+                        <div className="flex items-center w-full">
+                            <label className="font-medium w-[120px]">Điểm xuất phát:</label>
+                            <label className="flex-1 border px-2 py-1 rounded-lg">{tour.depart_destination}</label>
+                        </div>
+                        
                     </div>
                 </div>    
                 {/* hightlight */}
                 <div>
                     <div className="flex items-center w-full">
                         <label className="font-medium w-[120px]">Điểm Nhấn:</label>
-                        <span className="flex-1 border px-2 py-1 rounded-lg h-[200px]">{tour.hightlights}</span>
+                        <span className="flex-1 border px-2 py-1 rounded-lg h-[200px]">{tour.highlights}</span>
                     </div>              
                 </div>
                 {/* information bonus */}

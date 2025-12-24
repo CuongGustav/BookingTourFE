@@ -76,10 +76,10 @@ export default function TourDetailPage () {
                         selectedSchedule={selectedSchedule}
                     />
                     {/* hight light */}
-                    { tourInfo.hightlights && (
+                    { tourInfo.highlights && (
                         <div className="bg-blue-100">
                             <h2 className="font-semibold text-lg p-4">Điểm nhấn chương trình</h2>
-                            <p>{tourInfo.hightlights}</p>
+                            <p>{tourInfo.highlights}</p>
                         </div>
                     )}
                     {/* attractions, cuisine, suitable_for, ideal_time, transportation, promotions */}

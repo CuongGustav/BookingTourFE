@@ -86,15 +86,18 @@ export default function CreateTourPage () {
     }
     //check price
     useEffect(() => {
-        if (basePrice === 0 && childPrice === 0 && infantPrice === 0) {
+        const basePriceNew = Number(basePrice);
+        const childPriceNew = Number(childPrice);
+        const infantPriceNew = Number(infantPrice);
+        if (basePriceNew === 0 && childPriceNew === 0 && infantPriceNew === 0) {
             setPriceError(null);
             return;
         }
-        if (childPrice > 0 && basePrice > 0 && childPrice >= basePrice) {
+        if (childPriceNew > 0 && basePriceNew > 0 && childPriceNew >= basePriceNew) {
             setPriceError("Giá trẻ em phải nhỏ hơn giá gốc");
-        } else if (infantPrice > 0 && childPrice > 0 && infantPrice >= childPrice) {
+        } else if (infantPriceNew > 0 && childPriceNew > 0 && infantPriceNew >= childPriceNew) {
             setPriceError("Giá sơ sinh phải nhỏ hơn giá trẻ em");
-        } else if (infantPrice > 0 && basePrice > 0 && infantPrice >= basePrice) {
+        } else if (infantPriceNew > 0 && basePriceNew > 0 && infantPriceNew >= basePriceNew) {
             setPriceError("Giá sơ sinh phải nhỏ hơn giá gốc");
         } else {
             setPriceError(null);
@@ -560,7 +563,7 @@ export default function CreateTourPage () {
                             <select
                                 value={isFeatured ? "true" : "false"}
                                 onChange={(e) => setIsFeatured(e.target.value === "true")}
-                                className="flex-1 border px-2 py-1 rounded-lg"
+                                className="flex-1 border px-2 py-1 rounded-lg cursor-pointer"
                             >
                                 <option value="false">Không</option>
                                 <option value="true">Có</option>
@@ -572,13 +575,12 @@ export default function CreateTourPage () {
                             <select
                                 value={departDestination}
                                 onChange={(e) => setDepartDestination(e.target.value)}
-                                className="flex-1 border px-2 py-1 rounded-lg"
+                                className="flex-1 border px-2 py-1 rounded-lg cursor-pointer"
                             >
                                 <option >-- Chọn điểm xuất phát --</option>
-                                <option value="Hà Nội">Hà Nội</option>
-                                <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                                <option value="Đà Nẵng">Đà Nẵng</option>
-                                <option value="Nha Trang">Nha Trang</option>
+                                <option value="TP. Hà Nội">TP. Hà Nội</option>
+                                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
                             </select>
                         </div>
                     </div>
@@ -796,7 +798,7 @@ export default function CreateTourPage () {
                             {destinations.length === 0 ? (
                                 <p className="text-gray-400 text-sm">Đang tải danh sách điểm đến...</p>
                             ) : (
-                                <div className="grid grid-cols-8 gap-2">
+                                <div className="grid grid-cols-6 gap-6">
                                     {destinations.map((dest) => (
                                         <label 
                                             key={dest.destination_id} 
@@ -856,7 +858,9 @@ export default function CreateTourPage () {
                                         onClick={() => removeItinerary(index)}
                                         className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
                                     >
-                                        Xóa
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                        </svg>
                                     </button>
                                 </div>
 
@@ -924,7 +928,9 @@ export default function CreateTourPage () {
                                             onClick={() => removeSchedule(index)}
                                             className="text-red-600 hover:text-red-800 p-1 cursor-pointer"
                                         >
-                                            Xóa
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
                                         </button>
                                     </div>
                                     <p className=" items-center mb-3 text-red-600">Chú ý định dạng ngày tháng là tháng/ngày/năm</p>
@@ -945,7 +951,7 @@ export default function CreateTourPage () {
                                             </div>
                                             {/* price_adult */}
                                             <div className="flex gap-2">
-                                                <label className="font-medium w-[120px] pt-2">Giá vé gốc:</label>
+                                                <label className="font-medium w-[120px] pt-2">Giá người lớn:</label>
                                                 <input
                                                     type="text"
                                                     value={formatNumber(schedule.price_adult)}
