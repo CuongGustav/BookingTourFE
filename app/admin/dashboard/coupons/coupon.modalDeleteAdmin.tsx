@@ -1,20 +1,19 @@
 'use client'
 
-import { destinationInfo } from "@/app/types/destination";
+import { ReadCouponAdmin } from "@/app/types/coupon";
 
 interface ModalDeleteDestinationAdminProps {
     onClose: () => void;
-    des: destinationInfo | null
+    coupon: ReadCouponAdmin | null;
     onDeleted: ()=> void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
-export default function ModalDeleteDestinationAdmin ({onClose,des, onDeleted}: ModalDeleteDestinationAdminProps) {
-    const id = des?.destination_id
+export default function ModalDeleteCouponAdmin ({onClose, coupon, onDeleted}: ModalDeleteDestinationAdminProps) {
     const handleDelete = async () => {
         try {
-            const res = await fetch(`${API_URL}/destination/admin/delete/${id}`, {
+            const res = await fetch(`${API_URL}/coupon/admin/delete/${coupon?.coupon_id}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -39,8 +38,8 @@ export default function ModalDeleteDestinationAdmin ({onClose,des, onDeleted}: M
                 className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 relative shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h1 className="text-2xl font-bold mb-2 text-main">Xóa điểm đến</h1>
-                <p>Bạn muốn xóa điểm đến {des?.name}</p>
+                <h1 className="text-2xl font-bold mb-2 text-main">Xóa mã giảm giá</h1>
+                <p>Bạn muốn xóa mã giảm giá {coupon?.code}</p>
                 <button
                     onClick={onClose}
                     className="absolute top-6 right-6 cursor-pointer hover:text-red-600 transition"
