@@ -20,7 +20,7 @@ export default function ModalDeleteCouponAdmin ({onClose, coupon, onDeleted}: Mo
 
             const data = await res.json();
             if (res.ok) {
-                alert("Xóa điểm đến thành công!");
+                alert("Xóa mã giảm giá thành công!");
                 onDeleted();
                 onClose();
             } else {
