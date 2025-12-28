@@ -101,7 +101,11 @@ export default function ReadTourDetail() {
                             <label className="font-medium w-[120px]">Hoạt động:</label>
                             <label className="flex-1 border px-2 py-1 rounded-lg">{tour.is_active ? "Có" : "Không"}</label>
                         </div>
-                        
+                        {/* depart_destination */}
+                        <div className="flex items-center w-full">
+                            <label className="font-medium w-[120px]">Điểm xuất phát:</label>
+                            <label className="flex-1 border px-2 py-1 rounded-lg">{tour.depart_destination}</label>
+                        </div>
                     </div>
                     {/* price */}
                     <div className="flex flex-1 flex-col gap-2">
@@ -128,13 +132,15 @@ export default function ReadTourDetail() {
                                 <label className="flex-1 px-2 py-1">{formatPrice(tour.infant_price)}</label>
                                 <label className="font-bold px-4">VND</label>
                             </div>
-                        </div>
-                        {/* depart_destination */}
+                        </div> 
+                        {/* single_room_surcharge */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Điểm xuất phát:</label>
-                            <label className="flex-1 border px-2 py-1 rounded-lg">{tour.depart_destination}</label>
-                        </div>
-                        
+                            <label className="font-medium w-[140px]">Phụ thu phòng đơn:</label>
+                            <div className="flex border rounded-lg w-full justify-between items-center">
+                                <label className="flex-1 px-2 py-1">{formatPrice(tour.single_room_surcharge)}</label>
+                                <label className="font-bold px-4">VND</label>
+                            </div>
+                        </div>            
                     </div>
                 </div>    
                 {/* hightlight */}

@@ -24,6 +24,7 @@ export interface TourInfo {
 }
 
 export interface TourDetailInfo {
+    tour_id: string;
     tour_code: string;
     title: string;
     duration_days: number;
@@ -47,6 +48,7 @@ export interface TourDetailInfo {
     transportation: string;
     promotions: string;
     depart_destination: string;
+    single_room_surcharge: number;
     images: ReadTourImages[];
     schedules: ReadTourSchedule[];
     destinations: destinationByTourID[];

@@ -39,6 +39,7 @@ export default function UpdateTourPage() {
     const [basePrice, setBasePrice] = useState(0);
     const [childPrice, setChildPrice] = useState(0);
     const [infantPrice, setInfantPrice] = useState(0);
+    const [singleRoomSurcharge, setSingleRoomSurcharge] = useState(0);
     const [highlights, setHighlights] = useState("");
     const [attractions, setAttractions] = useState("");
     const [cuisine, setCuisine] = useState("");
@@ -97,7 +98,8 @@ export default function UpdateTourPage() {
         const basePriceNew = Number(basePrice);
         const childPriceNew = Number(childPrice);
         const infantPriceNew = Number(infantPrice);
-        if (basePriceNew === 0 && childPriceNew === 0 && infantPriceNew === 0) {
+        const singleRoomSurchargeNew = Number(singleRoomSurcharge)
+        if (basePriceNew === 0 && childPriceNew === 0 && infantPriceNew === 0 && singleRoomSurchargeNew) {
             setPriceError(null);
             return;
         }
@@ -110,7 +112,7 @@ export default function UpdateTourPage() {
         } else {
             setPriceError(null);
         }
-    }, [basePrice, childPrice, infantPrice]);
+    }, [basePrice, childPrice, infantPrice, singleRoomSurcharge]);
     //image main
     const setImageMain = (file: File) => {
         setImageMainFile(file);
@@ -171,6 +173,7 @@ export default function UpdateTourPage() {
                     setPromotion(tourData.promotions);
                     setIncludedServices(tourData.included_services);
                     setExcludedServices(tourData.excluded_services);
+                    setSingleRoomSurcharge(tourData.single_room_surcharge);
                     if (tourData.main_image_url) {
                         setPreview(tourData.main_image_url); // URL from Cloudinary
                     }
@@ -246,6 +249,7 @@ export default function UpdateTourPage() {
             basePrice !== originalTour.base_price ||
             childPrice !== originalTour.child_price ||
             infantPrice !== originalTour.infant_price ||
+            singleRoomSurcharge !== originalTour.single_room_surcharge ||
             highlights !== (originalTour.highlights || "") ||
             attractions !== (originalTour.attractions || "") ||
             cuisine !== (originalTour.cuisine || "") ||
@@ -260,7 +264,7 @@ export default function UpdateTourPage() {
         setTourInfoChanged(changed);
     }, [title, durationDays, durationNights, isFeatured, isActive, departDestination, basePrice, childPrice, infantPrice,
         highlights, attractions, cuisine, idealTime, suitableFor, transportation, promotion, includedServices, excludedServices,
-        imageMainFile, originalTour]);
+        imageMainFile, singleRoomSurcharge, originalTour]);
 
     //change tour destinations yet?    
     useEffect(() => {
@@ -325,6 +329,7 @@ export default function UpdateTourPage() {
                 formData.append('promotions', promotion || "");
                 formData.append('included_services', includedServices || "");
                 formData.append('excluded_services', excludedServices || "");
+                formData.append("single_room_surcharge", singleRoomSurcharge.toString());
                 if (imageMainFile) {
                     formData.append('main_image', imageMainFile);
                 }
@@ -493,7 +498,7 @@ export default function UpdateTourPage() {
                     <div className="flex w-1/3 gap-2 flex-col">
                         {/* duration_days */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Số Ngày:</label>
+                            <label className="font-medium w-[128px]">Số Ngày:</label>
                             <input
                                 type="number"
                                 value={durationDays === 0 ? '' : durationDays}
@@ -507,7 +512,7 @@ export default function UpdateTourPage() {
                         </div>
                         {/* duration_nights */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Số Đêm:</label>
+                            <label className="font-medium w-[128px]">Số Đêm:</label>
                             <input
                                 type="number"
                                 value={durationNights === 0 ? '' : durationNights}
@@ -526,7 +531,7 @@ export default function UpdateTourPage() {
                         )}
                         {/* tour hot */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Tour hot:</label>
+                            <label className="font-medium w-[128px]">Tour hot:</label>
                             <select
                                 value={isFeatured}
                                 onChange={(e) => setIsFeatured(Number(e.target.value) as 0 | 1)}
@@ -538,7 +543,7 @@ export default function UpdateTourPage() {
                         </div>
                         {/* tour active */}
                         <div className="flex items-center w-full">
-                            <label className="font-medium w-[120px]">Hoạt động:</label>
+                            <label className="font-medium w-[128px]">Hoạt động:</label>
                             <select
                                 value={isActive}
                                 onChange={(e) => setIsActive(Number(e.target.value) as 0 | 1)}
@@ -548,8 +553,26 @@ export default function UpdateTourPage() {
                                 <option value={1}>Có</option>
                             </select>
                         </div>
+                        {/* depart destination */}
+                        <div className="flex items-center w-full gap-2">
+                            <label className="w-[120px] font-medium flex items-center">
+                                Điểm xuất phát:
+                            </label>
+
+                            <div className="flex flex-1  border rounded-lg items-center">
+                                <select
+                                    className="w-full h-full px-2 py-1 outline-none bg-transparent"
+                                    value={departDestination}
+                                    onChange={(e) => setDepartDestination(e.target.value)}
+                                >
+                                    <option value="TP. Hà Nội">TP. Hà Nội</option>
+                                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                    <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    {/* PRICE + DEPART */}
+                    {/* PRICE */}
                     <div className="flex flex-col gap-3 w-full">
                         {/*PRICE BASE */}
                         <div className="flex items-center w-full gap-2">
@@ -602,29 +625,28 @@ export default function UpdateTourPage() {
                                 <span className="px-4 font-bold">VND</span>
                             </div>
                         </div>
+                        {/* single_room_surcharge */}
+                        <div className="flex items-center w-full">
+                            <label className="w-[150px] font-medium flex items-center">
+                                Phụ thu phòng đơn:
+                            </label>
+                            <div className="flex border rounded-lg w-full justify-between items-center">
+                                <input 
+                                    className="flex-1 px-2 py-1 outline:none focus:outline-none"
+                                    value={singleRoomSurcharge === 0 ? '' : formatPrice(singleRoomSurcharge)}
+                                    onChange={(e) => {
+                                        const value = parseFormattedNumber(e.target.value);
+                                        setSingleRoomSurcharge(value);
+                                    }}
+                                />
+                                <label className="font-bold px-4">VND</label>
+                            </div>
+                        </div>
                         {priceError && (
                             <p className="text-red-600 text-sm mt-1 lg:pl-30">
                                 {priceError}
                             </p>
                         )}
-                        {/* depart destination */}
-                        <div className="flex items-center w-full gap-2">
-                            <label className="w-[120px] font-medium flex items-center">
-                                Điểm xuất phát:
-                            </label>
-
-                            <div className="flex flex-1  border rounded-lg items-center">
-                                <select
-                                    className="w-full h-full px-2 py-1 outline-none bg-transparent"
-                                    value={departDestination}
-                                    onChange={(e) => setDepartDestination(e.target.value)}
-                                >
-                                    <option value="TP. Hà Nội">TP. Hà Nội</option>
-                                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                                    <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 {/* highlights */}

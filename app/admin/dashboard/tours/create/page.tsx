@@ -26,6 +26,7 @@ export default function CreateTourPage () {
     const [basePrice, setBasePrice] = useState<number>(0)
     const [childPrice, setChildPrice] = useState<number>(0)
     const [infantPrice, setInfantPrice] = useState<number>(0)
+    const [singleRoomSurcharge, setSingleRoomSurcharge] = useState<number>(0)
     const [hightlight, setHightlight] = useState("")
     const [attractions, setAttractions] = useState("")
     const [cuisine, setCuisine] = useState("")
@@ -89,7 +90,8 @@ export default function CreateTourPage () {
         const basePriceNew = Number(basePrice);
         const childPriceNew = Number(childPrice);
         const infantPriceNew = Number(infantPrice);
-        if (basePriceNew === 0 && childPriceNew === 0 && infantPriceNew === 0) {
+        const singleRoomSurchargeNew = Number(singleRoomSurcharge);
+        if (basePriceNew === 0 && childPriceNew === 0 && infantPriceNew === 0 && singleRoomSurchargeNew) {
             setPriceError(null);
             return;
         }
@@ -102,7 +104,7 @@ export default function CreateTourPage () {
         } else {
             setPriceError(null);
         }
-    }, [basePrice, childPrice, infantPrice]);
+    }, [basePrice, childPrice, infantPrice, singleRoomSurcharge]);
     //image
     const setImageMain = (file: File) => {
         setImageFile(file);
@@ -319,7 +321,7 @@ export default function CreateTourPage () {
     //handle submit
     const handleSubmit = async () => {
         //tour
-        if(!title || !durationDays || !durationNights || !departDestination || !basePrice || !imageMainFile){
+        if(!title || !durationDays || !durationNights || !departDestination || !basePrice || !singleRoomSurcharge || !imageMainFile){
             alert("Tiêu đề, số ngày, số đêm, điểm khởi hành, giá góc, ảnh chính là bắt buộc");
             return;
         }
@@ -381,6 +383,7 @@ export default function CreateTourPage () {
             tourFormData.append("child_price", childPrice.toString());
             tourFormData.append("infant_price", infantPrice.toString());
             tourFormData.append("is_featured", isFeatured ? "1" : "0");
+            tourFormData.append("single_room_surcharge", singleRoomSurcharge.toString());
             if (imageMainFile) {
                 tourFormData.append("main_image", imageMainFile);
             }
@@ -626,6 +629,21 @@ export default function CreateTourPage () {
                                     onChange={(e) => {
                                         const value = parseFormattedNumber(e.target.value);
                                         setInfantPrice(value);
+                                    }}
+                                />
+                                <label className="font-bold px-4">VND</label>
+                            </div>
+                        </div>
+                        {/* single_room_surcharge */}
+                        <div className="flex items-center w-full">
+                            <label className="font-medium w-[120px]">Giá phụ thu phòng đơn:</label>
+                            <div className="flex border rounded-lg w-full justify-between items-center">
+                                <input 
+                                    className="flex-1 px-2 py-1 outline:none focus:outline-none"
+                                    value={singleRoomSurcharge === 0 ? '' : formatNumber(singleRoomSurcharge)}
+                                    onChange={(e) => {
+                                        const value = parseFormattedNumber(e.target.value);
+                                        setSingleRoomSurcharge(value);
                                     }}
                                 />
                                 <label className="font-bold px-4">VND</label>
