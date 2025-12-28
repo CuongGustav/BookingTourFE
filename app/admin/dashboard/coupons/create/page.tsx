@@ -332,7 +332,7 @@ export default function CreateCouponPage() {
                                 <input 
                                     className="flex-1 px-3 py-2 outline:none focus:outline-none"
                                     disabled={!discountType}
-                                    value={discountValue === 0 ? '' : discountValue}
+                                    value={discountValue === 0 ? '' : formatPrice(discountValue)}
                                     onChange={(e) => handleDiscountValueChange(e.target.value)}
                                     type="number"
                                     min={0}
