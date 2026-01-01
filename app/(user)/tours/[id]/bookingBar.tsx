@@ -1,4 +1,7 @@
-// components/BookingBar.tsx
+'use client'
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { formatPrice } from "@/app/common"
 import {TourDetailInfo } from "@/app/types/tour"
 import { ReadTourSchedule } from "@/app/types/tour_schedule"
@@ -12,6 +15,24 @@ interface BookingBarProps {
 
 export default function BookingBar({ tourInfo, selectedSchedule, onClearSchedule }: BookingBarProps) {
     const minPrice = Math.min(...tourInfo.schedules.map(s => Number(s.price_adult)))
+    const router = useRouter();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    
+        useEffect(() => {
+            const checkLoginStatus = async () => {
+                try {
+                    const response = await fetch('/api/auth/check', {
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    setIsLoggedIn(data.isLoggedIn);
+                } catch (error) {
+                    console.error('Error checking auth status:', error);
+                    setIsLoggedIn(false);
+                }
+            };
+            checkLoginStatus();
+        }, []);
 
     if (!selectedSchedule) {
         return (
@@ -91,7 +112,16 @@ export default function BookingBar({ tourInfo, selectedSchedule, onClearSchedule
                 >
                     Ngày khác
                 </button>
-                <button className="flex-1 bg-blue-900 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition cursor-pointer">
+                <button 
+                    className="flex-1 bg-blue-900 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition cursor-pointer"
+                    onClick={ () => {
+                        if (isLoggedIn) {
+                            router.push(`/booking?tour_id=${tourInfo.tour_id}&schedule_id=${selectedSchedule.schedule_id}`)
+                        } else {
+                            alert("Bạn cần phải đăng nhập")
+                        }
+                    }}
+                >
                     Đặt ngay
                 </button>
             </div>

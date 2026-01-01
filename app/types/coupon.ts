@@ -2,7 +2,7 @@ export interface ReadCouponAdmin {
     coupon_id : string,
     code : string,
     description : string,
-    discount_type :  "PERCENTAGE" | "FFIXED",
+    discount_type :  "PERCENTAGE" | "FIXED",
     discount_value : number,
     min_order_amount : number,
     max_discount_amount : number,

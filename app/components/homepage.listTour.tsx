@@ -19,7 +19,9 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
 
     const fetchListTour = async () => {
         try {
-            const res = await  fetch(`${API_URL}/tour/8tour`)
+            const res = await fetch(`${API_URL}/tour/8tour`, {
+                credentials: 'include'  
+            });
             const data = await res.json();
             const tourList = Array.isArray(data) ? data : data.data || [];
             setTours(tourList.slice(0, 8));
@@ -28,11 +30,10 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
             console.error(e);
             alert("Lỗi tải dữ liệu");
             setLoading(false);  
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
-    }
+    };
     useEffect(() => {
         fetchListTour()
     }, []);
@@ -93,7 +94,7 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
                                     className="object-cover group-hover:scale-110 transition-transform duration-500 h-full"
                                 />
                                 {isLoggedIn && (
-                                    <div className="absolute top-2 left-2 cursor-pointer z-1">
+                                    <div className="absolute top-2 left-2 cursor-pointer z-5">
                                         <FavoriteButton tourId={tour.tour_id} initialIsFavorite={tour.is_like ?? false} />
                                     </div>
                                 )}
