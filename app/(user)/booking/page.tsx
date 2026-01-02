@@ -6,6 +6,9 @@ import { TourDetailInfo } from "@/app/types/tour";
 import { ReadTourSchedule } from "@/app/types/tour_schedule";
 import { AccountWhoAmI } from "@/app/types/account";
 import BookingPassenger from "./BookingPassenger";
+import Image from "next/image";
+import { Code } from "lucide-react";
+import { formatPrice } from "@/app/common";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -17,11 +20,16 @@ export default function BookingPage () {
     const [loading, setLoading] = useState(true);
     const [tourInfo, setTourInfo] = useState<TourDetailInfo | null>(null);
     const [selectedSchedule, setSelectedSchedule] = useState<ReadTourSchedule | null>(null);
+    const [numPassengerData, setNumPassengerData] = useState(
+        {numAdults: 1, numChildren: 0,numInfants: 0,}
+    )
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("")
     const [address, setAddress] = useState("")
+
+    // const [specialRequest, setSpecialRequest] = useState("")
 
     // fetch data
     useEffect(() => {
@@ -135,14 +143,17 @@ export default function BookingPage () {
         setErrors(newErrors);
     };
 
-
-
-
-
-
     if (loading || !isLoggedIn || !tourInfo || !selectedSchedule) {
         return <div className="w-8/10 mx-auto">Đang tải trang...</div>;
     }
+
+    const calculateTotalPrice = () => {
+        const adultTotal = numPassengerData.numAdults * selectedSchedule.price_adult;
+        const childTotal = numPassengerData.numChildren * selectedSchedule.price_child;
+        const infantTotal = numPassengerData.numInfants * selectedSchedule.price_infant;
+        
+        return adultTotal + childTotal + infantTotal;
+    };
 
     return (
         <div className="w-8/10 mx-auto py-6 relative">
@@ -239,17 +250,87 @@ export default function BookingPage () {
                                 />
                             </div>
                         </div>
-
                     </div>
-                    <h1 className="font-bold">HÀNH KHÁCH</h1>
                     {/* booking passenger infor */}
                     <div>
-                        <BookingPassenger singleRoomSurCharge={tourInfo.single_room_surcharge}/>
+                        <BookingPassenger 
+                            singleRoomSurCharge={tourInfo.single_room_surcharge}
+                            onNumPassengerChange={setNumPassengerData}
+                        />
+                    </div>
+                    <h1 className="font-bold">GHI CHÚ</h1>
+                    <div className="flex flex-col gap-2">
+                        <span>Quý khách có ghi chú lưu ý gì, hãy nói với chúng tôi</span>
+                        <textarea
+                            rows={4}
+                            maxLength={500}
+                            className="border rounded-xl p-2"
+                        />
                     </div>
                 </div>
                 {/* infor tour */}
-                <div className="flex flex-1 flex-col">
-                   
+                <div className="flex flex-1 flex-col gap-6">
+                    <h1 className="font-bold">TÓM TẮT CHUYẾN ĐI</h1>
+                    <div className="flex gap-2">
+                        <div className="flex-shrink-0">
+                            <Image
+                                src={tourInfo.main_image_url}
+                                alt="ảnh tour"
+                                width={120}
+                                height={90}
+                                className="object-cover rounded"
+                            />
+                        </div>
+                        <div className="flex flex-col justify-center flex-1 min-w-0">
+                            <span className="font-bold text-sm line-clamp-2 mb-1">
+                                {tourInfo.title} 
+                            </span>
+                            <span className="flex gap-1 items-center text-xs text-gray-800">
+                                <Code className="w-4 h-4"/>
+                                {tourInfo.tour_code}
+                            </span>
+                        </div>
+                    </div>
+                    {/* total price */}
+                    <h1 className="font-bold">KHÁCH HÀNG + PHỤ THU</h1>
+                    <div className="flex flex-col gap-1">
+                        {numPassengerData.numAdults>0 && (
+                            <div className="flex justify-between">
+                                <span>Người lớn</span>
+                                <div>
+                                    <span>{numPassengerData.numAdults}</span>
+                                    <span> x </span>
+                                    <span>{formatPrice(selectedSchedule.price_adult)}</span>
+                                </div>
+                            </div>
+                        )}
+                        {numPassengerData.numChildren>0 && (
+                            <div className="flex justify-between">
+                                <span>Trẻ em</span>
+                                <div>
+                                    <span>{numPassengerData.numChildren}</span>
+                                    <span> x </span>
+                                    <span>{formatPrice(selectedSchedule.price_child)}</span>
+                                </div>
+                            </div>
+                        )}
+                        {numPassengerData.numInfants>0 && (
+                            <div className="flex justify-between">
+                                <span>Em bé</span>
+                                <div>
+                                    <span>{numPassengerData.numInfants}</span>
+                                    <span> x </span>
+                                    <span>{formatPrice(selectedSchedule.price_infant)}</span>
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex justify-between">
+                            <span>Tạm tính</span>
+                            <span>{formatPrice(calculateTotalPrice())}</span>
+                        </div>
+                    </div>
+
+
                 </div>
 
             </div>

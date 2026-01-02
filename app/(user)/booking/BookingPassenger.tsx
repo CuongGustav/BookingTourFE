@@ -1,14 +1,20 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect} from "react"
 import { CreateBookingPassenger } from "@/app/types/booking_passengers";
 import { Circle, Plus, Minus } from "lucide-react";
+import { formatPrice } from "@/app/common";
 
 interface BookingPassengerProps {
     singleRoomSurCharge: number;
+    onNumPassengerChange?: (data: {
+        numAdults: number;
+        numChildren: number;
+        numInfants: number;
+    }) => void;
 }
 
-export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerProps) {
+export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange}:BookingPassengerProps) {
     const [numAdults, setNumAdults] = useState(1);
     const [numChildren, setNumChildren] = useState(0);
     const [numInfants, setNumInfants] = useState(0);
@@ -21,9 +27,12 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
     const [childErrors, setChildErrors] = useState<{full_name: string; gender: string; date_of_birth: string} []>([])
     const [infantErrors, setInfantErrors] = useState<{full_name: string; gender: string; date_of_birth: string} []>([])
 
-    useEffect (() => {
-        const newPassengers = [...adultPassengers]; // tạo bản sao mảng
-        while (newPassengers.length < numAdults) {
+    const changeNumAdults = (delta: number) => {
+        const newNum = Math.max(1, numAdults + delta);
+        if (newNum === numAdults) return;
+
+        const newPassengers = [...adultPassengers].slice(0, newNum);
+        while (newPassengers.length < newNum) {
             newPassengers.push({
                 passenger_type: "ADULT",
                 full_name: '',
@@ -33,39 +42,49 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                 single_room: 0
             });
         }
-        setAdultPassengers(newPassengers.slice(0, numAdults));
-        
-        const newErrors = [...adultErrors];
-        while (newErrors.length < numAdults) {
-            newErrors.push({ full_name: '', gender: '', date_of_birth: '', id_number: ''});
-        }
-        setAdultErrors(newErrors.slice(0,numAdults));
-    }, [numAdults, adultErrors, adultPassengers]);
+        setAdultPassengers(newPassengers);
 
-    useEffect(() => {
-        const newPassengers = [...childPassengers];
-        while (newPassengers.length < numChildren) {
-        newPassengers.push({
-            passenger_type: "CHILD",
-            full_name: '',
-            date_of_birth: '',
-            gender: 'MALE',
-            id_number: '',
-            single_room: 0
-        });
+        const newErrors = [...adultErrors].slice(0, newNum);
+        while (newErrors.length < newNum) {
+            newErrors.push({ full_name: '', gender: '', date_of_birth: '', id_number: '' });
         }
-        setChildPassengers(newPassengers.slice(0, numChildren));
+        setAdultErrors(newErrors);
 
-        const newErrors = [...childErrors];
-        while (newErrors.length < numChildren) {
-        newErrors.push({ full_name: '', gender: '', date_of_birth: '' });
+        setNumAdults(newNum);
+    };
+
+    const changeNumChildren = (delta: number) => {
+        const newNum = Math.max(0, numChildren + delta);
+        if (newNum === numChildren) return;
+
+        const newPassengers = [...childPassengers].slice(0, newNum);
+        while (newPassengers.length < newNum) {
+            newPassengers.push({
+                passenger_type: "CHILD",
+                full_name: '',
+                date_of_birth: '',
+                gender: 'MALE',
+                id_number: '',
+                single_room: 0
+            });
         }
-        setChildErrors(newErrors.slice(0, numChildren));
-    }, [numChildren, childErrors, childPassengers]);
+        setChildPassengers(newPassengers);
 
-    useEffect(() => {
-        const newPassengers = [...infantPassengers];
-        while (newPassengers.length < numInfants) {
+        const newErrors = [...childErrors].slice(0, newNum);
+        while (newErrors.length < newNum) {
+            newErrors.push({ full_name: '', gender: '', date_of_birth: '' });
+        }
+        setChildErrors(newErrors);
+
+        setNumChildren(newNum);
+    };
+
+    const changeNumInfants = (delta: number) => {
+        const newNum = Math.max(0, numInfants + delta);
+        if (newNum === numInfants) return;
+
+        const newPassengers = [...infantPassengers].slice(0, newNum);
+        while (newPassengers.length < newNum) {
             newPassengers.push({
                 passenger_type: "INFANT",
                 full_name: '',
@@ -75,14 +94,16 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                 single_room: 0
             });
         }
-        setInfantPassengers(newPassengers.slice(0, numInfants));
+        setInfantPassengers(newPassengers);
 
-        const newErrors = [...infantErrors];
-        while (newErrors.length < numInfants) {
-        newErrors.push({ full_name: '', gender: '', date_of_birth: '' });
+        const newErrors = [...infantErrors].slice(0, newNum);
+        while (newErrors.length < newNum) {
+            newErrors.push({ full_name: '', gender: '', date_of_birth: '' });
         }
-        setInfantErrors(newErrors.slice(0, numInfants));
-    }, [numInfants, infantErrors, infantPassengers]);
+        setInfantErrors(newErrors);
+
+        setNumInfants(newNum);
+    };
 
     const updateAdult = (index: number, field: keyof CreateBookingPassenger, value: string | "MALE" | "FEMALE" | "OTHER" | 1 | 0) => {
         setAdultPassengers((prev) => prev.map((p, i) => (i === index ? { ...p, [field]: value } : p)));
@@ -136,6 +157,16 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
         updateAdult(index, 'id_number', numericValue);
     };
 
+    useEffect(() => {
+        if (onNumPassengerChange) {
+            onNumPassengerChange({
+                numAdults,
+                numChildren,
+                numInfants
+            })
+        }
+    },[numAdults, numChildren, numInfants, onNumPassengerChange])
+
     return (
         <div className="flex flex-col gap-6">
             <h1 className="font-bold uppercase">HÀNH KHÁCH</h1>
@@ -151,14 +182,14 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                     <div className="flex items-center gap-2">
                         <button 
                             className="p-2 cursor-pointer" 
-                            onClick={() => setNumAdults(Math.max(1, numAdults - 1))}
+                            onClick={() => changeNumAdults(-1)}
                         >
                             <Minus size={12}/>
                         </button>
                         <span>{numAdults}</span>
                         <button 
                             className="p-2 cursor-pointer" 
-                            onClick={() => setNumAdults(numAdults + 1)}
+                            onClick={() => changeNumAdults(1)}
                         >
                             <Plus size={12}/>
                         </button>
@@ -175,14 +206,14 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                     <div className="flex items-center gap-2">
                         <button 
                             className="p-2 cursor-pointer" 
-                            onClick={() => setNumChildren(Math.max(0, numChildren - 1))}
+                            onClick={() => changeNumChildren(-1)}
                         >
                             <Minus size={12}/>
                         </button>
                         <span>{numChildren}</span>
                         <button 
                             className="p-2 cursor-pointer"  
-                            onClick={() => setNumChildren(numChildren + 1)}
+                            onClick={() => changeNumChildren(1)}
                         >
                             <Plus size={12}/>
                         </button>
@@ -199,14 +230,14 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                     <div className="flex items-center gap-2">
                         <button 
                             className="p-2 cursor-pointer" 
-                            onClick={() => setNumInfants(Math.max(0, numInfants - 1))}
+                            onClick={() => changeNumInfants(-1)}
                         >
                             <Minus size={12}/>
                         </button>
                         <span>{numInfants}</span>
                         <button 
                             className="p-2 cursor-pointer" 
-                            onClick={() => setNumInfants(numInfants + 1)}
+                            onClick={() => changeNumInfants(1)}
                         >
                             <Plus size={12}/>
                         </button>
@@ -214,22 +245,21 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                 </div>
             </div>
 
-            <h1 className="font-bold uppercase">THÔNG TIN HÀNH KHÁCH</h1>
+            <h1 className="font-bold uppercase pb-2">THÔNG TIN HÀNH KHÁCH</h1>
 
             <div>
-                <div className="flex items-center mb-2">
-                    <span className="mr-2">Người lớn</span>
+                <div className="flex items-center mb-2 border-t-1 pt-2 border-gray-500 ">
+                    <span className="mr-2 font-bold">Người lớn</span>
                 </div>
                 {adultPassengers.map((passenger, index) => (
-                    <div key={`adult-${index}`} className="border-b pb-4">
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div key={`adult-${index}`} className=" pb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
                             <div className="col-span-1">
                                 <div className="flex gap-1">
                                     <p>Họ tên: </p><p className="text-red-600">*</p>
                                 </div>
-                                <p className="text-sm text-gray-500">Liên hệ</p>
                                 <input
-                                    className="border p-2 w-full rounded"
+                                    className="p-2 w-full rounded border"
                                     value={passenger.full_name}
                                     onChange={(e) => updateAdult(index, 'full_name', e.target.value)}
                                     onBlur={() => validateAdult(index)}
@@ -238,10 +268,10 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                             </div>
                             <div className="col-span-1">
                                 <div className="flex gap-1">
-                                    <p>Số CMND/Hộ chiếu: </p><p className="text-red-600">*</p>
+                                    <p>Số CCCD: </p><p className="text-red-600">*</p>
                                 </div>
                                 <input
-                                    className="border p-2 w-full rounded"
+                                    className="p-2 w-full border rounded"
                                     maxLength={12}
                                     value={passenger.id_number}
                                     onChange={(e) => handleIdNumberChange(index, e.target.value)}
@@ -251,7 +281,7 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                             </div>
                             <div>
                                 <div className="flex gap-1">
-                                    <p>Giới tính: </p><p className="text-red-600">*</p>
+                                    <p>Giới tính: </p>
                                 </div>
                                 <select
                                     className="border p-2 w-full rounded"
@@ -270,29 +300,150 @@ export default function BookingPassenger({singleRoomSurCharge}:BookingPassengerP
                                     <p>Ngày sinh: </p><p className="text-red-600">*</p>
                                 </div>
                                 <div className="relative">
-                                <input
-                                    type="date"
-                                    className="border p-2 w-full rounded pr-8"
-                                    value={passenger.date_of_birth}
-                                    onChange={(e) => updateAdult(index, 'date_of_birth', e.target.value)}
-                                    onBlur={() => validateAdult(index)}
-                                />
-                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2">📅</span>
+                                    <input
+                                        type="date"
+                                        className="border p-2 w-full rounded"
+                                        value={passenger.date_of_birth}
+                                        onChange={(e) => updateAdult(index, 'date_of_birth', e.target.value)}
+                                        onBlur={() => validateAdult(index)}
+                                    />
                                 </div>
                                 {adultErrors[index]?.date_of_birth && <p className="text-red-600 text-sm">{adultErrors[index].date_of_birth}</p>}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <p>Phòng đơn</p>
-                                <input
-                                type="checkbox"
-                                checked={passenger.single_room === 1}
-                                onChange={(e) => updateAdult(index, 'single_room', e.target.checked ? 1 : 0)}
-                                />
-                                <p>{singleRoomSurCharge}</p>
+                            <div className="flex flex-col gap-2">
+                                <label htmlFor={`single-room-${index}`} className="cursor-pointer">Phòng đơn</label>
+                                <div className="flex gap-2 items-center">
+                                    <input
+                                        type="checkbox"
+                                        id={`single-room-${index}`} 
+                                        checked={passenger.single_room === 1}
+                                        onChange={(e) => {
+                                            updateAdult(index, 'single_room', e.target.checked ? 1 : 0);
+                                        }}
+                                        className="cursor-pointer"  
+                                    />
+                                    <p>{formatPrice(singleRoomSurCharge)}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 ))}
+
+                {/* have children */}
+                {numChildren > 0 && (
+                    <div>
+                        <div className="flex items-center mb-2 border-t-1 pt-2 border-gray-500 ">
+                            <span className="mr-2 font-bold">Trẻ em</span>
+                        </div>    
+                        {childPassengers.map((passenger, index) => (
+                            <div key={`child-${index}`} className="pb-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                                    <div className="col-span-1">
+                                        <div className="flex gap-1">
+                                            <p>Họ tên: </p><p className="text-red-600">*</p>
+                                        </div>
+                                        <input
+                                            className="border p-2 w-full rounded"
+                                            value={passenger.full_name}
+                                            onChange={(e) => updateChild(index, 'full_name', e.target.value)}
+                                            onBlur={() => validateChild(index)}
+                                        />
+                                        {childErrors[index]?.full_name && <p className="text-red-600 text-sm">{childErrors[index].full_name}</p>}
+                                    </div>
+                                    <div>
+                                        <div className="flex gap-1">
+                                            <p>Giới tính: </p>
+                                        </div>
+                                        <select
+                                            className="border p-2 w-full rounded"
+                                            value={passenger.gender}
+                                            onChange={(e) => updateChild(index, 'gender', e.target.value as "MALE" | "FEMALE" | "OTHER")}
+                                            onBlur={() => validateChild(index)}
+                                        >
+                                            <option value="MALE">Nam</option>
+                                            <option value="FEMALE">Nữ</option>
+                                            <option value="OTHER">Khác</option>
+                                        </select>
+                                        {childErrors[index]?.gender && <p className="text-red-600 text-sm">{childErrors[index].gender}</p>}
+                                    </div>
+                                    <div>
+                                        <div className="flex gap-1">
+                                            <p>Ngày sinh: </p> <p className="text-red-600">*</p>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                className="border p-2 w-full rounded "
+                                                value={passenger.date_of_birth}
+                                                onChange={(e) => updateChild(index, 'date_of_birth', e.target.value)}
+                                                onBlur={() => validateChild(index)}
+                                            />
+                                        </div>
+                                        {childErrors[index]?.date_of_birth && <p className="text-red-600 text-sm">{childErrors[index].date_of_birth}</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* have infant */}
+                {numInfants > 0 && (
+                    <div>
+                        <div className="flex items-center mb-2 border-t-1 pt-2 border-gray-500 ">
+                            <span className="mr-2 font-bold">Em bé</span>
+                        </div>    
+                        {infantPassengers.map((passenger, index) => (
+                            <div key={`child-${index}`} className="pb-4">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                                    <div className="col-span-1">
+                                        <div className="flex gap-1">
+                                            <p>Họ tên: </p><p className="text-red-600">*</p>
+                                        </div>
+                                        <input
+                                            className="border p-2 w-full rounded"
+                                            value={passenger.full_name}
+                                            onChange={(e) => updateInfant(index, 'full_name', e.target.value)}
+                                            onBlur={() => validateInfant(index)}
+                                        />
+                                        {infantErrors[index]?.full_name && <p className="text-red-600 text-sm">{infantErrors[index].full_name}</p>}
+                                    </div>
+                                    <div>
+                                        <div className="flex gap-1">
+                                            <p>Giới tính: </p>
+                                        </div>
+                                        <select
+                                            className="border p-2 w-full rounded"
+                                            value={passenger.gender}
+                                            onChange={(e) => updateInfant(index, 'gender', e.target.value as "MALE" | "FEMALE" | "OTHER")}
+                                            onBlur={() => validateInfant(index)}
+                                        >
+                                            <option value="MALE">Nam</option>
+                                            <option value="FEMALE">Nữ</option>
+                                            <option value="OTHER">Khác</option>
+                                        </select>
+                                        {infantErrors[index]?.gender && <p className="text-red-600 text-sm">{infantErrors[index].gender}</p>}
+                                    </div>
+                                    <div>
+                                        <div className="flex gap-1">
+                                            <p>Ngày sinh: </p> <p className="text-red-600">*</p>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                className="border p-2 w-full rounded "
+                                                value={passenger.date_of_birth}
+                                                onChange={(e) => updateInfant(index, 'date_of_birth', e.target.value)}
+                                                onBlur={() => validateInfant(index)}
+                                            />
+                                        </div>
+                                        {infantErrors[index]?.date_of_birth && <p className="text-red-600 text-sm">{infantErrors[index].date_of_birth}</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )
