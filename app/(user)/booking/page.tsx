@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TourDetailInfo } from "@/app/types/tour";
 import { ReadTourSchedule } from "@/app/types/tour_schedule";
@@ -9,6 +9,8 @@ import BookingPassenger from "./BookingPassenger";
 import Image from "next/image";
 import { Code } from "lucide-react";
 import { formatPrice } from "@/app/common";
+import ModalReadListCoupon from "./booking.couponModal";
+import { ReadCoupon } from "@/app/types/coupon";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -21,7 +23,7 @@ export default function BookingPage () {
     const [tourInfo, setTourInfo] = useState<TourDetailInfo | null>(null);
     const [selectedSchedule, setSelectedSchedule] = useState<ReadTourSchedule | null>(null);
     const [numPassengerData, setNumPassengerData] = useState(
-        {numAdults: 1, numChildren: 0,numInfants: 0,}
+        {numAdults: 1, numChildren: 0,numInfants: 0, numSingleRooms: 0 }
     )
 
     const [fullName, setFullName] = useState("");
@@ -29,7 +31,20 @@ export default function BookingPage () {
     const [phone, setPhone] = useState("")
     const [address, setAddress] = useState("")
 
-    // const [specialRequest, setSpecialRequest] = useState("")
+    const [isModalOpen, setIsModalOpen] = useState(false); 
+    const [selectedCoupon, setSelectedCoupon] = useState<ReadCoupon | null>(null); 
+    const [discountAmount, setDiscountAmount] = useState(0); 
+
+    const [isPassengerValid, setIsPassengerValid] = useState(false);
+
+    const isFormValid = () => {
+        const isContactValid = 
+            fullName.trim() !== "" && 
+            /^0\d{9}$/.test(phone) && 
+            /^[^\s@]+@gmail\.com$/.test(email);
+        
+        return isContactValid && isPassengerValid;
+    };
 
     // fetch data
     useEffect(() => {
@@ -143,17 +158,75 @@ export default function BookingPage () {
         setErrors(newErrors);
     };
 
+    const calculateTotalPrice = useCallback(() => {
+        if (!selectedSchedule || !tourInfo) {
+            return 0;
+        }
+        const adultTotal = numPassengerData.numAdults * selectedSchedule.price_adult;
+        const childTotal = numPassengerData.numChildren * selectedSchedule.price_child;
+        const infantTotal = numPassengerData.numInfants * selectedSchedule.price_infant;
+        const singleRoomTotal = numPassengerData.numSingleRooms * tourInfo.single_room_surcharge;
+        
+        return adultTotal + childTotal + infantTotal + singleRoomTotal;
+    }, [numPassengerData, selectedSchedule, tourInfo]);
+
+    //check price when using coupon
+    useEffect(() => {
+        if (!selectedCoupon || !tourInfo || !selectedSchedule) {
+            return;
+        }
+        const total = calculateTotalPrice();
+        if (total < selectedCoupon.min_order_amount) {
+            alert("Đơn hàng không còn đủ điều kiện áp dụng mã giảm giá. Mã sẽ được xóa.");
+            setSelectedCoupon(null);
+            setDiscountAmount(0);
+        } else {
+            // Recalculate discount if total changes
+            let discount = 0;
+            if (selectedCoupon.discount_type === "FIXED") {
+                discount = selectedCoupon.discount_value;
+            } else {
+                discount = total * (selectedCoupon.discount_value / 100);
+                if (selectedCoupon.max_discount_amount) {
+                    discount = Math.min(discount, selectedCoupon.max_discount_amount);
+                }
+            }
+            setDiscountAmount(discount);
+        }
+    }, [numPassengerData, selectedCoupon, selectedSchedule, tourInfo, calculateTotalPrice]);
+
     if (loading || !isLoggedIn || !tourInfo || !selectedSchedule) {
         return <div className="w-8/10 mx-auto">Đang tải trang...</div>;
     }
 
-    const calculateTotalPrice = () => {
-        const adultTotal = numPassengerData.numAdults * selectedSchedule.price_adult;
-        const childTotal = numPassengerData.numChildren * selectedSchedule.price_child;
-        const infantTotal = numPassengerData.numInfants * selectedSchedule.price_infant;
-        
-        return adultTotal + childTotal + infantTotal;
+    // Handle selecting a coupon
+    const handleSelectCoupon = (coupon: ReadCoupon) => {
+        const total = calculateTotalPrice();
+        if (total < coupon.min_order_amount) {
+            alert("Đơn hàng chưa đủ giá trị tối thiểu để áp dụng mã giảm giá này.");
+            return;
+        }
+
+        setSelectedCoupon(coupon);
+        let discount = 0;
+        if (coupon.discount_type === "FIXED") {
+            discount = coupon.discount_value;
+        } else {
+            discount = total * (coupon.discount_value / 100);
+            if (coupon.max_discount_amount) {
+                discount = Math.min(discount, coupon.max_discount_amount);
+            }
+        }
+        setDiscountAmount(discount);
+        setIsModalOpen(false);
     };
+
+    const removeCoupon = () => {
+        setSelectedCoupon(null);
+        setDiscountAmount(0);
+    };
+
+    const finalTotal = calculateTotalPrice() - discountAmount;
 
     return (
         <div className="w-8/10 mx-auto py-6 relative">
@@ -256,6 +329,7 @@ export default function BookingPage () {
                         <BookingPassenger 
                             singleRoomSurCharge={tourInfo.single_room_surcharge}
                             onNumPassengerChange={setNumPassengerData}
+                            onValidityChange={setIsPassengerValid}
                         />
                     </div>
                     <h1 className="font-bold">GHI CHÚ</h1>
@@ -292,7 +366,7 @@ export default function BookingPage () {
                         </div>
                     </div>
                     {/* total price */}
-                    <h1 className="font-bold">KHÁCH HÀNG + PHỤ THU</h1>
+                    <h1 className="font-bold border-t pt-2">KHÁCH HÀNG + PHỤ THU</h1>
                     <div className="flex flex-col gap-1">
                         {numPassengerData.numAdults>0 && (
                             <div className="flex justify-between">
@@ -325,15 +399,94 @@ export default function BookingPage () {
                             </div>
                         )}
                         <div className="flex justify-between">
+                            <span>Phụ thu tạm tính</span>
+                            <div>
+                                <span>{numPassengerData.numSingleRooms}</span>
+                                <span> x </span>
+                                <span>{formatPrice(tourInfo.single_room_surcharge)}</span>
+                            </div>
+                        </div>
+                        <div className="flex justify-between">
                             <span>Tạm tính</span>
                             <span>{formatPrice(calculateTotalPrice())}</span>
                         </div>
                     </div>
-
-
+                    {/* coupon */}
+                    <div className="flex justify-between border-t pt-2">
+                        <div className="flex items-center gap-3">
+                            <Image 
+                                src="/coupon.png" 
+                                alt="mã giảm giá" 
+                                width={20} 
+                                height={20}
+                                className="object-contain icon-active"
+                            />
+                            <span className="font-bold">MÃ GIẢM GIÁ</span>
+                        </div>
+                        <div>
+                            {selectedCoupon ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-green-600">{selectedCoupon.code}</span>
+                                    <button 
+                                        onClick={removeCoupon}
+                                        className="text-red-600 hover:underline"
+                                    >
+                                        Xóa
+                                    </button>
+                                    <button 
+                                        onClick={() => setIsModalOpen(true)}
+                                        className="text-blue-600 hover:underline"
+                                    >
+                                        Thay đổi
+                                    </button>
+                                </div>
+                            ) : (
+                                <button 
+                                    className="flex gap-2 items-center cursor-pointer text-red-600"
+                                    onClick={() => setIsModalOpen(true)}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <span>Thêm mã giảm giá</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    {/* final price */}
+                    <div className="flex flex-col gap-1">
+                        <div className="flex justify-between">
+                            <span>Giảm giá</span>
+                            <span>{formatPrice(discountAmount)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Tổng tiền</span>
+                            <span>{formatPrice(finalTotal)}</span>
+                        </div>
+                    </div>
+                    {/* button */}
+                    <div>
+                        <button
+                            disabled={!isFormValid()}
+                            className={`w-full py-4 rounded-xl font-bold mt-4 transition-all ${
+                                isFormValid() 
+                                ? 'bg-main text-white bg-blue-900 cursor-pointer hover:bg-blue-800' 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                            onClick={() => {
+                                console.log("Tiến hành thanh toán...");
+                            }}
+                        >
+                            THANH TOÁN NGAY
+                        </button>
+                    </div>
                 </div>
-
             </div>
+            <ModalReadListCoupon 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSelect={handleSelectCoupon} 
+            />
         </div>
     )
 }

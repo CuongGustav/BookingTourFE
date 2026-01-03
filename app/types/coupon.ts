@@ -17,3 +17,14 @@ export interface ReadCouponAdmin {
     image_coupon_url : string,
     image_coupon_public_id : string
 }
+
+export interface ReadCoupon {
+    code : string,
+    description : string,
+    discount_type :  "PERCENTAGE" | "FIXED",
+    discount_value : number,
+    min_order_amount : number,
+    max_discount_amount : number,
+    valid_from : string,
+    valid_to : string,
+}

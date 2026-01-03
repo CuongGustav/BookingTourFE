@@ -11,15 +11,39 @@ interface BookingPassengerProps {
         numAdults: number;
         numChildren: number;
         numInfants: number;
+        numSingleRooms: number;
     }) => void;
+    onValidityChange?: (isValid: boolean) => void;
 }
 
-export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange}:BookingPassengerProps) {
+const calculateAge = (birthDateString: string) => {
+    if (!birthDateString) return 0;
+    const today = new Date();
+    const birthDate = new Date(birthDateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+};
+
+export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange, onValidityChange}:BookingPassengerProps) {
     const [numAdults, setNumAdults] = useState(1);
     const [numChildren, setNumChildren] = useState(0);
     const [numInfants, setNumInfants] = useState(0);
 
-    const [adultPassengers, setAdultPassengers] = useState<CreateBookingPassenger[]>([])
+    const [adultPassengers, setAdultPassengers] = useState<CreateBookingPassenger[]>([
+        {
+            passenger_type: "ADULT",
+            full_name: '',
+            date_of_birth: '',
+            gender: 'MALE',
+            id_number: '',
+            single_room: 0
+        }
+    ])
     const [childPassengers, setChildPassengers] = useState<CreateBookingPassenger[]>([])
     const [infantPassengers, setInfantPassengers] = useState<CreateBookingPassenger[]>([])
 
@@ -115,19 +139,30 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
         setInfantPassengers((prev) => prev.map((p, i) => (i === index ? { ...p, [field]: value } : p)));
     };
     
-    const validateAdult = (index:number) => {
-        const errors = { full_name: '', gender: '', date_of_birth: '', id_number: ''};
+    const validateAdult = (index: number) => {
+        const errors = { full_name: '', gender: '', date_of_birth: '', id_number: '' };
         const data = adultPassengers[index];
-
-        if (!data.full_name.trim()) errors.full_name = 'Thông tin bắt buộc';
-        if (!data.gender) errors.gender = 'Thông tin bắt buộc';
-        if (!data.date_of_birth.trim()) errors.date_of_birth = 'Thông tin bắt buộc';
-        if (!data.id_number.trim()) {
+        if (!data.full_name || !data.full_name.trim()) {
+            errors.full_name = 'Thông tin bắt buộc';
+        }
+        if (!data.date_of_birth) {
+            errors.date_of_birth = 'Thông tin bắt buộc';
+        } else {
+            const age = calculateAge(data.date_of_birth);
+            if (age < 12) {
+                errors.date_of_birth = 'Người lớn phải từ 12 tuổi trở lên';
+            }
+        }
+        if (!data.id_number || !data.id_number.trim()) {
             errors.id_number = 'Thông tin bắt buộc';
         } else if (!/^\d{12}$/.test(data.id_number)) {
             errors.id_number = 'Số CCCD phải là 12 chữ số';
         }
-        setAdultErrors((prev) => prev.map((e, i) => (i === index ? errors : e)));
+        setAdultErrors((prev) => {
+            const newErrors = [...prev];
+            newErrors[index] = errors;
+            return newErrors;
+        });
     };
 
     const validateChild = (index: number) => {
@@ -135,9 +170,14 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
         const data = childPassengers[index];
 
         if (!data.full_name.trim()) errors.full_name = 'Thông tin bắt buộc';
-        if (!data.gender) errors.gender = 'Thông tin bắt buộc';
-        if (!data.date_of_birth.trim()) errors.date_of_birth = 'Thông tin bắt buộc';
-
+        if (!data.date_of_birth.trim()) {
+            errors.date_of_birth = 'Thông tin bắt buộc';
+        } else {
+            const age = calculateAge(data.date_of_birth);
+            if (age < 2 || age > 11) {
+                errors.date_of_birth = 'Trẻ em phải từ 2 đến 11 tuổi';
+            }
+        }
         setChildErrors((prev) => prev.map((e, i) => (i === index ? errors : e)));
     };
 
@@ -146,9 +186,14 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
         const data = infantPassengers[index];
 
         if (!data.full_name.trim()) errors.full_name = 'Thông tin bắt buộc';
-        if (!data.gender) errors.gender = 'Thông tin bắt buộc';
-        if (!data.date_of_birth.trim()) errors.date_of_birth = 'Thông tin bắt buộc';
-
+        if (!data.date_of_birth.trim()) {
+            errors.date_of_birth = 'Thông tin bắt buộc';
+        } else {
+            const age = calculateAge(data.date_of_birth);
+            if (age >= 2) {
+                errors.date_of_birth = 'Em bé phải dưới 2 tuổi';
+            }
+        }
         setInfantErrors((prev) => prev.map((e, i) => (i === index ? errors : e)));
     };
 
@@ -159,13 +204,43 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
 
     useEffect(() => {
         if (onNumPassengerChange) {
+            const numSingleRooms = adultPassengers.filter(p => p.single_room === 1).length;
             onNumPassengerChange({
                 numAdults,
                 numChildren,
-                numInfants
+                numInfants,
+                numSingleRooms
             })
         }
-    },[numAdults, numChildren, numInfants, onNumPassengerChange])
+    },[numAdults, numChildren, numInfants, adultPassengers, onNumPassengerChange])
+
+    useEffect(() => {
+        const validateAll = () => {
+            const isAdultsFilled = adultPassengers.every(p => 
+                p.full_name.trim() !== '' && 
+                p.date_of_birth.trim() !== '' && 
+                /^\d{12}$/.test(p.id_number)
+            );
+            const isChildrenFilled = childPassengers.every(p => 
+                p.full_name.trim() !== '' && 
+                p.date_of_birth.trim() !== ''
+            );
+            const isInfantsFilled = infantPassengers.every(p => 
+                p.full_name.trim() !== '' && 
+                p.date_of_birth.trim() !== ''
+            );
+
+            const hasAdultErrors = adultErrors.some(e => e.full_name || e.date_of_birth || e.id_number || e.gender);
+            const hasChildErrors = childErrors.some(e => e.full_name || e.date_of_birth || e.gender);
+            const hasInfantErrors = infantErrors.some(e => e.full_name || e.date_of_birth || e.gender);
+            return isAdultsFilled && isChildrenFilled && isInfantsFilled && 
+                !hasAdultErrors && !hasChildErrors && !hasInfantErrors;
+        };
+        if (onValidityChange) {
+            onValidityChange(validateAll());
+        }
+    }, [adultPassengers, childPassengers, infantPassengers, adultErrors, childErrors, infantErrors, onValidityChange]); 
+
 
     return (
         <div className="flex flex-col gap-6">
@@ -394,7 +469,7 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
                             <span className="mr-2 font-bold">Em bé</span>
                         </div>    
                         {infantPassengers.map((passenger, index) => (
-                            <div key={`child-${index}`} className="pb-4">
+                            <div key={`infant-${index}`} className="pb-4">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                                     <div className="col-span-1">
                                         <div className="flex gap-1">
