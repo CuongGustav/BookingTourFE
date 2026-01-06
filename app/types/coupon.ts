@@ -19,6 +19,7 @@ export interface ReadCouponAdmin {
 }
 
 export interface ReadCoupon {
+    coupon_id: string;
     code : string,
     description : string,
     discount_type :  "PERCENTAGE" | "FIXED",

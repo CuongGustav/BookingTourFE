@@ -11,6 +11,7 @@ import { Code } from "lucide-react";
 import { formatPrice } from "@/app/common";
 import ModalReadListCoupon from "./booking.couponModal";
 import { ReadCoupon } from "@/app/types/coupon";
+import { CreateBookingPassenger } from "@/app/types/booking_passengers";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -26,6 +27,18 @@ export default function BookingPage () {
         {numAdults: 1, numChildren: 0,numInfants: 0, numSingleRooms: 0 }
     )
 
+    const [passengersData, setPassengersData] = useState<{
+        adults: CreateBookingPassenger[];
+        children: CreateBookingPassenger[];
+        infants: CreateBookingPassenger[];
+    }>({
+        adults: [],
+        children: [],
+        infants: []
+    });
+    // Modal preview
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("")
@@ -34,6 +47,8 @@ export default function BookingPage () {
     const [isModalOpen, setIsModalOpen] = useState(false); 
     const [selectedCoupon, setSelectedCoupon] = useState<ReadCoupon | null>(null); 
     const [discountAmount, setDiscountAmount] = useState(0); 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [specialRequest, setSpecialRequest] = useState("")
 
     const [isPassengerValid, setIsPassengerValid] = useState(false);
 
@@ -228,6 +243,82 @@ export default function BookingPage () {
 
     const finalTotal = calculateTotalPrice() - discountAmount;
 
+    const handleConfirmBooking = async () => {
+        if (!isFormValid() || !tourInfo || !selectedSchedule) {
+            alert("Vui lòng điền đầy đủ thông tin");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const allPassengers = [
+                ...passengersData.adults.map(p => ({
+                    passenger_type: "ADULT",
+                    full_name: p.full_name,
+                    date_of_birth: p.date_of_birth,
+                    gender: p.gender,
+                    id_number: p.id_number,
+                    single_room: p.single_room === 1
+                })),
+                ...passengersData.children.map(p => ({
+                    passenger_type: "CHILD",
+                    full_name: p.full_name,
+                    date_of_birth: p.date_of_birth,
+                    gender: p.gender,
+                    id_number: "",
+                    single_room: false
+                })),
+                ...passengersData.infants.map(p => ({
+                    passenger_type: "INFANT",
+                    full_name: p.full_name,
+                    date_of_birth: p.date_of_birth,
+                    gender: p.gender,
+                    id_number: "",
+                    single_room: false
+                }))
+            ];
+
+            const bookingData = {
+                tour_id: tourInfo.tour_id,
+                schedule_id: selectedSchedule.schedule_id,
+                num_adults: numPassengerData.numAdults,
+                num_children: numPassengerData.numChildren,
+                num_infants: numPassengerData.numInfants,
+                contact_name: fullName,
+                contact_email: email,
+                contact_phone: phone,
+                contact_address: address,
+                special_request: specialRequest || null,
+                coupon_id: selectedCoupon?.coupon_id || null,
+                passengers: allPassengers,
+            };
+
+            const response = await fetch(`${API_URL}/booking/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(bookingData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(`Đặt tour thành công! Mã đặt chỗ: ${result.booking_code}`);
+                router.push(`/`);
+            } else {
+                alert(result.message || "Đặt tour thất bại. Vui lòng thử lại.");
+            }
+        } catch (error) {
+            console.error("Error creating booking:", error);
+            alert("Có lỗi xảy ra khi đặt tour. Vui lòng thử lại sau.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="w-8/10 mx-auto py-6 relative">
             <button 
@@ -320,6 +411,7 @@ export default function BookingPage () {
                                     className="px-2 py-3 outline-none active:outline-none"
                                     placeholder="Nhập địa chỉ"
                                     value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -330,6 +422,7 @@ export default function BookingPage () {
                             singleRoomSurCharge={tourInfo.single_room_surcharge}
                             onNumPassengerChange={setNumPassengerData}
                             onValidityChange={setIsPassengerValid}
+                            onPassengersDataChange={setPassengersData}
                         />
                     </div>
                     <h1 className="font-bold">GHI CHÚ</h1>
@@ -339,6 +432,8 @@ export default function BookingPage () {
                             rows={4}
                             maxLength={500}
                             className="border rounded-xl p-2"
+                            value={specialRequest}
+                            onChange={(e) => setSpecialRequest(e.target.value)}
                         />
                     </div>
                 </div>
@@ -467,26 +562,157 @@ export default function BookingPage () {
                     {/* button */}
                     <div>
                         <button
-                            disabled={!isFormValid()}
+                            disabled={!isFormValid() || isSubmitting}
                             className={`w-full py-4 rounded-xl font-bold mt-4 transition-all ${
-                                isFormValid() 
+                                isFormValid() && !isSubmitting
                                 ? 'bg-main text-white bg-blue-900 cursor-pointer hover:bg-blue-800' 
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                             onClick={() => {
-                                console.log("Tiến hành thanh toán...");
+                                if (isFormValid()) {
+                                    setIsPreviewOpen(true);
+                                }
                             }}
                         >
-                            THANH TOÁN NGAY
+                            {isSubmitting ? 'ĐANG XỬ LÝ...' : 'THANH TOÁN NGAY'}
                         </button>
                     </div>
                 </div>
             </div>
+            {/* modal coupon */}
             <ModalReadListCoupon 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
                 onSelect={handleSelectCoupon} 
             />
+            {/* Modal Preview*/}
+            {isPreviewOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+                    onClick={() => setIsPreviewOpen(false)}
+                >
+
+                    <div
+                        className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 relative shadow-2xl
+                                    max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h1 className="text-2xl font-bold mb-2 text-main mx-auto items-center">Chi tiết dơn đặt</h1>
+                        <button
+                            onClick={() => setIsPreviewOpen(false)}
+                            className="absolute top-6 right-6 cursor-pointer hover:text-red-600 transition"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div className="flex flex-col my-2 gap-2 px-2 ">
+                            {/* Tour */}
+                            <div>
+                                <h3 className="font-bold text-lg mb-3">TÓM TẮT CHUYẾN ĐI</h3>
+                                <div className="bg-gray-50 p-4 rounded-lg flex gap-4">
+                                    <Image src={tourInfo.main_image_url} alt={tourInfo.title} width={120} height={90} className="object-cover rounded" />
+                                    <div>
+                                        <p className="font-bold">{tourInfo.title}</p>
+                                        <p className="text-sm text-gray-600">Mã tour: {tourInfo.tour_code}</p>
+                                        <p className="text-sm">Ngày khởi hành: {new Date(selectedSchedule.departure_date).toLocaleDateString('vi-VN')}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* contact */}
+                            <div>
+                                <h3 className="font-bold text-lg mb-3">THÔNG TIN LIÊN LẠC</h3>
+                                <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
+                                    <div><p className="text-sm text-gray-600">Họ tên</p><p className="font-semibold">{fullName}</p></div>
+                                    <div><p className="text-sm text-gray-600">Email</p><p className="font-semibold">{email}</p></div>
+                                    <div><p className="text-sm text-gray-600">Số điện thoại</p><p className="font-semibold">{phone}</p></div>
+                                    <div><p className="text-sm text-gray-600">Địa chỉ</p><p className="font-semibold">{address || 'Không có'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* passenger */}
+                            <div>
+                                <h3 className="font-bold text-lg mb-3">DANH SÁCH HÀNH KHÁCH</h3>
+                                <div className="space-y-6">
+                                    {passengersData.adults.length > 0 && (
+                                        <div>
+                                            <p className="font-semibold mb-2">Người lớn ({passengersData.adults.length})</p>
+                                            {passengersData.adults.map((p, i) => (
+                                                <div key={i} className="bg-gray-50 p-3 rounded mb-2">
+                                                    <p><strong>{i+1}.</strong> {p.full_name} ({p.gender === 'MALE' ? 'Nam' : p.gender === 'FEMALE' ? 'Nữ' : 'Khác'})</p>
+                                                    <p className="text-sm text-gray-600">Ngày sinh: {new Date(p.date_of_birth).toLocaleDateString('vi-VN')} | CCCD: {p.id_number}</p>
+                                                    {p.single_room === 1 && <p className="text-sm text-orange-600">Yêu cầu phòng đơn (+{formatPrice(tourInfo.single_room_surcharge)})</p>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {passengersData.children.length > 0 && (
+                                        <div>
+                                            <p className="font-semibold mb-2">Trẻ em ({passengersData.children.length})</p>
+                                            {passengersData.children.map((p, i) => (
+                                                <div key={i} className="bg-gray-50 p-3 rounded mb-2">
+                                                    <p><strong>{i+1}.</strong> {p.full_name} ({p.gender === 'MALE' ? 'Nam' : p.gender === 'FEMALE' ? 'Nữ' : 'Khác'})</p>
+                                                    <p className="text-sm text-gray-600">Ngày sinh: {new Date(p.date_of_birth).toLocaleDateString('vi-VN')}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {passengersData.infants.length > 0 && (
+                                        <div>
+                                            <p className="font-semibold mb-2">Em bé ({passengersData.infants.length})</p>
+                                            {passengersData.infants.map((p, i) => (
+                                                <div key={i} className="bg-gray-50 p-3 rounded mb-2">
+                                                    <p><strong>{i+1}.</strong> {p.full_name} ({p.gender === 'MALE' ? 'Nam' : p.gender === 'FEMALE' ? 'Nữ' : 'Khác'})</p>
+                                                    <p className="text-sm text-gray-600">Ngày sinh: {new Date(p.date_of_birth).toLocaleDateString('vi-VN')}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 p-6 rounded-lg">
+                                <h3 className="font-bold text-lg mb-4">TỔNG THANH TOÁN</h3>
+                                <div className="space-y-2 text-lg">
+                                    <div className="flex justify-between"><span>Tạm tính</span><span>{formatPrice(calculateTotalPrice())}</span></div>
+                                    {discountAmount > 0 && (
+                                        <div className="flex justify-between text-green-600">
+                                            <span>Giảm giá {selectedCoupon ? `(${selectedCoupon.code})` : ''}</span>
+                                            <span>-{formatPrice(discountAmount)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between font-bold text-xl border-t-2 pt-3">
+                                        <span>TỔNG TIỀN</span>
+                                        <span className="text-main">{formatPrice(finalTotal)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-4 mt-8">
+                            <button 
+                                onClick={() => setIsPreviewOpen(false)} 
+                                className="px-6 py-3 border border-gray-400 rounded-xl hover:bg-gray-100"
+                                disabled={isSubmitting}
+                            >
+                                Quay lại chỉnh sửa
+                            </button>
+                            <button
+                                onClick={handleConfirmBooking}
+                                disabled={isSubmitting}
+                                className={`px-6 py-3 rounded-xl font-bold ${
+                                    isSubmitting 
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-main text-white bg-blue-900 hover:bg-blue-600'
+                                }`}
+                            >
+                                {isSubmitting ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN THANH TOÁN'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

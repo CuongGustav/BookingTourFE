@@ -14,6 +14,11 @@ interface BookingPassengerProps {
         numSingleRooms: number;
     }) => void;
     onValidityChange?: (isValid: boolean) => void;
+    onPassengersDataChange?: (data: {
+        adults: CreateBookingPassenger[];
+        children: CreateBookingPassenger[];
+        infants: CreateBookingPassenger[];
+    }) => void;
 }
 
 const calculateAge = (birthDateString: string) => {
@@ -29,7 +34,7 @@ const calculateAge = (birthDateString: string) => {
     return age;
 };
 
-export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange, onValidityChange}:BookingPassengerProps) {
+export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange, onValidityChange, onPassengersDataChange}:BookingPassengerProps) {
     const [numAdults, setNumAdults] = useState(1);
     const [numChildren, setNumChildren] = useState(0);
     const [numInfants, setNumInfants] = useState(0);
@@ -213,6 +218,16 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
             })
         }
     },[numAdults, numChildren, numInfants, adultPassengers, onNumPassengerChange])
+
+    useEffect(() => {
+        if (onPassengersDataChange) {
+            onPassengersDataChange({
+                adults: adultPassengers,
+                children: childPassengers,
+                infants: infantPassengers
+            });
+        }
+    }, [adultPassengers, childPassengers, infantPassengers, onPassengersDataChange]);
 
     useEffect(() => {
         const validateAll = () => {
