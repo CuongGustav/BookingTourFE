@@ -1,3 +1,5 @@
+import { ReadBookingPassenger } from "./booking_passengers";
+
 export interface ReadBookingUser {
     booking_id: string;
     booking_code: string;
@@ -18,4 +20,34 @@ export interface ReadBookingUser {
     cancellation_reason: string;
     created_at: string;
     tour_title: string;
+}
+
+export interface TourDetail {
+    title: string;
+    tour_code: string;
+    main_image_url: string;
+    single_room_surcharge: number;
+}
+
+export interface ScheduleDetail {
+    departure_date: string;
+}
+
+export interface CouponDetail {
+    code: string;
+}
+
+export interface ReadBookingDetail {
+    booking_code: string;
+    tour: TourDetail;
+    schedule: ScheduleDetail;
+    contact_name: string;
+    contact_email: string;
+    contact_phone: string;
+    contact_address: string | null;
+    passengers: ReadBookingPassenger[];
+    total_price: number;
+    discount_amount: number;
+    final_price: number;
+    coupon?: CouponDetail;
 }
