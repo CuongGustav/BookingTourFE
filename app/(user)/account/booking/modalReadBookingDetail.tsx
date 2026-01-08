@@ -133,7 +133,7 @@ const ModalReadBookingDetail: React.FC<ModalReadBookingDetailProps> = ({ isOpen,
                 <div className="flex justify-end mt-8">
                 <button 
                     onClick={onClose} 
-                    className="px-6 py-3 border border-gray-400 rounded-xl hover:bg-gray-100"
+                    className="px-6 py-3 border border-gray-400 rounded-xl hover:bg-gray-100 cursor-pointer"
                 >
                     Đóng
                 </button>

@@ -307,7 +307,7 @@ export default function BookingPage () {
 
             if (response.ok) {
                 alert(`Đặt tour thành công! Mã đặt chỗ: ${result.booking_code}`);
-                router.push(`/`);
+                router.push(`/payment/${result.booking_id}`);
             } else {
                 alert(result.message || "Đặt tour thất bại. Vui lòng thử lại.");
             }
