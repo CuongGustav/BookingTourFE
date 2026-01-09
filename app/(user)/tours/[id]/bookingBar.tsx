@@ -14,7 +14,9 @@ interface BookingBarProps {
 }
 
 export default function BookingBar({ tourInfo, selectedSchedule, onClearSchedule }: BookingBarProps) {
-    const minPrice = Math.min(...tourInfo.schedules.map(s => Number(s.price_adult)))
+    const minPrice = tourInfo.schedules && tourInfo.schedules.length > 0
+        ? Math.min(...tourInfo.schedules.map(s => Number(s.price_adult)))
+        : 0;
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     
