@@ -42,7 +42,7 @@ export default function CouponPage () {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedCoupon, setSelectedCoupon] = useState<ReadCouponAdmin | null>(null);
 
-    const fetchListDestination = async () => {
+    const fetchListCoupon = async () => {
         try {
             const res = await  fetch(`${API_URL}/coupon/admin/getAll`, { credentials: "include" })
             const data = await res.json()
@@ -59,7 +59,7 @@ export default function CouponPage () {
     }
     
     useEffect(() => {
-        fetchListDestination()
+        fetchListCoupon()
     }, []);
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
@@ -357,7 +357,7 @@ export default function CouponPage () {
                         setShowDeleteModal(false);
                         setSelectedCoupon(null);
                     }}
-                    onDeleted={() => fetchListDestination()}
+                    onDeleted={() => fetchListCoupon()}
                 />
             )}
 
