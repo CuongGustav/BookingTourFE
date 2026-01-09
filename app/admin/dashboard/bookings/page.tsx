@@ -4,6 +4,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { ReadBookingUser } from "@/app/types/booking";
 import { formatPrice } from "@/app/common";
+import ReadBookingDetailPage from "./ReadBookingDetail";
 
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
@@ -39,6 +40,8 @@ export default function AdminPage () {
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [page, setPage] = useState(1);
     const pageSize = 7;
+    const [isOpenModalRead, setIsOpenModalRead] = useState(false);
+    const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
    
     const fetchListBooking = async () => {
         try {
@@ -66,7 +69,9 @@ export default function AdminPage () {
             if (search.trim()) {
                 const term = search.toLowerCase().trim();
                 result = result.filter(booking =>
-                    booking.booking_code.toLowerCase().includes(term) 
+                    booking.booking_code.toLowerCase().includes(term) ||
+                    booking.contact_email.toLowerCase().includes(term) ||
+                    booking.contact_phone.toLowerCase().includes(term)
                 )
             }
             //sort by result search, sortBy, sortOrder
@@ -219,6 +224,10 @@ export default function AdminPage () {
                                     <td className="px-6 py-4 font-medium">
                                         <a 
                                             className="cursor-pointer hover:text-blue-600"
+                                            onClick={()=>{
+                                                setSelectedBookingId(booking.booking_id)
+                                                setIsOpenModalRead(true);
+                                            }}
                                         >
                                             {booking.booking_code}
                                         </a>
@@ -321,7 +330,18 @@ export default function AdminPage () {
                         </div>
                     )}
                 </div>   
-            </div>   
+            </div> 
+            {/* read booking   */}
+            {isOpenModalRead && selectedBookingId && (
+                <ReadBookingDetailPage 
+                    isOpen={isOpenModalRead}
+                    onClose={() => {
+                        setIsOpenModalRead(false);
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                />
+            )}
         </div>     
     )
 }

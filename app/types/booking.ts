@@ -20,6 +20,7 @@ export interface ReadBookingUser {
     cancellation_reason: string;
     created_at: string;
     tour_title: string;
+    special_request?: string;
 }
 
 export interface TourDetail {
@@ -53,6 +54,7 @@ export interface ReadBookingDetail {
     special_request?: string;
     tour_id: string;
     schedule_id: string;
+    tour_title?:string;
 }
 
 export interface BookingResponse {
