@@ -6,7 +6,7 @@ import { Circle, Plus, Minus } from "lucide-react";
 import { formatPrice } from "@/app/common";
 
 interface BookingPassengerProps {
-    singleRoomSurCharge: number;
+    singleRoomSurCharge?: number;
     onNumPassengerChange?: (data: {
         numAdults: number;
         numChildren: number;
@@ -19,6 +19,11 @@ interface BookingPassengerProps {
         children: CreateBookingPassenger[];
         infants: CreateBookingPassenger[];
     }) => void;
+    initialData?: {
+        adults: CreateBookingPassenger[];
+        children: CreateBookingPassenger[];
+        infants: CreateBookingPassenger[];
+    };
 }
 
 const calculateAge = (birthDateString: string) => {
@@ -34,7 +39,7 @@ const calculateAge = (birthDateString: string) => {
     return age;
 };
 
-export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange, onValidityChange, onPassengersDataChange}:BookingPassengerProps) {
+export default function BookingPassenger({singleRoomSurCharge, onNumPassengerChange, onValidityChange, onPassengersDataChange, initialData}:BookingPassengerProps) {
     const [numAdults, setNumAdults] = useState(1);
     const [numChildren, setNumChildren] = useState(0);
     const [numInfants, setNumInfants] = useState(0);
@@ -255,6 +260,30 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
             onValidityChange(validateAll());
         }
     }, [adultPassengers, childPassengers, infantPassengers, adultErrors, childErrors, infantErrors, onValidityChange]); 
+
+    //response --> update 
+    const [isInitialLoaded, setIsInitialLoaded] = useState(false);
+    useEffect(() => {
+        if (initialData && !isInitialLoaded) {
+            const hasData = 
+                initialData.adults.length > 0 || 
+                initialData.children.length > 0 || 
+                initialData.infants.length > 0;
+
+            if (hasData) {
+                setAdultPassengers(initialData.adults);
+                setNumAdults(initialData.adults.length);
+                
+                setChildPassengers(initialData.children);
+                setNumChildren(initialData.children.length);
+                
+                setInfantPassengers(initialData.infants);
+                setNumInfants(initialData.infants.length);
+                
+                setIsInitialLoaded(true); 
+            }
+        }
+    }, [initialData, isInitialLoaded]);
 
 
     return (

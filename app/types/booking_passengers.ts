@@ -8,6 +8,7 @@ export interface CreateBookingPassenger {
 }
 
 export interface ReadBookingPassenger {
+    passenger_id: string;
     passenger_type: 'ADULT' | 'CHILD' | 'INFANT';
     full_name: string;
     gender: 'MALE' | 'FEMALE' | 'OTHER' | null;

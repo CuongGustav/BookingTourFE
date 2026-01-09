@@ -50,4 +50,14 @@ export interface ReadBookingDetail {
     discount_amount: number;
     final_price: number;
     coupon?: CouponDetail;
+    special_request?: string;
+    tour_id: string;
+    schedule_id: string;
+}
+
+export interface BookingResponse {
+    booking: ReadBookingUser & {
+        passengers: ReadBookingPassenger[];
+        special_request: string | null;
+    };
 }
