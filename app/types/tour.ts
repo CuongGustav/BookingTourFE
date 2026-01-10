@@ -21,6 +21,8 @@ export interface TourInfo {
     slug: string;
     upcoming_schedules: TourSchedule[];
     is_like?: boolean;
+    single_room_surcharge?: number;
+
 }
 
 export interface TourDetailInfo {
