@@ -16,7 +16,7 @@ export interface ReadBookingUser {
     contact_email: string;
     contact_phone: string;
     contact_address: string;
-    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCEL_PENDING';
+    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCEL_PENDING' | 'PAID';
     cancellation_reason: string;
     created_at: string;
     tour_title: string;

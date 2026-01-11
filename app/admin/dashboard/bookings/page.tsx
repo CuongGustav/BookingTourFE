@@ -270,6 +270,8 @@ export default function AdminPage () {
                                             ${
                                                 booking.status === "PENDING"
                                                     ? "bg-yellow-100 text-yellow-800"
+                                                    : booking.status === "PAID"
+                                                    ? "bg-purple-100 text-purple-800"
                                                     : booking.status === "CONFIRMED"
                                                     ? "bg-blue-100 text-blue-800"
                                                     : booking.status === "COMPLETED"
@@ -282,6 +284,8 @@ export default function AdminPage () {
                                             {
                                                 booking.status === "PENDING"
                                                     ? "Chờ xử lý"
+                                                    : booking.status === "PAID"
+                                                    ? "Đã thanh toán"
                                                     : booking.status === "CONFIRMED"
                                                     ? "Đã xác nhận"
                                                     : booking.status === "COMPLETED"
@@ -291,8 +295,8 @@ export default function AdminPage () {
                                                     : "Đã hủy"
                                             }
                                         </span>
-
                                     </td>
+
                                     <td className="px-6 py-4 text-sm ">
                                         {new Date(booking.created_at).toLocaleDateString("vi-VN")}
                                     </td>

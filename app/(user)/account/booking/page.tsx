@@ -255,6 +255,12 @@ export default function BookingAccountPage () {
                 >
                     Đang xử lý
                 </Link>
+                <Link
+                    href="/account/booking?status=paid"
+                    className={status === "paid" ? activeClass : normalClass}
+                >
+                    Đã thanh toán
+                </Link>
 
                 <Link
                     href="/account/booking?status=confirmed"
