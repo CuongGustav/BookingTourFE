@@ -6,6 +6,7 @@ import { ReadBookingUser } from "@/app/types/booking";
 import { formatPrice } from "@/app/common";
 import ReadBookingDetailPage from "./ReadBookingDetail";
 import CancelBookingPendingPage from "./CancelBookingPending";
+import CancelBookingPaidPage from "./CancelBookingPaid";
 
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
@@ -45,6 +46,8 @@ export default function AdminPage () {
     const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
     const [selectedBookingCode, setSelectedBookingCode] = useState("");
     const [isOpenModalCancelBookingPending, setIsOpenModalCancelBookingPending] = useState(false);
+    const [isOpenModalCancelBookingPaid, setIsOpenModalCancelBookingPaid] = useState(false);
+
 
    
     const fetchListBooking = async () => {
@@ -236,6 +239,11 @@ export default function AdminPage () {
                                             <>
                                                 <button 
                                                     className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                                                    onClick={ () => {
+                                                        setSelectedBookingId(booking.booking_id)
+                                                        setIsOpenModalCancelBookingPaid(true)
+                                                        }
+                                                    }
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -411,8 +419,20 @@ export default function AdminPage () {
                     booking_id={selectedBookingId}
                     booking_code={selectedBookingCode}
                     onSuccess={fetchListBooking}
-                />
-                
+                /> 
+            )}
+            {/* cancel booking paid */}
+            {isOpenModalCancelBookingPaid && selectedBookingId &&(
+                <CancelBookingPaidPage
+                    isOpen={isOpenModalCancelBookingPaid}
+                    onClose={()=>{
+                        setIsOpenModalCancelBookingPaid(false)
+                        setSelectedBookingId(null);
+                        setSelectedBookingCode("");
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListBooking}
+                /> 
             )}
         </div>     
     )
