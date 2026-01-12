@@ -1,5 +1,3 @@
-// Updated File: app/admin/booking/create/page.tsx
-
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from "react"
@@ -268,7 +266,7 @@ export default function CreateBookingAdminPage() {
             const result = await response.json();
             if (response.ok) {
                 alert("Tạo booking thành công!");
-                router.push('/admin/dashboard/bookings'); 
+                router.push(`/admin/dashboard/payments/create/${result.booking_id}`);
             } else {
                 alert(result.message || "Lỗi tạo booking");
             }
@@ -282,7 +280,7 @@ export default function CreateBookingAdminPage() {
     };
 
     return (
-         <div className="min-w-100 px-8 mx-auto py-6 h-98/100 overflow-y-auto relative">
+        <div className="min-w-100 px-8 mx-auto py-6 h-98/100 overflow-y-auto relative">
             <button 
                 className="bg-white px-4 py-2 rounded-xl border-1 border-gray-300 mb-4 cursor-pointer hover:bg-gray-300 hover:text-white
                             absolute top-4 left-8"
