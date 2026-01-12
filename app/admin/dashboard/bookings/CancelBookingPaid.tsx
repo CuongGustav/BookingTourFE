@@ -124,7 +124,7 @@ export default function CancelBookingPaidPage ({isOpen, onClose, booking_id, onS
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
-                    <h1 className="text-2xl font-bold text-red-600 pr-10">Xác nhận hủy booking</h1>
+                    <h1 className="text-2xl font-bold text-red-600 pr-10">Xác nhận hủy</h1>
                 </div>
                 <div className="overflow-y-auto flex-1 p-6">
                     {loading ? (

@@ -5,6 +5,8 @@ import { useState, useMemo, useEffect } from "react";
 import { PaymentInfo } from "@/app/types/payment";
 import { formatPrice } from "@/app/common";
 import ReadPaymentAdminPage from "./ReadPaymentDetail";
+import CancelBookingPaidPage from "../bookings/CancelBookingPaid";
+import ConfirmBookingPaidPage from "../bookings/ConfirmBookingPaid";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
@@ -39,8 +41,12 @@ export default function AdminPage () {
     const pageSize = 6;
     const [isOpenModalRead, setIsOpenModalRead] = useState(false);
     const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+    const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+    const [isOpenModalCancelBookingPaid, setIsOpenModalCancelBookingPaid] = useState(false);
+    const [isOpenModalConfirmBookingPaid, setIsOpenModalConfirmBookingPaid] = useState(false);
+    
 
-    const fetchListDestination = async () => {
+    const fetchListPayment = async () => {
         try {
             const res = await  fetch(`${API_URL}/payment/admin/all`, { credentials: "include" })
             const data = await res.json()
@@ -57,7 +63,7 @@ export default function AdminPage () {
     }
 
     useEffect(() => {
-        fetchListDestination()
+        fetchListPayment()
     }, []);
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
@@ -204,6 +210,11 @@ export default function AdminPage () {
                                                 <div className="flex gap-2 items-center">
                                                     <button 
                                                         className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"                          
+                                                        onClick={ () => {
+                                                            setSelectedBookingId(payment.booking_id)
+                                                            setIsOpenModalCancelBookingPaid(true)
+                                                        }
+                                                    }
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -211,6 +222,11 @@ export default function AdminPage () {
                                                     </button>
                                                     <button 
                                                         className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                                                        onClick={ () => {
+                                                            setSelectedBookingId(payment.booking_id)
+                                                            setIsOpenModalConfirmBookingPaid(true)
+                                                        }
+                                                    }
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -364,7 +380,30 @@ export default function AdminPage () {
                     payment_id={selectedPaymentId}
                 />
             )}
+            {/* cancel booking paid */}
+            {isOpenModalCancelBookingPaid && selectedBookingId &&(
+                <CancelBookingPaidPage
+                    isOpen={isOpenModalCancelBookingPaid}
+                    onClose={()=>{
+                        setIsOpenModalCancelBookingPaid(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListPayment}
+                /> 
+            )}
+            {/* confirm booking paid */}
+            {isOpenModalConfirmBookingPaid && selectedBookingId &&(
+                <ConfirmBookingPaidPage
+                    isOpen={isOpenModalConfirmBookingPaid}
+                    onClose={()=>{
+                        setIsOpenModalConfirmBookingPaid(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListPayment}
+                /> 
+            )}
         </div>
-
     )
 }
