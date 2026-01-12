@@ -10,6 +10,17 @@ import Image from "next/image";
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 type PaymentMethod = "QR" | "TRANSFER";
 
+interface QRCodeResponse {
+    message: string;
+    qr_code: string;
+    bank_info: {
+        bank_name: string;
+        account_no: string;
+        account_name: string;
+        amount: number;
+        description: string;
+    };
+}
 
 export default function PaymentPage() {
     const [method, setMethod] = useState<PaymentMethod>("QR"); 
@@ -20,13 +31,17 @@ export default function PaymentPage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState<string | null>(null);
-    const [booking,setBooking] = useState<BookingResponse | null>(null);
+    const [booking, setBooking] = useState<BookingResponse | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState(false);
-
+    
+    // QR Code state
+    const [qrCode, setQrCode] = useState<string | null>(null);
+    const [qrLoading, setQrLoading] = useState(false);
+    const [qrError, setQrError] = useState<string | null>(null);
 
     //check login
     useEffect(() => {
@@ -63,6 +78,7 @@ export default function PaymentPage() {
                     setBooking(result)
                 } else {
                     setError("Không thể tải thông tin booking");
+                    router.push(`/`)
                 }
                 
             } catch (err) {
@@ -75,9 +91,38 @@ export default function PaymentPage() {
         if (!loading && isLoggedIn) {
             fetchBooking();
         }
-    }, [booking_id, loading, isLoggedIn]);
+    }, [booking_id, loading, isLoggedIn, router]);
 
-
+    // Fetch QR Code
+    useEffect(() => {
+        const fetchQRCode = async () => {
+            if (!booking || method !== "QR") return;
+            
+            setQrLoading(true);
+            setQrError(null);
+            
+            try {
+                const response = await fetch(`${API_URL}/payment/generate-qr/${booking_id}`, {
+                    credentials: 'include',
+                });
+                
+                if (response.ok) {
+                    const result: QRCodeResponse = await response.json();
+                    setQrCode(result.qr_code);
+                } else {
+                    const errorData = await response.json();
+                    setQrError(errorData.message || "Không thể tạo mã QR");
+                }
+            } catch (err) {
+                setQrError("Lỗi kết nối server");
+                console.error(err);
+            } finally {
+                setQrLoading(false);
+            }
+        };
+        
+        fetchQRCode();
+    }, [booking, method, booking_id]);
 
     const setImage = (file: File) => {
         setImageFile(file);
@@ -148,6 +193,7 @@ export default function PaymentPage() {
             </div>
         );
     }
+    
     if (error) {
         return (
             <div className="w-8/10 mx-auto py-6 text-center">
@@ -165,7 +211,7 @@ export default function PaymentPage() {
                     onClick={() => setMethod("TRANSFER")}
                     className={`pb-2 font-bold transition cursor-pointer ${
                         method === "TRANSFER"
-                            ? "border-main text-main"
+                            ? "border-b-2 border-blue-900 text-blue-900"
                             : "hover:text-blue-600"
                     }`}
                 >
@@ -176,7 +222,7 @@ export default function PaymentPage() {
                     onClick={() => setMethod("QR")}
                     className={`pb-2 font-bold transition cursor-pointer ${
                         method === "QR"
-                            ? "border-main text-main"
+                            ? "border-b-2 border-blue-900 text-blue-900"
                             : "hover:text-blue-600"
                     }`}
                 >
@@ -216,12 +262,40 @@ export default function PaymentPage() {
                                 </>
                             )}
                             {method === "QR" && (
-                                <div>
+                                <div className="flex flex-col items-center gap-4">
                                     <h3 className="font-semibold mb-2">Thanh toán bằng QR</h3>
-                                    <p>Nội dung quét QR...</p>
+                                    {qrLoading && (
+                                        <div className="flex items-center justify-center h-64">
+                                            <p>Đang tạo mã QR...</p>
+                                        </div>
+                                    )}
+                                    {qrError && (
+                                        <div className="text-red-500 text-center">
+                                            <p>{qrError}</p>
+                                        </div>
+                                    )}
+                                    {qrCode && !qrLoading && (
+                                        <div className="flex flex-col items-center gap-3">
+                                            <Image
+                                                src={qrCode}
+                                                alt="QR Code thanh toán"
+                                                width={300}
+                                                height={300}
+                                                className="border-2 border-gray-200 rounded-lg"
+                                            />
+                                            <div className="text-sm text-center">
+                                                <p className="font-semibold">Quét mã QR để chuyển khoản</p>
+                                                <p className="mt-2">Tên tài khoản: NGUYEN QUOC CUONG</p>
+                                                <p className="">Số tiền: {formatPrice(booking?.booking.final_price)}</p>
+                                                <p>Nội dung: {booking?.booking.booking_code}</p>
+                                                <p className="text-orange-400">Nếu không có mã QR hãy chuyển sang tab chuyển khoản</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
+                        
                         {/* upload image */}
                         <div className="flex flex-col flex-1">
                             <h3 className="font-semibold mb-2">Hình ảnh minh chứng:</h3>
@@ -274,6 +348,7 @@ export default function PaymentPage() {
                             </div>
                         </div>
                     </div>
+                    
                     <button 
                         onClick={handleConfirmPayment}
                         disabled={!imageFile || isSubmitting}
