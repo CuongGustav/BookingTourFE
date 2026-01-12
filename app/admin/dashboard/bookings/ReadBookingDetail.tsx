@@ -69,6 +69,11 @@ export default function ReadBookingDetailPage ({isOpen, onClose, booking_id}: Mo
                     <>
                         <h1 className="text-2xl font-bold mb-2 text-main text-center">Chi tiết đơn đặt - {bookingData.booking_code}</h1>
                         <div className="flex flex-col my-2 gap-2 px-2">
+                            {bookingData?.cancellation_reason && (
+                                <div className="flex flex-col">
+                                    <span className=" text-lg mb-3">Lý do hủy: {bookingData?.cancellation_reason}</span>
+                                </div>
+                            )}
                             {/* Tour */}
                             <div>
                                 <h3 className="font-bold text-lg mb-3">TÓM TẮT CHUYẾN ĐI</h3>

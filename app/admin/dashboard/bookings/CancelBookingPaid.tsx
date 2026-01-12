@@ -95,8 +95,6 @@ export default function CancelBookingPaidPage ({isOpen, onClose, booking_id, onS
             if (!res.ok) {
                 throw new Error(data.message || "Hủy booking thất bại");
             }
-
-            alert("Hủy booking thành công!");
             onSuccess();
             onClose();
         } catch (err) {

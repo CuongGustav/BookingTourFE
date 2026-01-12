@@ -55,6 +55,7 @@ export interface ReadBookingDetail {
     tour_id: string;
     schedule_id: string;
     tour_title?:string;
+    cancellation_reason?: string;
 }
 
 export interface BookingResponse {
