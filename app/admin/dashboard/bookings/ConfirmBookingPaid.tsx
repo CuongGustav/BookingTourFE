@@ -73,7 +73,7 @@ export default function ConfirmBookingPaidPage ({isOpen, onClose, booking_id, on
             const res = await fetch(
                 `${API_URL}/booking/admin/confirm-booking-paid/${booking_id}`,
                 {
-                    method: "POST",
+                    method: "PATCH",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",

@@ -79,7 +79,7 @@ export default function CancelBookingPaidPage ({isOpen, onClose, booking_id, onS
             const res = await fetch(
                 `${API_URL}/booking/admin/cancel-booking-paid/${booking_id}`,
                 {
-                    method: "POST",
+                    method: "PATCH",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",

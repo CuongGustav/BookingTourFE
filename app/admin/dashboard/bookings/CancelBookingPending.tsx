@@ -34,7 +34,7 @@ export default function CancelBookingPendingPage({
             const res = await fetch(
                 `${API_URL}/booking/admin/cancel-booking-pending/${booking_id}`,
                 {
-                    method: "POST",
+                    method: "PATCH",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",

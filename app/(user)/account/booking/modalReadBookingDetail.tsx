@@ -24,6 +24,7 @@ const ModalReadBookingDetail: React.FC<ModalReadBookingDetailProps> = ({ isOpen,
         discount_amount,
         final_price,
         coupon,
+        cancellation_reason,
     } = bookingData;
 
     // Categorize passengers
@@ -50,6 +51,12 @@ const ModalReadBookingDetail: React.FC<ModalReadBookingDetailProps> = ({ isOpen,
                     </svg>
                 </button>
                 <div className="flex flex-col my-2 gap-2 px-2">
+                    { cancellation_reason && (
+                        <div>
+                            <span>Lý do hủy: {cancellation_reason}</span>
+                        </div>
+                    )}
+                    
                     {/* Tour */}
                     <div>
                         <h3 className="font-bold text-lg mb-3">TÓM TẮT CHUYẾN ĐI</h3>

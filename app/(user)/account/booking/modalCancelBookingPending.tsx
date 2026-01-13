@@ -11,7 +11,7 @@ interface ModalDeleteBookingProps {
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function ModalDeleteBooking({ onClose, booking, onDeleted }: ModalDeleteBookingProps) {
+export default function ModalCancelBookingPending({ onClose, booking, onDeleted }: ModalDeleteBookingProps) {
     const [reason, setReason] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
