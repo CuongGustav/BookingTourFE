@@ -19,4 +19,5 @@ export interface ReadPaymentAdminInfo {
     status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED",
     created_at: string,
     payment_images: PaymentImageInfo[],
+    cancellation_reason?: string;
 }

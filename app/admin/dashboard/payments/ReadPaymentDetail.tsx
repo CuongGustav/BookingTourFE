@@ -93,6 +93,9 @@ export default function ReadPaymentAdminPage ({isOpen, onClose, payment_id} : Mo
                     <div className="flex flex-col gap-6">
                         {/* Payment Info */}
                         <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                            {paymentData.cancellation_reason && (
+                                <span>Lý do hủy: {paymentData.cancellation_reason}</span>
+                            )}
                             <h3 className="font-bold text-lg mb-3">Thông tin thanh toán</h3>
                             
                             <div className="flex justify-between items-center">
