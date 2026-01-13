@@ -2,30 +2,26 @@
 
 import { useState } from "react";
 
-interface ModalCancelBookingConfirmProps {
+interface CancelBookingCancelPendingProps {
     isOpen: boolean;
     onClose: () => void;
     booking_id: string;
-    booking_code: string;
     onSuccess: () => void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function ModalCancelBookingConfirm({isOpen, onClose, booking_id, booking_code, onSuccess }: ModalCancelBookingConfirmProps) {
-    const [reason, setReason] = useState("");
+export default function CancelBookingCancelPending({isOpen, onClose, booking_id, onSuccess }: CancelBookingCancelPendingProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const isReasonEmpty = reason.trim() === "";
 
     const handleCancelBooking = async () => {
         if (!booking_id) return;
         setIsLoading(true);
 
         try {
-            const res = await fetch(`${API_URL}/booking/cancel-booking-confirm/${booking_id}`, {
+            const res = await fetch(`${API_URL}/booking/admin/cancel-booking-cancel-pending/${booking_id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ cancellation_reason: reason }),
                 credentials: "include",
             });
 
@@ -34,7 +30,6 @@ export default function ModalCancelBookingConfirm({isOpen, onClose, booking_id, 
                 alert("Yêu cầu hủy booking tour thành công!");
                 onClose();
                 onSuccess();
-                
             } else {
                 alert(data.message || "Hủy thất bại!");
             }
@@ -54,25 +49,12 @@ export default function ModalCancelBookingConfirm({isOpen, onClose, booking_id, 
                 className="bg-white rounded-xl p-6 w-full max-w-md relative shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h1 className="text-2xl font-bold mb-2 text-red-600">Xác nhận hủy đơn</h1>
-                <p className="text-gray-600 mb-4">
-                    Bạn đang yêu cầu hủy booking <span className="font-bold text-black">{booking_code}</span>.
-                </p>
+                <h1 className="text-2xl font-bold mb-2 text-red-600">Hủy yêu cầu hủy booking</h1>
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Lý do hủy (bắt buộc phải ghi số tài khoản ngân hàng để hoàn tiền / đến quầy để nhận tiền).
+                        Hãy điện cho khách hàng xác nhận trước khi hủy yêu cầu
                     </label>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Vì đã xác nhận booking nên bạn sẽ nhận được % số tiền đã chuyển.
-                    </label>
-                    <textarea
-                        className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none"
-                        rows={5}
-                        placeholder="Nhập lý do bạn muốn hủy tour..."
-                        value={reason}
-                        onChange={(e) => setReason(e.target.value)}
-                    />
                 </div>
                 
                 <button
@@ -94,16 +76,11 @@ export default function ModalCancelBookingConfirm({isOpen, onClose, booking_id, 
                     </button>
                     <button
                         onClick={handleCancelBooking}
-                        disabled={isLoading || isReasonEmpty}
-                        className={`py-2 px-6 rounded-lg font-medium flex items-center
-                            ${isReasonEmpty || isLoading
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-red-600 text-white hover:bg-red-700 cursor-pointer"}
-                        `}
+                        disabled={isLoading}
+                        className="py-2 px-6 border border-gray-300 text-white rounded-lg hover:bg-blue-700 bg-blue-600 cursor-pointer font-medium disabled:opacity-50"
                     >
-                        {isLoading ? "Đang xử lý..." : "Xác nhận hủy"}
+                        {isLoading ? "Đang xử lý..." : "Từ chối yêu cầu hủy"}
                     </button>
-
                 </div>
             </div>
         </div>

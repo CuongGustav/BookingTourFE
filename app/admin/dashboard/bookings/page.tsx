@@ -10,6 +10,7 @@ import CancelBookingPaidPage from "./CancelBookingPaid";
 import ConfirmBookingPaidPage from "./ConfirmBookingPaid";
 import CancelBookingConfirmPage from "./CancelBookingConfirm";
 import ConfirmBookingCancelPending from "./ConfirmBookingCanCelPending";
+import CancelBookingCancelPending from "./CancelBookingCancelPending";
 
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
@@ -53,6 +54,8 @@ export default function AdminPage () {
     const [isOpenModalConfirmBookingPaid, setIsOpenModalConfirmBookingPaid] = useState(false);
     const [isOpenModalCancelBookingConfirm, setIsOpenModalCancelBookingConfirm] = useState(false);
     const [isOpenModalConfirmBookingCancelPending, setIsOpenModalConfirmBookingCancelPending] = useState(false);
+    const [isOpenModalCancelBookingCancelPending, setIsOpenModalCancelBookingCancelPending] = useState(false);
+
 
 
     const fetchListBooking = async () => {
@@ -118,7 +121,7 @@ export default function AdminPage () {
             setPage(1);
         };
     
-    if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách tài khoản...</div>;
+    if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách booking...</div>;
 
     return (
         <div className="py-2 max-w-7xl mx-auto h-screen relative">
@@ -298,6 +301,11 @@ export default function AdminPage () {
                                                 </button>
                                                 <button 
                                                     className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                                                    onClick={ () => {
+                                                        setSelectedBookingId(booking.booking_id)
+                                                        setIsOpenModalCancelBookingCancelPending(true)
+                                                        }
+                                                    }    
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -492,6 +500,18 @@ export default function AdminPage () {
                     isOpen={isOpenModalConfirmBookingCancelPending}
                     onClose={()=>{
                         setIsOpenModalConfirmBookingCancelPending(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListBooking}
+                /> 
+            )}
+            {/* cancel booking cancel pending */}
+            {isOpenModalCancelBookingCancelPending && selectedBookingId &&(
+                <CancelBookingCancelPending
+                    isOpen={isOpenModalCancelBookingCancelPending}
+                    onClose={()=>{
+                        setIsOpenModalCancelBookingCancelPending(false)
                         setSelectedBookingId(null);
                     }}
                     booking_id={selectedBookingId}
