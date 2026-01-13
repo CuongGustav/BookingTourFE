@@ -10,6 +10,7 @@ import ModalReadBookingDetail from "./modalReadBookingDetail";
 import { ReadBookingDetail } from "@/app/types/booking";
 import ModalCancelBookingPending from "./modalCancelBookingPending";
 import ModalCancelBookingPaid from "./CancelBookingPaid";
+import ModalCancelBookingConfirm from "./CancelBookingConfirm";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -56,7 +57,7 @@ export default function BookingAccountPage () {
     const [selectBookingID, setSelectedBookingID] = useState("")
     const [selectBookingCode, setSelectedBookingCode] = useState("")
     const [isOpenModalCanCelBookingPaid, setIsOpenModalCanCelBookingPaid] = useState(false);
-
+    const [isOpenModalCanCelBookingConfirm, setIsOpenModalCanCelBookingConfirm] = useState(false);
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
             let result = [...bookings];
@@ -184,7 +185,11 @@ export default function BookingAccountPage () {
                 return (
                     <button 
                         className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
-                        
+                        onClick={() => {
+                            setIsOpenModalCanCelBookingConfirm(true)
+                            setSelectedBookingID(booking.booking_id)
+                            setSelectedBookingCode(booking.booking_code)
+                        }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -493,6 +498,20 @@ export default function BookingAccountPage () {
                     isOpen={isOpenModalCanCelBookingPaid}
                     onClose={()=>{
                         setIsOpenModalCanCelBookingPaid(false)
+                        setSelectedBookingID("");
+                        setSelectedBookingCode("");
+                    }}
+                    booking_id={selectBookingID}
+                    booking_code={selectBookingCode}
+                    onSuccess={fetchBookings}
+                /> 
+            )}
+            {/* cancel booking confirm */}
+            {isOpenModalCanCelBookingConfirm && selectBookingID &&(
+                <ModalCancelBookingConfirm
+                    isOpen={isOpenModalCanCelBookingConfirm}
+                    onClose={()=>{
+                        setIsOpenModalCanCelBookingConfirm(false)
                         setSelectedBookingID("");
                         setSelectedBookingCode("");
                     }}
