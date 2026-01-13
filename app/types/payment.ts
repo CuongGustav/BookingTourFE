@@ -10,6 +10,14 @@ export interface PaymentInfo{
     created_at: string,
 }
 
+export interface RefundInfo {
+    cancellation_date: string;        
+    days_before_departure: number;    
+    departure_date: string;           
+    refund_amount: number;             
+    refund_percentage: number;         
+}
+
 export interface ReadPaymentAdminInfo {
     payment_id: string,
     booking_id: string,
@@ -20,4 +28,5 @@ export interface ReadPaymentAdminInfo {
     created_at: string,
     payment_images: PaymentImageInfo[],
     cancellation_reason?: string;
+    refund_info?: RefundInfo;
 }

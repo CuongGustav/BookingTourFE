@@ -9,6 +9,7 @@ import CancelBookingPendingPage from "./CancelBookingPending";
 import CancelBookingPaidPage from "./CancelBookingPaid";
 import ConfirmBookingPaidPage from "./ConfirmBookingPaid";
 import CancelBookingConfirmPage from "./CancelBookingConfirm";
+import ConfirmBookingCancelPending from "./ConfirmBookingCanCelPending";
 
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
@@ -51,10 +52,9 @@ export default function AdminPage () {
     const [isOpenModalCancelBookingPaid, setIsOpenModalCancelBookingPaid] = useState(false);
     const [isOpenModalConfirmBookingPaid, setIsOpenModalConfirmBookingPaid] = useState(false);
     const [isOpenModalCancelBookingConfirm, setIsOpenModalCancelBookingConfirm] = useState(false);
+    const [isOpenModalConfirmBookingCancelPending, setIsOpenModalConfirmBookingCancelPending] = useState(false);
 
 
-
-   
     const fetchListBooking = async () => {
         try {
             const res = await  fetch(`${API_URL}/booking/admin/all`, { credentials: "include" })
@@ -283,13 +283,27 @@ export default function AdminPage () {
                                             </button>
                                         )}
                                         {booking.status === "CANCEL_PENDING" && (
-                                            <button 
-                                                className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                </svg>
-                                            </button>
+                                            <>
+                                                <button 
+                                                    className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                                                    onClick={ () => {
+                                                        setSelectedBookingId(booking.booking_id)
+                                                        setIsOpenModalConfirmBookingCancelPending(true)
+                                                        }
+                                                    }
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                    </svg>
+                                                </button>
+                                                <button 
+                                                    className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                    </svg>
+                                                </button>
+                                            </>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 font-medium">
@@ -466,6 +480,18 @@ export default function AdminPage () {
                     isOpen={isOpenModalCancelBookingConfirm}
                     onClose={()=>{
                         setIsOpenModalCancelBookingConfirm(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListBooking}
+                /> 
+            )}
+            {/* confirm booking cancel pending */}
+            {isOpenModalConfirmBookingCancelPending && selectedBookingId &&(
+                <ConfirmBookingCancelPending
+                    isOpen={isOpenModalConfirmBookingCancelPending}
+                    onClose={()=>{
+                        setIsOpenModalConfirmBookingCancelPending(false)
                         setSelectedBookingId(null);
                     }}
                     booking_id={selectedBookingId}

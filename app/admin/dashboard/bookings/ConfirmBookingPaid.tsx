@@ -86,9 +86,8 @@ export default function ConfirmBookingPaidPage ({isOpen, onClose, booking_id, on
             if (!res.ok) {
                 throw new Error(data.message || "Hủy booking thất bại");
             }
-
-            onSuccess();
             onClose();
+            onSuccess();
         } catch (err) {
             setError("Có lỗi xảy ra");
             console.error(err);

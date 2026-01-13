@@ -48,7 +48,6 @@ export default function CancelBookingConfirmPage ({isOpen, onClose, booking_id, 
         }
     }, [isOpen, booking_id]);
 
-    // Clear error khi input thay đổi (tùy chọn, để UX tốt hơn)
     useEffect(() => {
         setError(null);
     }, [reason, refundMethod, imageFile]);
@@ -109,7 +108,6 @@ export default function CancelBookingConfirmPage ({isOpen, onClose, booking_id, 
     };
 
     const handleCancel = async () => {
-        // Validation giờ đã ở ngoài (disable nút), nhưng giữ để an toàn
         if (!isFormValid) {
             setError("Vui lòng nhập đầy đủ thông tin: lý do, phương thức hoàn trả, và upload ảnh.");
             return;
@@ -142,9 +140,8 @@ export default function CancelBookingConfirmPage ({isOpen, onClose, booking_id, 
             if (!res.ok) {
                 throw new Error(data.message || "Hoàn trả thất bại");
             }
-
-            onSuccess();
             onClose();
+            onSuccess();
         } catch (err) {
             setError("Có lỗi xảy ra");
             console.error(err);
