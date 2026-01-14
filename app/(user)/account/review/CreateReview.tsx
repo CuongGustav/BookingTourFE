@@ -2,7 +2,7 @@
 
 import { useState, DragEvent } from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
