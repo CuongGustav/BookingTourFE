@@ -1,5 +1,298 @@
+'use client'
+
+import { useState, useMemo, useEffect } from "react";
+import ReviewInfo from "@/app/types/reviews";
+import ReadReview from "./ReadReview";
+
+
+const API_URL = process.env.NEXT_PUBLIC_URL_API
+
+const SortIcon = ({isActive, direction}: {isActive: boolean; direction: "asc" | "desc" | null}) => {
+    if(!isActive) {
+        return (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+            </svg>
+        );
+    }
+    return direction === "asc" ? (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+        </svg>
+
+    ):(
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+    )
+}
+
 export default function AdminPage () {
+
+    const [reviews, setReviews] = useState<ReviewInfo[]>([])
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState<keyof ReviewInfo>("created_at");
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+    const [page, setPage] = useState(1);
+    const pageSize = 6;
+    const [isOpenModelRead, setIsOpenModelRead] = useState(false)
+    const [selectReviewID, setSelectReviewID] = useState("")
+
+
+
+    const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
+        let result = [...reviews];
+        // search 
+        if (search.trim()) {
+            const term = search.toLowerCase().trim();
+            result = result.filter(payment =>
+                payment.booking_code.toLowerCase().includes(term) 
+            );
+        }
+        //sort by result search, sortBy, sortOrder
+        result.sort((a, b) => {
+            const aVal = a[sortBy];
+            const bVal = b[sortBy];
+            if (aVal === null || aVal === undefined) return 1;
+            if (bVal === null || bVal === undefined) return -1;
+            if (typeof aVal === "string" && typeof bVal === "string") {
+                return sortOrder === "asc"
+                ? aVal.localeCompare(bVal)
+                : bVal.localeCompare(aVal);
+            }
+            if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+            if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+        });
+        return result;
+    }, [reviews, search, sortBy, sortOrder]);
+
+        // navigation page
+    const paginated = filteredAndSorted.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = Math.ceil(filteredAndSorted.length / pageSize);
+    
+    //sort
+    const handleSort = (field: keyof ReviewInfo) => {
+        if (sortBy === field) {
+        setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+        } else {
+        setSortBy(field);
+        setSortOrder("asc");
+        }
+        setPage(1);
+    };
+
+    const fetchListReview = async () => {
+        try {
+            const res = await  fetch(`${API_URL}/reviews/admin/all`, { credentials: "include" })
+            const data = await res.json()
+            setReviews(Array.isArray(data) ? data : data.data || []);
+            setLoading(false);
+        } catch (e) {
+            console.error(e);
+            alert("Lỗi tải dữ liệu");
+            setLoading(false);  
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchListReview()
+    }, []);
+
+    if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách đánh giá...</div>;
+
     return (
-        <div>Quản lý đánh giá</div>
+        <div className="py-2 max-w-7xl mx-auto h-screen relative">
+            <div className="w-full max-w-[96%] mx-auto">
+                {/* title */}
+                <h1 className="text-3xl font-bold mb-2 text-main">Quản lý đánh giá</h1>
+                <div className="flex gap-4 items-center">
+                    {/* search */}
+                    <div className="bg-white p-2 rounded-xl border-1 border-gray-300 mb-4 flex-1">
+                        <input
+                            type="text"
+                            placeholder="Tìm mã booking code."
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                            className="w-full px-5 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        />
+                    </div>
+                </div>
+                <div>
+                    {/* table section*/}
+                    <div className="bg-white rounded-xl border border-gray-300 overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[900px] border-collapse"> 
+                                <thead className="bg-gray-50 border-b border-gray-300">
+                                    <tr>
+                                        <th 
+                                            onClick={() => handleSort("review_id")} 
+                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                ReviewID
+                                                <SortIcon isActive={sortBy === "review_id"} direction={sortBy === "review_id" ? sortOrder : null} />
+                                            </div>
+                                        </th>
+                                        <th 
+                                            onClick={() => handleSort("review_id")} 
+                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                Booking Code
+                                                <SortIcon isActive={sortBy === "review_id"} direction={sortBy === "review_id" ? sortOrder : null} />
+                                            </div>
+                                        </th>
+                                        <th 
+                                            onClick={() => handleSort("comment")} 
+                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                Nội dung
+                                                <SortIcon isActive={sortBy === "comment"} direction={sortBy === "comment" ? sortOrder : null} />
+                                            </div>
+                                        </th>
+                                        <th 
+                                            onClick={() => handleSort("rating")} 
+                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                Đánh giá
+                                                <SortIcon isActive={sortBy === "rating"} direction={sortBy === "rating" ? sortOrder : null} />
+                                            </div>
+                                        </th>
+                                        <th 
+                                            onClick={() => handleSort("created_at")} 
+                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                Ngày tạo 
+                                                <SortIcon isActive={sortBy === "created_at"} direction={sortBy === "created_at" ? sortOrder : null} />
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>  
+                                <tbody className="divide-y divide-gray-200">
+                                    {paginated.map(review => (
+                                        <tr key={review.review_id} className="hover:bg-gray-50 transition">
+                                            <td className="px-4 py-4 font-semibold text-gray-800 max-w-[100px]">
+                                                <a 
+                                                    className="block cursor-pointer hover:text-blue-600 
+                                                            truncate whitespace-nowrap overflow-hidden"
+                                                    onClick={()=>{
+                                                        setIsOpenModelRead(true)
+                                                        setSelectReviewID(review.review_id)
+                                                    }}
+                                                >
+                                                    {review.review_id}
+                                                </a>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium">
+                                                <span
+                                                >
+                                                    {review.booking_code}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-4 py-4 max-w-[350px]">
+                                                <p className="line-clamp-2 text-sm text-gray-600">
+                                                    {review.comment || "—"}
+                                                </p>
+                                            </td>
+                                            <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">
+                                                {review.rating}
+                                            </td>
+                                            <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                                {new Date(review.created_at).toLocaleDateString("vi-VN")}
+                                            </td>
+                                        </tr>    
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* navigation section - Đã bỏ absolute để tránh lỗi layout */}
+                    <div className="mt-8 mb-6">
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-2 flex-wrap">
+                                {/* arrow left */}
+                                <button
+                                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                                    disabled={page === 1}
+                                    className={`px-3 py-2 rounded-lg font-medium transition ${
+                                        page === 1 
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                            : "bg-gray-200 hover:bg-gray-300 cursor-pointer text-gray-700"
+                                    }`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                    </svg>
+                                </button>
+
+                                {/* number pages */}
+                                {(() => {
+                                    const maxVisible = 5;
+                                    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+                                    const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                                    
+                                    if (endPage - startPage + 1 < maxVisible) {
+                                        startPage = Math.max(1, endPage - maxVisible + 1);
+                                    }
+                                    
+                                    return Array.from(
+                                        { length: endPage - startPage + 1 }, 
+                                        (_, i) => startPage + i
+                                    ).map(p => (
+                                        <button 
+                                            key={p} 
+                                            onClick={() => setPage(p)}
+                                            className={`px-4 py-2 rounded-lg font-bold transition cursor-pointer min-w-[45px] ${
+                                                page === p 
+                                                    ? "bg-blue-600 text-white shadow-md" 
+                                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                            }`}
+                                        >
+                                            {p}
+                                        </button>
+                                    ));
+                                })()}
+
+                                {/* arrow right */}
+                                <button
+                                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                                    disabled={page === totalPages}
+                                    className={`px-3 py-2 rounded-lg font-medium transition ${
+                                        page === totalPages 
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                            : "bg-gray-200 hover:bg-gray-300 cursor-pointer text-gray-700"
+                                    }`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+            {/* read review */}
+            {isOpenModelRead && selectReviewID &&(
+                <ReadReview
+                    isOpen={isOpenModelRead}
+                    onClose={()=>{
+                        setIsOpenModelRead(false)
+                        setSelectReviewID("");
+                    }}
+                    reviewId={selectReviewID}
+                /> 
+            )}
+        </div>
     )
 }

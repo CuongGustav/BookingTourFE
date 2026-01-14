@@ -10,4 +10,12 @@ export default interface ReviewInfo {
     review_id: string;
     tour_id: string;
     images?: ReviewImagesInfo[];
+    account?: AccountInfo
+}
+
+interface AccountInfo {
+    account_id: string;
+    email: string;
+    full_name: string;
+    phone: string;
 }
