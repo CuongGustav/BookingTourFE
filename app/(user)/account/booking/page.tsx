@@ -10,6 +10,7 @@ import ModalReadBookingDetail from "./modalReadBookingDetail";
 import { ReadBookingDetail } from "@/app/types/booking";
 import ModalCancelBookingPending from "./modalCancelBookingPending";
 import ModalCancelBookingConfirm from "./CancelBookingConfirm";
+import CreateReviewUser from "../review/CreateReview";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -55,7 +56,9 @@ export default function BookingAccountPage () {
     const [isCancelling, setIsCancelling] = useState(false);
     const [selectBookingID, setSelectedBookingID] = useState("")
     const [selectBookingCode, setSelectedBookingCode] = useState("")
+    const [selectedTourID, setSelectedTourID] = useState("")
     const [isOpenModalCanCelBookingConfirm, setIsOpenModalCanCelBookingConfirm] = useState(false);
+    const [isOpenModalCreateReview, setIsOpenModalCreateReview] = useState(false)
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
             let result = [...bookings];
@@ -180,8 +183,18 @@ export default function BookingAccountPage () {
                     </button>
                 );
             case "completed":
+                if (booking.is_review === true ) {
+                        return <span>Đã bình luận</span>;
+                    }
                 return (
-                    <button className="px-3 py-1 text-xs font-bold bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer uppercase">
+                    <button
+                        className="px-3 py-1 text-xs font-bold bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer uppercase"
+                        onClick={() => {
+                            setIsOpenModalCreateReview(true)
+                            setSelectedBookingID(booking.booking_id)
+                            setSelectedTourID(booking.tour_id)
+                        }}
+                    >
                         Bình luận
                     </button>
                 );
@@ -486,6 +499,20 @@ export default function BookingAccountPage () {
                     }}
                     booking_id={selectBookingID}
                     booking_code={selectBookingCode}
+                    onSuccess={fetchBookings}
+                /> 
+            )}
+            {/* create review */}
+            {isOpenModalCreateReview && selectBookingID &&(
+                <CreateReviewUser
+                    isOpen={isOpenModalCreateReview}
+                    onClose={()=>{
+                        setIsOpenModalCreateReview(false)
+                        setSelectedBookingID("");
+                        setSelectedTourID("");
+                    }}
+                    booking_id={selectBookingID}
+                    tour_id={selectedTourID}
                     onSuccess={fetchBookings}
                 /> 
             )}

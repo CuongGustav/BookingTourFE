@@ -21,6 +21,7 @@ export interface ReadBookingUser {
     created_at: string;
     tour_title: string;
     special_request?: string;
+    is_review?: boolean;
 }
 
 export interface TourDetail {
@@ -56,6 +57,7 @@ export interface ReadBookingDetail {
     schedule_id: string;
     tour_title?:string;
     cancellation_reason?: string;
+    is_review?: boolean;
 }
 
 export interface BookingResponse {
