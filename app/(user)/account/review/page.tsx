@@ -3,6 +3,7 @@
 import ReviewInfo from "@/app/types/reviews";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import DeleteReview from "./DeleteReview";
+import ReadReview from "./ReadReview";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -35,6 +36,7 @@ export default function ReviewPage () {
     const [page, setPage] = useState(1);
     const pageSize = 5;
     const [isOpenModelDelete, setIsOpenModelDelete] = useState(false)
+    const [isOpenModelRead, setIsOpenModelRead] = useState(false)
     const [selectReviewID, setSelectReviewID] = useState("")
 
     const filteredAndSorted = useMemo(() => { //lưu kết quả xử lý từ dữ liệu API, không cần gọi lại
@@ -193,6 +195,10 @@ export default function ReviewPage () {
                                                 <a 
                                                     className="block cursor-pointer hover:text-blue-600 
                                                             truncate whitespace-nowrap overflow-hidden"
+                                                    onClick={()=>{
+                                                        setIsOpenModelRead(true)
+                                                        setSelectReviewID(review.review_id)
+                                                    }}
                                                 >
                                                     {review.review_id}
                                                 </a>
@@ -282,7 +288,7 @@ export default function ReviewPage () {
                     </div>
                 </div>
             </div>
-            {/* create review */}
+            {/* delete review */}
             {isOpenModelDelete && selectReviewID &&(
                 <DeleteReview
                     isOpen={isOpenModelDelete}
@@ -292,6 +298,17 @@ export default function ReviewPage () {
                     }}
                     review_id={selectReviewID}
                     onSuccess={fetchBookings}
+                /> 
+            )}
+            {/* read review */}
+            {isOpenModelRead && selectReviewID &&(
+                <ReadReview
+                    isOpen={isOpenModelRead}
+                    onClose={()=>{
+                        setIsOpenModelRead(false)
+                        setSelectReviewID("");
+                    }}
+                    reviewId={selectReviewID}
                 /> 
             )}
         </div>
