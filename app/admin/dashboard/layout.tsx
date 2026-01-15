@@ -43,7 +43,7 @@ export default async function AdminLayout({
         return (
             <div className="flex h-screen">
                 <NavbarAdmin account={account}/>
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 h-screen overflow-y-auto w-screen overflow-x-auto">{children}</main>
             </div>
         );
     }
