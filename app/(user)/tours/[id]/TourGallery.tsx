@@ -35,7 +35,7 @@ export default function TourGallery({ images }: TourGalleryProps) {
     return (
         <div>
         {/* Grid Gallery */}
-            <div className="flex flex-col md:flex-row gap-4 h-[500px] rounded-2xl overflow-hidden">
+            <div className="flex flex-col md:flex-row gap-4 h-[500px] rounded-2xl overflow-hidden mt-4">
                 {/* Ảnh chính (bên trái - chiếm 60%) */}
                 <div
                     onClick={() => {

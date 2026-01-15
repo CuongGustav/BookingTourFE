@@ -136,7 +136,7 @@ export default function TourSchedule({ schedules, onScheduleSelect, selectedSche
 
                     <div className="grid grid-cols-7 gap-2 text-center">
                         {calendarDays.map((item, index) => {
-                            if (!item.date) return <div key={index} className="h-24" />
+                            if (!item.date) return <div key={index} className="h-16" />
 
                             const dateStr = item.date.toISOString().split('T')[0]
                             const schedule = scheduleByDate.get(dateStr)
@@ -147,7 +147,7 @@ export default function TourSchedule({ schedules, onScheduleSelect, selectedSche
                                 <div
                                     key={index}
                                     onClick={() => schedule && onScheduleSelect(schedule)}
-                                    className={`h-24 flex flex-col items-center justify-center rounded-xl transition-all border-2 cursor-pointer
+                                    className={`h-16 flex flex-col items-center justify-center rounded-xl transition-all border-2 cursor-pointer
                                         ${schedule ? "hover:border-blue-600 border-gray-200" : "border-transparent text-gray-400 cursor-not-allowed"}
                                         ${isActive ? "border-blue-900 bg-blue-50" : ""}
                                     `}

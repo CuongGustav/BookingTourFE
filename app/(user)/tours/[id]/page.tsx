@@ -10,6 +10,7 @@ import TourAdditionalInfo from "./TourAdditionalInfo";
 import TourItinerary from "./TourItinerary";
 import TourInfoNote from "./TourInfoNote";
 import BookingBar from "./bookingBar";
+import ReviewTourPage from "./ReviewTour";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
@@ -69,7 +70,7 @@ export default function TourDetailPage () {
             <h1 className="text-2xl font-bold">{tourInfo.title}</h1>
             <div className="flex gap-4">
                 <div className="flex flex-col gap-8 w-75/100">
-                    {/* <TourGallery images={tourInfo.images || []} /> */}
+                    <TourGallery images={tourInfo.images || []} />
                     <TourSchedule 
                         schedules={tourInfo.schedules || []} 
                         onScheduleSelect={setSelectedSchedule}
@@ -88,6 +89,10 @@ export default function TourDetailPage () {
                     <TourItinerary itineraries={tourInfo.itineraries} />
                     {/* Information to note */}
                     <TourInfoNote included_service={tourInfo.included_services} excluded_service={tourInfo.excluded_services} />
+                    {/* review */}
+                    { tourInfo.total_reviews !== 0 && (
+                        <ReviewTourPage tour_id={tour_id} rating_average={tourInfo.rating_average} total_reviews={tourInfo.total_reviews}/>                    
+                    )}
                 </div>
                 <div className="hidden lg:block">
                     <div className="sticky top-24">
