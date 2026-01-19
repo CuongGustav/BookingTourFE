@@ -3,6 +3,7 @@ import ListTour from "../components/homepage.listTour";
 import FilterHomePage from "../components/homepage.filterHomePage";
 import { cookies } from "next/headers"
 import CouponSlide from "../components/homepage.slideCoupon";
+import ListTourHot from "../components/homepage.tourHot";
 
 export default async function HomePage() {
 
@@ -28,11 +29,16 @@ export default async function HomePage() {
             <div className="w-4/5 m-auto pt-8">
                 <CouponSlide/>
             </div>
-            {/* <div className="py-8 bg-blue-100">
+            <div className="bg-blue-100 pt-[70px]">
+                <div className="w-4/5 m-auto">
+                    <ListTourHot isLoggedIn={isLoggedIn}/>
+                </div>
+            </div>
+            <div className="m-auto pt-8 mb-8">
                 <div className="w-4/5 m-auto">
                     <DestinationFavourite/>
                 </div>
-            </div> */}
+            </div>
         </div>
     )
 }

@@ -11,7 +11,7 @@ interface ListTourProps {
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function ListTour ({ isLoggedIn }: ListTourProps)  {
+export default function ListTourHot ({ isLoggedIn }: ListTourProps)  {
 
     const router = useRouter()
     const [tours, setTours] = useState<TourInfo[]>([])
@@ -19,12 +19,12 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
 
     const fetchListTour = async () => {
         try {
-            const res = await fetch(`${API_URL}/tour/8tour`, {
+            const res = await fetch(`${API_URL}/tour/tourhot`, {
                 credentials: 'include'  
             });
             const data = await res.json();
             const tourList = Array.isArray(data) ? data : data.data || [];
-            setTours(tourList.slice(0, 8));
+            setTours(tourList.slice(0, 4));
             setLoading(false);
         } catch (e) {
             console.error(e);
@@ -71,11 +71,11 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
     return (
         <div className="w-full py-4">
             <div className="flex relative">
-                <h1 className="text-blue-900 font-bold float-left text-3xl py-2">Tour du lịch</h1>
-                <span className="absolute border-2 border-blue-900 bottom-0 w-1/8"/>
+                <h1 className="text-red-600 font-bold float-left text-3xl py-2">Tour HOT</h1>
+                <span className="absolute border-2 border-red-600 bottom-0 w-1/8"/>
             </div>
             <div className="flex my-4">
-                <p className="">Hãy chọn một tour du lịch nổi tiếng dưới đây. Đặt ngay để không bỏ lỡ!</p>
+                <p className="">Hãy chọn một tour du lịch đang hot dưới đây. Đặt ngay để không bỏ lỡ!</p>
             </div>
             {/* list tour */}
             <div className="flex flex-wrap">
@@ -94,7 +94,7 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
                                     className="object-cover group-hover:scale-110 transition-transform duration-500 h-full"
                                 />
                                 {isLoggedIn && (
-                                    <div className="absolute top-2 left-2 cursor-pointer">
+                                    <div className="absolute top-2 left-2 cursor-pointer z-5">
                                         <FavoriteButton tourId={tour.tour_id} initialIsFavorite={tour.is_like ?? false} />
                                     </div>
                                 )}
@@ -157,15 +157,6 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
                         </div>
                     </div>
                 ))}
-            </div>
-            {/* button */}
-            <div className="w-full flex justify-center mt-4">
-                <button 
-                    className="px-8 py-4 text-xl border-2 border-blue-900 text-blue-900 font-bold rounded-2xl cursor-pointer hover:bg-blue-900 hover:text-white"
-                    onClick={()=>router.push("/tours")}
-                >
-                    Xem tất cả
-                </button>
             </div>
         </div>
     )

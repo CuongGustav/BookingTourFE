@@ -108,15 +108,17 @@ export default function Header({ account: initialAccount }: HeaderProps) {
                                     }`}
                                 >
                                     Trang chủ
-                                </Link>
-                                <li 
-                                    onClick={() => handleClickMenu('about')}
-                                    className={`cursor-pointer text-hover-blue transition-colors ${
+                                </Link>  
+                                <Link
+                                    href="/about"
+                                    target="_blank"
+                                    className={`text-hover-blue transition-colors cursor-pointer ${
                                         activeSelectOption === 'about' ? 'text-main' : ''
                                     }`}
                                 >
                                     Giới thiệu
-                                </li>
+                                </Link>
+
                             </ul>
                         </div>
                     </div>

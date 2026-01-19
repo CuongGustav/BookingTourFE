@@ -351,14 +351,14 @@ export default function ModalUpdateAccount({ accountInfo, onClose, onUpdated }: 
                 <div className="flex justify-end gap-4 mt-8">
                     <button
                         onClick={onClose}
-                        className="px-6 py-3 border border-gray-400 rounded-lg hover:bg-gray-100 transition"
+                        className="cursor-pointer px-6 py-3 border border-gray-400 rounded-lg hover:bg-gray-100 transition"
                     >
                         Hủy
                     </button>
                     <button
                         onClick={handleUpdate}
                         disabled={loading}
-                        className={`px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+                        className={`cursor-pointer px-8 py-3 bg-blue-800 text-white rounded-lg hover:bg-blue-600 transition ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                         {loading ? "Đang cập nhật..." : "Cập nhật"}
                     </button>

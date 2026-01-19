@@ -105,7 +105,7 @@ export default function DestinationFavourite () {
                 {/* image */}
                 <div className="flex w-full gap-2 mt-4">
                     <div className="flex flex-col w-1/2 rounded gap-2 ">
-                        <div className="flex h-[600px] rounded gap-2">
+                        <div className="flex h-[400px] rounded gap-2">
                             <div className="w-6/10 rounded border-gray-300 border-2 relative">
                                 <ImageBox
                                     src={getImage(0)}
@@ -127,7 +127,7 @@ export default function DestinationFavourite () {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex h-[300px] rounded gap-2">
+                        <div className="flex h-[200px] rounded gap-2">
                             <div className="w-4/10 rounded border-gray-300 border-2 relative">
                                 <ImageBox
                                     src={getImage(5)}
@@ -143,13 +143,13 @@ export default function DestinationFavourite () {
                         </div>
                     </div>
                     <div className="flex flex-col w-1/2 gap-2 rounded">
-                        <div className="flex h-[296px] rounded border-gray-300 border-2 relative">
+                        <div className="flex h-[196px] rounded border-gray-300 border-2 relative">
                             <ImageBox
                                 src={getImage(2)}
                                 title={destinations[2]?.name}
                             />
                         </div>
-                        <div className="flex h-[600px] gap-2 rounded">
+                        <div className="flex h-[400px] gap-2 rounded">
                             <div className="flex flex-col w-1/2 gap-2 rounded">
                                 <div className="h-1/2 rounded border-gray-300 border-2 relative">
                                     <ImageBox

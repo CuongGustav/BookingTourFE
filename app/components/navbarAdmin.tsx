@@ -138,17 +138,18 @@ export default function NavbarAdmin({ account }: NavbarAdminProps) {
             </div>
             <div className="flex">
                 <ul className="flex flex-col p-2 gap-4 w-full">
-                    <div
-                        className={`flex items-center gap-1 font-bold cursor-pointer transition-transform `}
+                    <Link 
+                        href="/admin/dashboard/account"
+                        className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
+                            ${isActive('account') ? 'text-main' : ''}   
+                        `}
                     >
                         <Image 
                             src="/account.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all }`}
-                        />  
-                        <p className="">
-                            {account.full_name}
-                        </p>
-                    </div>
+                            className={`transition-all ${isActive('account') ? 'icon-active' : ''}`}
+                        /> 
+                        {account.full_name}
+                    </Link>
                     <button 
                         onClick={logoutHandled}
                         className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105`}

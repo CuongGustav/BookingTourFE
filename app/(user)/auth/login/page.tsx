@@ -96,7 +96,7 @@ export default function Login () {
 
 
     return (
-        <div className="w-4/5 mx-auto flex flex-col justify-center">
+        <div className="w-4/5 mx-auto flex flex-col justify-center mb-21">
             <div className="relative loginInfor flex flex-col items-center mx-auto rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.2)] p-8 mt-10">
                 <p className="text-3xl font-medium text-main">Đăng Nhập</p>
                 <form className="flex flex-col mt-4">

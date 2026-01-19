@@ -63,7 +63,7 @@ export default function FilterHomePage() {
                                 Bạn muốn đi đâu? <span className="text-red-500">*</span>
                             </label>
                             {/* Điểm đến (destination) */}
-                            <div ref={destinationRef} className="relative">
+                            <div ref={destinationRef} className="relative z-50">
                                 <p className="font-semibold mb-2">Điểm đến</p>
                                 <button
                                     onClick={() => setOpenDestination(!openDestination)}
@@ -76,7 +76,7 @@ export default function FilterHomePage() {
                                 </button>
 
                                 {openDestination && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
                                         {provincesData.map((p) => (
                                             <button
                                                 key={p.id}
