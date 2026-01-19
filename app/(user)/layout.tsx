@@ -23,12 +23,14 @@ async function getAccount(): Promise<AccountLogin | null> {
         const data = await res.json();
         return data.identity || data;
     }
-    } catch (err) {
-        console.error("Không thể lấy account:", err);
+    } catch {
+        // console.error("Không thể lấy account:", err);
+        return null;
     }
     return null;
 }
 
+export const dynamic = 'force-dynamic';
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
     const account = await getAccount();
 

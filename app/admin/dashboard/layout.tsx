@@ -23,8 +23,8 @@ async function getAccount(): Promise<AccountLogin | null> {
             const data = await res.json();
             return data.identity || data;
         }
-    } catch (err) {
-        console.error("Không thể lấy account:", err);
+    } catch {
+        // console.error("Không thể lấy account:", err);
     }
     return null;
 }

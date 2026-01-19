@@ -6,10 +6,11 @@ import { TourInfo } from "@/app/types/tour";
 import FilterBar from "./filterBar";
 import TourList from "./tourList";
 import { ChevronDown } from "lucide-react"; 
+import { Suspense } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
-export default function ToursPage () {
+function ToursContent()  {
     const searchParams = useSearchParams();
 
     const [tours, setTours] = useState<TourInfo[]>([]);
@@ -207,5 +208,17 @@ export default function ToursPage () {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ToursPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center min-h-screen">
+                <p>Đang tải tours...</p>
+            </div>
+        }>
+            <ToursContent />
+        </Suspense>
     );
 }
