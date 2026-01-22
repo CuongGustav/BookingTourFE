@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from "next/navigation";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { ReadCouponAdmin } from "@/app/types/coupon";
 import { formatPrice } from "@/app/common";
 import ModalDeleteCouponAdmin from "./coupon.modalDeleteAdmin";
@@ -41,6 +41,7 @@ export default function CouponPage () {
     const pageSize = 7;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedCoupon, setSelectedCoupon] = useState<ReadCouponAdmin | null>(null);
+    const calledRef = useRef(false)
 
     const fetchListCoupon = async () => {
         try {
@@ -59,6 +60,8 @@ export default function CouponPage () {
     }
     
     useEffect(() => {
+        if (calledRef.current) return
+        calledRef.current = true
         fetchListCoupon()
     }, []);
 

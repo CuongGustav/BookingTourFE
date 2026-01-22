@@ -184,7 +184,7 @@ export default function BookingAccountPage () {
                 );
             case "completed":
                 if (booking.is_review === true ) {
-                        return <span>Đã bình luận</span>;
+                        return <span>Đã đánh giá</span>;
                     }
                 return (
                     <button
@@ -195,7 +195,7 @@ export default function BookingAccountPage () {
                             setSelectedTourID(booking.tour_id)
                         }}
                     >
-                        Bình luận
+                        Đánh giá
                     </button>
                 );
             case "cancelled":

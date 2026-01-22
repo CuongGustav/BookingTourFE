@@ -524,9 +524,9 @@ export default function CreateTourPage () {
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-8 ">
+                <div className="flex gap-8 lg:grid-cols-1 ">
                     {/* duration_days, duration_nights, is_feature , depart_destination*/}
-                    <div className="flex w-1/3 gap-2 flex-col">
+                    <div className="flex lg:w-1/3 gap-2 flex-col md:w-full">
                         {/* duration_days */}
                         <div className="flex items-center w-full">
                             <label className="font-medium w-[120px]">Số Ngày:</label>

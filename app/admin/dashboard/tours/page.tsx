@@ -218,7 +218,7 @@ export default function AdminPage () {
                                         className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
                                     >
                                         <div className="flex items-center gap-2">
-                                            Tour hot
+                                            Trạng thái
                                             <SortIcon isActive={sortBy === "is_featured"} direction={sortBy === "is_featured" ? sortOrder : null} />
                                         </div>
                                     </th>
@@ -227,7 +227,7 @@ export default function AdminPage () {
                                         className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
                                     >
                                         <div className="flex items-center gap-2">
-                                            Trạng thái
+                                            Tour hot
                                             <SortIcon isActive={sortBy === "is_active"} direction={sortBy === "is_active" ? sortOrder : null} />
                                         </div>
                                     </th>
@@ -287,17 +287,18 @@ export default function AdminPage () {
                                         </td>
                                         <td className="px-6 py-4">{formatPrice(tour.base_price)|| "—"}</td>
                                         <td className="px-6 py-4">{tour.rating_average|| "—"}</td>
-                                        <td className="px-6 py-4">{tour.total_reviews|| "—"}</td>   
+                                        <td className="px-6 py-4">{tour.total_reviews|| "—"}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${tour.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                                                {tour.is_active ? "Hoạt động" : "Bị khóa"}
+                                            </span>
+                                        </td>    
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${tour.is_featured ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
                                                 {tour.is_featured ? "Có" : "Không"}
                                             </span>
                                         </td>     
-                                        <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${tour.is_active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                                {tour.is_active ? "Hoạt động" : "Bị khóa"}
-                                            </span>
-                                        </td>                       
+                                                              
                                         <td className="px-6 py-4 w-[200px] ">{tour.main_image_url || "—"}</td>
    
                                         <td className="px-6 py-4 text-sm text-gray-500">
@@ -312,7 +313,7 @@ export default function AdminPage () {
                 {/* navigation */}
                 <div className="absolute bottom-4 left-0 right-0">
                     {totalPages > 1 && (
-                        <div className="mt-4 flex justify-center items-center gap-2 flex-wrap">
+                        <div className="flex justify-center items-center gap-2 flex-wrap">
                             {/* arrow left */}
                             <button
                                 onClick={() => setPage(prev => Math.max(1, prev - 1))}

@@ -19,7 +19,7 @@ export default function ListTour ({ isLoggedIn }: ListTourProps)  {
 
     const fetchListTour = async () => {
         try {
-            const res = await fetch(`${API_URL}/tour/8tour`, {
+            const res = await fetch(`${API_URL}/tour/4tour`, {
                 credentials: 'include'  
             });
             const data = await res.json();

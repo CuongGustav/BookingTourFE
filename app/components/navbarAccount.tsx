@@ -100,7 +100,7 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
                     className={`transition-all ${isBookingActive ? 'icon-active' : ''}`}
                 />
                 <p className={`text-lg font-bold ${isBookingActive ? 'text-main' : ''}`}>
-                    Đơn đã đặt
+                    Quản lý booking
                 </p>
             </Link>
 
@@ -116,7 +116,7 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
                     className={`transition-all ${isReviewActive ? 'icon-active' : ''}`}
                 />
                 <p className={`text-lg font-bold ${isReviewActive ? 'text-main' : ''}`}>
-                    Đánh giá của quý khách
+                    Quản lý đánh giá
                 </p>
             </Link>
 
@@ -132,7 +132,7 @@ export default function NavbarAccount({ account }: { account: AccountLogin }) {
                     className={`transition-all ${isFavoriteActive ? 'icon-active' : ''}`}
                 />
                 <p className={`text-lg font-bold ${isFavoriteActive ? 'text-main' : ''}`}>
-                    Yêu thích tour đã lưu
+                    Danh sách tour yêu thích
                 </p>
             </Link>
         </div>

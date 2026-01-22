@@ -72,7 +72,7 @@ export default function NavbarAdmin({ account }: NavbarAdminProps) {
                             src="/tour.png" alt="account-icon" width={28} height={28}
                             className={`transition-all ${isActive('tours') ? 'icon-active' : ''}`}
                         /> 
-                        Quản Lý Chuyến Du Lịch
+                        Quản Lý Tour
                     </Link>
                     <Link 
                         href="/admin/dashboard/coupons"
@@ -96,7 +96,7 @@ export default function NavbarAdmin({ account }: NavbarAdminProps) {
                             src="/booking.png" alt="account-icon" width={28} height={28}
                             className={`transition-all ${isActive('bookings') ? 'icon-active' : ''}`}
                         /> 
-                        Quản Lý Đặt Vé
+                        Quản Lý Booking
                     </Link>
                     <Link 
                         href="/admin/dashboard/payments"

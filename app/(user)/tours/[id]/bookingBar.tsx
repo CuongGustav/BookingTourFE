@@ -76,7 +76,7 @@ export default function BookingBar({ tourInfo, selectedSchedule, onClearSchedule
                     <MapPin className="w-5 h-5 text-blue-600" />
                     <div>
                         <div className="text-gray-600">Khởi hành:</div>
-                        <div className="font-bold">TP. Hồ Chí Minh</div>
+                        <div className="font-bold">{tourInfo.depart_destination}</div>
                     </div>
                 </div>
 

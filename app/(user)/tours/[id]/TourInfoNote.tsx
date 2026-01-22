@@ -21,14 +21,7 @@ export default function TourInforNote({ included_service = '', excluded_service 
         { 
             id: 'child', 
             title: 'Lưu ý giá trẻ em', 
-            content: '- Trẻ em dưới 2 tuổi: 30% giá tour người lớn (không có chế độ giường riêng)\n\
-                        Trẻ em từ trên 2 tuổi đến dưới 12 tuổi bay hàng không VJ:\n\
-                        90% giá tour người lớn (không có chế độ giường riêng) \n\
-                        100% giá tour người lớn (có chế độ giường riêng) \n\
-                        Trẻ em từ trên 2 tuổi đến dưới 12 tuổi bay hàng không VN: \n\
-                        75% giá tour người lớn (không có chế độ giường riêng) \n\
-                        90% giá tour người lớn (có chế độ giường riêng) \n\
-                        Trẻ em từ 12 tuổi trở lên: 100% giá tour người lớn.' 
+            content: '- Xem giá trẻ em trong phần đặt tour giá sẽ thấp hơn giá người lớn'
         },
         { 
             id: 'register', 
@@ -46,11 +39,8 @@ export default function TourInforNote({ included_service = '', excluded_service 
         { 
             id: 'cancel', 
             title: 'Các điều kiện hủy tour', 
-            content: `Sau khi đóng tiền, nếu Quý khách muốn chuyển/huỷ tour xin vui lòng mang Vé Du Lịch hoặc biên nhận đóng tiền đến văn phòng đăng ký tour để làm thủ tục chuyển/huỷ tour và chịu chi phí theo quy định của Vietravel. Không giải quyết các trường hợp liên hệ chuyển/huỷ tour qua điện thoại.
-                        Đối với những tour còn thời hạn hủy nhưng đã làm visa, Quý khách vui lòng thanh toán phí visa.
-                        Sau khi đặt cọc tour và trước khi Vietravel nộp phí visa: chi phí không hoàn lại là 2.000.000 VND (phí đặt cọc vé máy bay và đặt lịch lăn tay với trung tâm tiếp nhận hồ sơ).
-                        Sau khi Vietravel nộp phí visa: chi phí không hoàn lại là 4.000.000 VND
-                        Trường hợp Quý khách bị từ chối visa, chi phí không hoàn lại là 4.000.000 VND` 
+            content: `Sau khi đóng tiền, nếu Quý khách muốn huỷ tour xin vui lòng mang Vé Du Lịch hoặc biên nhận đóng tiền đến văn phòng đăng ký tour để làm thủ tục huỷ tour và chịu chi phí theo quy định của Vietravel. 
+                        Giải quyết các trường hợp liên hệ huỷ tour qua điện thoại. Bằng số hotline: 0354798502`
         },
     ];
 
@@ -63,20 +53,15 @@ export default function TourInforNote({ included_service = '', excluded_service 
         { 
             id: 'payment', 
             title: 'Điều kiện thanh toán', 
-            content: `- Quý khách vui lòng đóng tiền cọc tương đương 50% giá tour/khách để giữ chỗ. Số tiền còn lại sẽ thanh toán trước ngày khởi hành 07 ngày (đối với các tour ngày thường) và thanh toán trước 21 ngày (đối với các tour trong các dịp Lễ, Tết).`
+            content: `- Quý khách vui lòng thanh toán 100% số tiền giá tour/khách để giữ chỗ.`
         },
         { 
             id: 'note', 
             title: 'Lưu ý về chuyển hoặc hủy tour', 
             content: `- Nếu hủy hoặc chuyển sang các tuyến du lịch khác trước ngày khởi hành 30 ngày: Không mất chi phí.
-                        - Nếu hủy hoặc chuyển sang các chuyến du lịch khác từ 25-29 ngày trước ngày khởi hành: Chi phí chuyển/huỷ tour là 50% tiền cọc tour.
-                        - Nếu hủy hoặc chuyển sang các chuyến du lịch khác từ 20-24 ngày trước ngày khởi hành: Chi phí chuyển/huỷ tour là 100% tiền cọc tour.
-                        - Nếu hủy chuyến du lịch ngay sau khi Đại Sứ Quán, Lãnh Sự Quán đã cấp visa: Chi phí huỷ tour là 100% tiền cọc tour.
-                        - Nếu hủy chuyến du lịch trong vòng từ 14-19 ngày trước ngày khởi hành: Chi phí huỷ tour là 50% trên giá tour du lịch.
-                        - Nếu hủy chuyến du lịch trong vòng từ 10-13 ngày trước ngày khởi hành: Chi phí huỷ tour là 70% trên giá tour du lịch.
-                        - Nếu hủy chuyến du lịch trong vòng từ 02-09 ngày trước ngày khởi hành: Chi phí huỷ tour là 90% trên giá vé du lịch.
-                        - Nếu hủy chuyến du lịch trong vòng 1 ngày trước ngày khởi hành: Chi phí huỷ tour là 100% trên giá vé du lịch.
-                        * Thời gian hủy tour được tính cho ngày làm việc, không tính thứ bảy và chủ nhật`
+                        - Nếu hủy hoặc chuyển sang các chuyến du lịch khác sớm hơn 7 ngày trước ngày khởi hành: Chi phí chuyển/huỷ tour là 30% tiền cọc tour.
+                        - Nếu hủy hoặc chuyển sang các chuyến du lịch khác muộn hơn 7 ngày trước ngày khởi hành: Chi phí chuyển/huỷ tour là 70% tiền cọc tour.
+                        * Thời gian hủy tour được tính cho ngày làm việc, tính cả thứ bảy và chủ nhật`
         },
     ];
 

@@ -173,7 +173,7 @@ export default function AdminPage() {
                                     setPeriodType('daily');
                                     setCustomRevenue(null);
                                 }}
-                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                                     periodType === 'daily'
                                         ? 'bg-blue-600 text-white shadow-md'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -186,7 +186,7 @@ export default function AdminPage() {
                                     setPeriodType('monthly');
                                     setCustomRevenue(null);
                                 }}
-                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                                     periodType === 'monthly'
                                         ? 'bg-blue-600 text-white shadow-md'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -199,7 +199,7 @@ export default function AdminPage() {
                                     setPeriodType('yearly');
                                     setCustomRevenue(null);
                                 }}
-                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                                     periodType === 'yearly'
                                         ? 'bg-blue-600 text-white shadow-md'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -212,7 +212,7 @@ export default function AdminPage() {
                                     setPeriodType('custom');
                                     setRevenueData([]);
                                 }}
-                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                                     periodType === 'custom'
                                         ? 'bg-blue-600 text-white shadow-md'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

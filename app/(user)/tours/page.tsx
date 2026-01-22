@@ -125,7 +125,7 @@ function ToursContent()  {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center py-20 text-xl text-gray-500">
+            <div className="w-full flex justify-center items-center min-h-scr een text-xl text-gray-500">
                 Đang tải tour...
             </div>
         );
@@ -214,8 +214,8 @@ function ToursContent()  {
 export default function ToursPage() {
     return (
         <Suspense fallback={
-            <div className="flex justify-center items-center min-h-screen">
-                <p>Đang tải tours...</p>
+            <div className="w-full flex justify-center items-center min-h-scr een text-xl text-gray-500">
+                Đang tải tour...
             </div>
         }>
             <ToursContent />

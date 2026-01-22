@@ -108,7 +108,7 @@ export default function AdminPage () {
         setPage(1);
     };
 
-    if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách điểm đến...</div>;
+    if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách thanh toán...</div>;
 
     return (
         <div className="py-2 max-w-7xl mx-auto h-screen relative">

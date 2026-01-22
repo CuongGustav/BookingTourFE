@@ -849,7 +849,7 @@ export default function UpdateTourPage() {
                     <button
                         onClick={handleUpdateTour}
                         disabled={isSubmitting || !hasChanges || !!durationError || !!priceError || hasScheduleError}
-                        className={`px-8 py-3 rounded-lg font-medium transition-colors w-full ${
+                        className={`px-8 py-3 rounded-lg font-medium transition-colors w-full cursor-pointer ${
                             hasChanges && !durationError && !priceError && !hasScheduleError
                                 ? 'bg-main text-white bg-blue-900'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
