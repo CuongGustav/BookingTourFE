@@ -97,7 +97,14 @@ export default function Header({ account: initialAccount }: HeaderProps) {
                     <div className="mainHeaderContent w-4/5 mx-auto flex justify-between ">
                         {/* Main Hearder Content*/}
                         <div className="mainHeaderLeft font-bold">
-                            Logo
+                        <Link href="/" 
+                                    onClick={() => handleClickMenu('logo')}
+                                    className={`cursor-pointer text-hover-blue transition-colors ${
+                                        activeSelectOption === 'logo' ? 'text-main' : ''
+                                    }`}
+                                >
+                                    Logo
+                                </Link>  
                         </div>
                         <div className="mainHeaderRight font-bold">
                             <ul className="flex gap-8">
