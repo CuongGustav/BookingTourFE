@@ -60,7 +60,7 @@ export default function Header({ account: initialAccount }: HeaderProps) {
             {/* Hearder */}
             <div className="header w-full fixed top-0 left-0 z-[10]">
                 {/* Sub Hearder */}
-                <div className="subHeader bg-yellow-200 p-1">
+                <div className="subHeader bg-blue-100 p-1">
                     <div className="subHeaderContent w-4/5 mx-auto flex justify-between text-sm">
                         <div className="subHeaderLeft">
                             <div className="flex items-center gap-3">
