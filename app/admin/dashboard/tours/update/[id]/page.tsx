@@ -80,6 +80,24 @@ export default function UpdateTourPage() {
     const [imagesChanged, setImagesChanged] = useState(false);
     const hasChanges = tourInfoChanged || destinationsChanged || itinerariesChanged || schedulesChanged || imagesChanged;
 
+    const [autoCalculateChildPrice, setAutoCalculateChildPrice] = useState<boolean>(true);
+    const [autoCalculateInfantPrice, setAutoCalculateInfantPrice] = useState<boolean>(true);
+
+    //auto calculate childPrice, infantPrice
+    useEffect(() => {
+        if (basePrice > 0) {
+            if (autoCalculateChildPrice) {
+                setChildPrice(Math.round(basePrice * 0.7)); 
+            }
+            if (autoCalculateInfantPrice) {
+                setInfantPrice(Math.round(basePrice * 0.4)); 
+            }
+        }
+    }, [basePrice, autoCalculateChildPrice, autoCalculateInfantPrice]);
+
+    //auto calculate schedule childPrice, infantPrice
+    
+
     //check duration_days, duration_nights
     useEffect(() => {
         const valDay = durationDays - durationNights;
@@ -601,9 +619,10 @@ export default function UpdateTourPage() {
                                 <input
                                     className="flex-1 h-full px-2 py-1 outline-none"
                                     value={childPrice === 0 ? "" : formatPrice(childPrice)}
-                                    onChange={(e) =>
-                                        setChildPrice(parseFormattedNumber(e.target.value))
-                                    }
+                                    onChange={(e) => {
+                                        setChildPrice(parseFormattedNumber(e.target.value));
+                                        setAutoCalculateChildPrice(false);
+                                    }}
                                 />
                                 <span className="px-4 font-bold">VND</span>
                             </div>
@@ -618,9 +637,10 @@ export default function UpdateTourPage() {
                                 <input
                                     className="flex-1 h-full px-2 py-1 outline-none"
                                     value={infantPrice === 0 ? "" : formatPrice(infantPrice)}
-                                    onChange={(e) =>
-                                        setInfantPrice(parseFormattedNumber(e.target.value))
-                                    }
+                                    onChange={(e) => {
+                                        setInfantPrice(parseFormattedNumber(e.target.value));
+                                        setAutoCalculateInfantPrice(false);
+                                    }}
                                 />
                                 <span className="px-4 font-bold">VND</span>
                             </div>

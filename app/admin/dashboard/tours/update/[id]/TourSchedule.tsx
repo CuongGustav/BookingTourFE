@@ -27,9 +27,21 @@ export default function TourSchedule({
     childPrice,
     infantPrice,
     durationNights,
-    setHasScheduleError
+    setHasScheduleError,
 }: TourScheduleProps) {
     const [scheduleError, setScheduleError] = useState<string | null>(null);
+    const [isWeekendPrice, setIsWeekendPrice] = useState<boolean[]>([]);
+
+    //weekend price
+    const isWeekend = (dateString: string): boolean => {
+        if (!dateString) return false;
+        const date = new Date(dateString);
+        const day = date.getDay();
+        return day === 0 || day === 6;
+    };
+    const calculateWeekendPrice = (price: number): number => {
+        return Math.round(price * 1.2);
+    };
 
     // 1. Kiểm tra thay đổi so với dữ liệu gốc
     useEffect(() => {
@@ -120,10 +132,11 @@ export default function TourSchedule({
         validateSchedules();
     }, [validateSchedules]);
 
-    // Thêm lịch mới
+    // Thêm lịch mới - sử dụng giá từ form chính
     const addSchedule = () => {
+        const newId = uuidv4();
         const newSchedule: UpdateTourSchedule = {
-            schedule_id: uuidv4(),
+            schedule_id: newId,
             departure_date: '',
             return_date: '',
             available_seats: 30,
@@ -132,6 +145,7 @@ export default function TourSchedule({
             price_infant: infantPrice || 0,
         };
         setSchedules([...schedules, newSchedule]);
+        setIsWeekendPrice([...isWeekendPrice, false]);
     };
 
     // Xóa lịch
@@ -139,6 +153,7 @@ export default function TourSchedule({
         if (!confirm("Bạn có chắc muốn xóa lịch khởi hành này?")) return;
         const updated = schedules.filter((_, i) => i !== index);
         setSchedules(updated);
+        setIsWeekendPrice(isWeekendPrice.filter((_, i) => i !== index));
     };
 
     // Cập nhật field
@@ -150,9 +165,20 @@ export default function TourSchedule({
         const updated = [...schedules];
         updated[index] = { ...updated[index], [field]: value };
 
-        if (field === 'departure_date' && durationNights > 0 && value) {
+        // Tự động tính giá trẻ em và em bé khi thay đổi giá người lớn
+        if (field === 'price_adult') {
+            const adultPrice = Number(value);
+            if (adultPrice > 0) {
+                updated[index].price_child = Math.round(adultPrice * 0.7);
+                updated[index].price_infant = Math.round(adultPrice * 0.4);
+            }
+        }
+
+        // Tự động tính ngày kết thúc và giá cuối tuần
+        if (field === 'departure_date' && value) {
             const dateStr = value as string;
-            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            
+            if (durationNights > 0 && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
                 const depDate = new Date(dateStr);
                 if (!isNaN(depDate.getTime())) {
                     const retDate = new Date(depDate);
@@ -160,7 +186,26 @@ export default function TourSchedule({
                     updated[index].return_date = retDate.toISOString().split('T')[0];
                 }
             }
+            
+            // Kiểm tra cuối tuần và tính giá
+            const weekend = isWeekend(dateStr);
+            const newIsWeekendPrice = [...isWeekendPrice];
+            newIsWeekendPrice[index] = weekend;
+            setIsWeekendPrice(newIsWeekendPrice);
+            
+            if (weekend) {
+                // Tăng 120% cho cuối tuần
+                updated[index].price_adult = calculateWeekendPrice(basePrice);
+                updated[index].price_child = calculateWeekendPrice(childPrice);
+                updated[index].price_infant = calculateWeekendPrice(infantPrice);
+            } else {
+                // Giá bình thường
+                updated[index].price_adult = basePrice;
+                updated[index].price_child = childPrice;
+                updated[index].price_infant = infantPrice;
+            }
         }
+        
         setSchedules(updated);
     };
 
@@ -193,8 +238,16 @@ export default function TourSchedule({
                     schedules.map((schedule, index) => (
                         <div key={schedule.schedule_id || `temp-${index}`} className="border rounded-lg p-5 bg-gradient-to-r from-gray-50 to-white shadow-sm hover:shadow-md transition">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-bold text-lg text-blue-900">Đợt {index + 1}</h3>
-                                <button type="button" onClick={() => removeSchedule(index)} className="text-red-500 hover:text-red-700">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-lg text-blue-900">Đợt {index + 1}</h3>
+                                    {/* Badge hiển thị nếu là cuối tuần */}
+                                    {isWeekendPrice[index] && (
+                                        <span className="bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                            Cuối tuần +120%
+                                        </span>
+                                    )}
+                                </div>
+                                <button type="button" onClick={() => removeSchedule(index)} className="text-red-500 hover:text-red-700 cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                     </svg>
@@ -203,31 +256,74 @@ export default function TourSchedule({
 
                             <div className="flex gap-2">
                                 <div className="flex flex-col w-1/2 gap-2">
+                                    {/* Ngày khởi hành */}
                                     <div className="flex gap-2">
                                         <label className="font-medium w-[120px] pt-2">Ngày khởi hành:</label>
-                                        <input type="date" value={schedule.departure_date} min={new Date().toISOString().split('T')[0]} onChange={(e) => updateSchedule(index, 'departure_date', e.target.value)} className="border px-3 py-2 rounded-lg bg-white flex-1 cursor-pointer" />
+                                        <input 
+                                            type="date" 
+                                            value={schedule.departure_date} 
+                                            min={new Date().toISOString().split('T')[0]} 
+                                            onChange={(e) => updateSchedule(index, 'departure_date', e.target.value)} 
+                                            className="border px-3 py-2 rounded-lg bg-white flex-1 cursor-pointer" 
+                                        />
                                     </div>
+                                    
+                                    {/* Giá người lớn */}
                                     <div className="flex gap-2">
                                         <label className="font-medium w-[120px] pt-2">Giá người lớn:</label>
-                                        <input type="text" value={formatPrice(schedule.price_adult)} onChange={(e) => updateSchedule(index, 'price_adult', parseFormattedNumber(e.target.value))} className="border px-3 py-2 rounded-lg bg-white flex-1" />
+                                        <input 
+                                            type="text" 
+                                            value={formatPrice(schedule.price_adult)} 
+                                            onChange={(e) => updateSchedule(index, 'price_adult', parseFormattedNumber(e.target.value))} 
+                                            className="border px-3 py-2 rounded-lg bg-white flex-1" 
+                                        />
                                     </div>
+                                    
+                                    {/* Giá trẻ em */}
                                     <div className="flex gap-2">
                                         <label className="font-medium w-[120px] pt-2">Giá trẻ em:</label>
-                                        <input type="text" value={formatPrice(schedule.price_child)} onChange={(e) => updateSchedule(index, 'price_child', parseFormattedNumber(e.target.value))} className="border px-3 py-2 rounded-lg bg-white flex-1" />
+                                        <input 
+                                            type="text" 
+                                            value={formatPrice(schedule.price_child)} 
+                                            onChange={(e) => updateSchedule(index, 'price_child', parseFormattedNumber(e.target.value))}
+                                            className="border px-3 py-2 rounded-lg bg-white flex-1" 
+                                        />
                                     </div>
                                 </div>
+                                
                                 <div className="flex flex-col w-1/2 gap-2">
+                                    {/* Ngày kết thúc */}
                                     <div className="flex gap-2">
                                         <label className="font-medium w-[120px] pt-2">Ngày kết thúc:</label>
-                                        <input type="date" value={schedule.return_date} readOnly={durationNights > 0} className={`border px-3 py-2 rounded-lg bg-white flex-1 cursor-pointer ${durationNights > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} />
+                                        <input 
+                                            type="date" 
+                                            value={schedule.return_date} 
+                                            readOnly={durationNights > 0} 
+                                            className={`border px-3 py-2 rounded-lg bg-white flex-1 cursor-pointer ${durationNights > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
+                                        />
                                     </div>
+                                    
+                                    {/* Giá sơ sinh */}
                                     <div className="flex gap-2">
                                         <label className="font-medium w-[120px] pt-2">Giá sơ sinh:</label>
-                                        <input type="text" value={formatPrice(schedule.price_infant)} onChange={(e) => updateSchedule(index, 'price_infant', parseFormattedNumber(e.target.value))} className="border px-3 py-2 rounded-lg bg-white flex-1" />
+                                        <input 
+                                            type="text" 
+                                            value={formatPrice(schedule.price_infant)} 
+                                            onChange={(e) => updateSchedule(index, 'price_infant', parseFormattedNumber(e.target.value))}
+                                            className="border px-3 py-2 rounded-lg bg-white flex-1" 
+                                        />
                                     </div>
+                                    
+                                    {/* Số chỗ */}
                                     <div className="flex gap-2">
                                         <label className="font-medium w-[120px] pt-2">Số chỗ:</label>
-                                        <input type="number" min="1" value={schedule.available_seats} onChange={(e) => updateSchedule(index, 'available_seats', Number(e.target.value) || 0)} className="border px-3 py-2 rounded-lg bg-white flex-1" />
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            value={schedule.available_seats} 
+                                            onChange={(e) => updateSchedule(index, 'available_seats', Number(e.target.value) || 0)} 
+                                            className="border px-3 py-2 rounded-lg bg-white flex-1" 
+                                        />
                                     </div>
                                 </div>
                             </div>

@@ -44,11 +44,36 @@ export default function CreateTourPage () {
     const [tourImages, setTourImages] = useState<CreateImageTourFE[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [departDestination, setDepartDestination] = useState<string>("");
-
+    const [isWeekendPrice, setIsWeekendPrice] = useState<boolean[]>([]);
+    const [autoCalculateChildPrice, setAutoCalculateChildPrice] = useState<boolean>(true);
+    const [autoCalculateInfantPrice, setAutoCalculateInfantPrice] = useState<boolean>(true);
 
     const [dragOver, setDragOver] = useState(false);
     const [imageMainFile, setImageFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>("");
+
+    //weekend price
+    const isWeekend = (dateString: string): boolean => {
+        if (!dateString) return false;
+        const date = new Date(dateString);
+        const day = date.getDay();
+        return day === 0 || day === 6;
+    };
+    const calculateWeekendPrice = (basePrice: number): number => {
+        return Math.round(basePrice * 1.2);
+    };
+
+    //price auto calculate
+    useEffect(() => {
+        if (basePrice > 0) {
+            if (autoCalculateChildPrice) {
+                setChildPrice(Math.round(basePrice * 0.7)); 
+            }
+            if (autoCalculateInfantPrice) {
+                setInfantPrice(Math.round(basePrice * 0.4)); 
+            }
+        }
+    }, [basePrice, autoCalculateChildPrice, autoCalculateInfantPrice]);
         
     //attraction
     const generateAttractions = (text: string) => {
@@ -177,6 +202,7 @@ export default function CreateTourPage () {
             status: 'available',
         };
         setSchedules([...schedules, newSchedule]);
+        setIsWeekendPrice([...isWeekendPrice, false]);
     };
     // calculate ReturnDate
     const calculateReturnDate = (departureDate: string, durationNights: number): string => {
@@ -186,23 +212,41 @@ export default function CreateTourPage () {
         return depDate.toISOString().split('T')[0];
     };
     //update schedule
-    const updateSchedule = <K extends keyof TourCreateSchedule>(
-        index: number,
-        field: K,
-        value: TourCreateSchedule[K]
-    ) => {
+    const updateSchedule = <K extends keyof TourCreateSchedule>(index: number,field: K,value: TourCreateSchedule[K]) => {
         const updated = [...schedules];
         updated[index] = { ...updated[index], [field]: value };
-        if (field === 'departure_date' && value && durationNights > 0) {
-            const returnDate = calculateReturnDate(value as string, durationNights);
-            updated[index].return_date = returnDate;
+        
+        if (field === 'departure_date' && value) {
+            const depDate = value as string;
+            
+            if (durationNights > 0) {
+                const returnDate = calculateReturnDate(depDate, durationNights);
+                updated[index].return_date = returnDate;
+            }
+            
+            const weekend = isWeekend(depDate);
+            const newIsWeekendPrice = [...isWeekendPrice];
+            newIsWeekendPrice[index] = weekend;
+            setIsWeekendPrice(newIsWeekendPrice);
+            
+            if (weekend) {
+                updated[index].price_adult = calculateWeekendPrice(basePrice);
+                updated[index].price_child = calculateWeekendPrice(childPrice);
+                updated[index].price_infant = calculateWeekendPrice(infantPrice);
+            } else {
+                updated[index].price_adult = basePrice;
+                updated[index].price_child = childPrice;
+                updated[index].price_infant = infantPrice;
+            }
         }
         setSchedules(updated);
         validateSchedule(index, updated);
     };
+
     //delete schedule
     const removeSchedule = (index: number) => {
         setSchedules(schedules.filter((_, i) => i !== index));
+        setIsWeekendPrice(isWeekendPrice.filter((_, i) => i !== index));
     };
     //validate schedule
     const validateSchedule = (index: number, schedulesList: TourCreateSchedule[]) => {
@@ -614,6 +658,7 @@ export default function CreateTourPage () {
                                     onChange={(e) => {
                                         const value = parseFormattedNumber(e.target.value);
                                         setChildPrice(value);
+                                        setAutoCalculateChildPrice(false); 
                                     }}
                                 />
                                 <label className="font-bold px-4">VND</label>
@@ -629,6 +674,7 @@ export default function CreateTourPage () {
                                     onChange={(e) => {
                                         const value = parseFormattedNumber(e.target.value);
                                         setInfantPrice(value);
+                                        setAutoCalculateInfantPrice(false); 
                                     }}
                                 />
                                 <label className="font-bold px-4">VND</label>
@@ -940,7 +986,15 @@ export default function CreateTourPage () {
                             schedules.map((schedule, index) => (
                                 <div key={index} className="border rounded-lg p-4 bg-gray-50">
                                     <div className="flex justify-between items-center mb-3">
-                                        <h3 className="font-semibold text-lg text-blue-600">Đợt {index + 1}</h3>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-semibold text-lg text-blue-600">Đợt {index + 1}</h3>
+                                            {/* Badge hiển thị nếu là cuối tuần */}
+                                            {isWeekendPrice[index] && (
+                                                <span className="bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-medium">
+                                                    Cuối tuần +120%
+                                                </span>
+                                            )}
+                                        </div>
                                         <button
                                             type="button"
                                             onClick={() => removeSchedule(index)}
@@ -951,18 +1005,19 @@ export default function CreateTourPage () {
                                             </svg>
                                         </button>
                                     </div>
-                                    <p className=" items-center mb-3 text-red-600">Chú ý định dạng ngày tháng là tháng/ngày/năm</p>
+                                    <p className="items-center mb-3 text-red-600">Chú ý định dạng ngày tháng là tháng/ngày/năm</p>
+                                    
                                     <div className="flex gap-2">
                                         <div className="flex flex-col w-1/2 gap-2">
                                             {/* departure_date */}
-                                            <div className="flex gap-2 ">
+                                            <div className="flex gap-2">
                                                 <label className="font-medium w-[120px] pt-2">Ngày khởi hành:</label>
                                                 <input
                                                     type="date"
                                                     value={schedule.departure_date}
                                                     min={new Date().toISOString().split('T')[0]}
                                                     onChange={(e) => {
-                                                    updateSchedule(index, 'departure_date', e.target.value);
+                                                        updateSchedule(index, 'departure_date', e.target.value);
                                                     }}
                                                     className="border px-3 py-2 rounded-lg bg-white flex-1 cursor-pointer"
                                                 />
@@ -991,11 +1046,10 @@ export default function CreateTourPage () {
                                                     className="border px-3 py-2 rounded-lg bg-white flex-1"
                                                 />
                                             </div>
-
                                         </div>
                                         <div className="flex flex-col w-1/2 gap-2">
                                             {/* return_date */}
-                                            <div className="flex gap-2 ">
+                                            <div className="flex gap-2">
                                                 <label className="font-medium w-[120px] pt-2">Ngày kết thúc:</label>
                                                 <input
                                                     type="date"
@@ -1024,18 +1078,18 @@ export default function CreateTourPage () {
                                                     type="number"
                                                     value={schedule.available_seats}
                                                     onChange={(e) =>
-                                                    updateSchedule(index, 'available_seats', Number(e.target.value))
+                                                        updateSchedule(index, 'available_seats', Number(e.target.value))
                                                     }
                                                     className="border px-3 py-2 rounded-lg bg-white flex-1"
                                                 />
-                                            </div>                                      
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             ))
                         )}
                     </div>
-                </div>  
+                </div> 
                 {/* tour images */}
                 <div className="flex flex-col gap-2 w-full mt-6 items-center">
                     <div className="flex justify-between items-center w-full">
