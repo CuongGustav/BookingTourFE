@@ -4,6 +4,8 @@ import { AccountLogin } from "../types/account";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { BarChart3, TrendingUp, MapPin, Compass } from 'lucide-react';
 
 interface NavbarAdminProps {
     account: AccountLogin;
@@ -12,10 +14,18 @@ interface NavbarAdminProps {
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 export default function NavbarAdmin({ account }: NavbarAdminProps) {
-
     const pathname = usePathname();
-
     const isActive = (slug: string) => pathname.includes(slug);
+    const activeSubTab = pathname.split('/').pop() || 'general';
+    const [expandStats, setExpandStats] = useState(false);
+
+    useEffect(() => {
+        if (pathname.includes('statics')) {
+            setExpandStats(true);
+        } else {
+            setExpandStats(false);
+        }
+    }, [pathname]);
 
     const logoutHandled = async () => {
         try{
@@ -122,18 +132,65 @@ export default function NavbarAdmin({ account }: NavbarAdminProps) {
                         /> 
                         Quản Lý Đánh Giá
                     </Link>
-                    <Link 
-                        href="/admin/dashboard/statics"
-                        className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105
-                            ${isActive('statics') ? 'text-main' : ''}   
-                        `}
-                    >
-                        <Image 
-                            src="/static.png" alt="account-icon" width={28} height={28}
-                            className={`transition-all ${isActive('statics') ? 'icon-active' : ''}`}
-                        /> 
-                        Thống Kê
-                    </Link>
+                    <div>
+                        <div className="flex items-center">
+                            <Link 
+                                href="/admin/dashboard/statics/general"
+                                className={`flex items-center gap-1 font-bold cursor-pointer transition-transform hover:scale-105 flex-1
+                                    ${isActive('statics') ? 'text-main' : ''}   
+                                `}
+                            >
+                                <Image 
+                                    src="/static.png" alt="account-icon" width={28} height={28}
+                                    className={`transition-all ${isActive('statics') ? 'icon-active' : ''}`}
+                                /> 
+                                Thống Kê
+                            </Link>
+                        </div>
+                        {expandStats && (
+                            <ul className="flex flex-col gap-2 pl-8 mt-2">
+                                <Link 
+                                    href="/admin/dashboard/statics/general"
+                                    className={`flex items-center gap-2 font-medium cursor-pointer transition-transform hover:scale-105
+                                        ${activeSubTab === 'general' ? 'text-main' : ''}   
+                                    `}
+                                >
+                                    <BarChart3 className="w-5 h-5" />
+                                    Tổng quan
+                                </Link>
+
+                                <Link 
+                                    href="/admin/dashboard/statics/revenue"
+                                    className={`flex items-center gap-2 font-medium cursor-pointer transition-transform hover:scale-105
+                                        ${activeSubTab === 'revenue' ? 'text-main' : ''}   
+                                    `}
+                                >
+                                    <TrendingUp className="w-5 h-5" />
+                                    Doanh thu
+                                </Link>
+
+                                <Link 
+                                    href="/admin/dashboard/statics/tour"
+                                    className={`flex items-center gap-2 font-medium cursor-pointer transition-transform hover:scale-105
+                                        ${activeSubTab === 'tour' ? 'text-main' : ''}   
+                                    `}
+                                >
+                                    <Compass className="w-5 h-5" />
+                                    Tour
+                                </Link>
+
+                                <Link 
+                                    href="/admin/dashboard/statics/destination"
+                                    className={`flex items-center gap-2 font-medium cursor-pointer transition-transform hover:scale-105
+                                        ${activeSubTab === 'destination' ? 'text-main' : ''}   
+                                    `}
+                                >
+                                    <MapPin className="w-5 h-5" />
+                                    Điểm đến
+                                </Link>
+                            </ul>
+                        )}
+                    </div>
                 </ul>
             </div>
             <div className="flex">
