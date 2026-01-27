@@ -29,4 +29,6 @@ export interface ReadPaymentAdminInfo {
     payment_images: PaymentImageInfo[],
     cancellation_reason?: string;
     refund_info?: RefundInfo;
+    money_paid?: number;
+    status_booking?: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCEL_PENDING' | 'PAID' | 'DEPOSIT';
 }

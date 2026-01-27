@@ -11,6 +11,8 @@ import ConfirmBookingPaidPage from "./ConfirmBookingPaid";
 import CancelBookingConfirmPage from "./CancelBookingConfirm";
 import ConfirmBookingCancelPending from "./ConfirmBookingCanCelPending";
 import CancelBookingCancelPending from "./CancelBookingCancelPending";
+import CancelBookingDepositPage from "./CancelBookingDeposit";
+import ConfirmBookingDepositPage from "./ConfirmBookingDeposit";
 
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
@@ -55,8 +57,8 @@ export default function AdminPage () {
     const [isOpenModalCancelBookingConfirm, setIsOpenModalCancelBookingConfirm] = useState(false);
     const [isOpenModalConfirmBookingCancelPending, setIsOpenModalConfirmBookingCancelPending] = useState(false);
     const [isOpenModalCancelBookingCancelPending, setIsOpenModalCancelBookingCancelPending] = useState(false);
-
-
+    const [isOpenModalCancelBookingDeposit, setIsOpenModalCancelBookingDeposit] = useState(false);
+    const [isOpenModalConfirmBookingDeposit, setIsOpenModalConfirmBookingDeposit] = useState(false);
 
     const fetchListBooking = async () => {
         try {
@@ -186,6 +188,15 @@ export default function AdminPage () {
                                     </div>
                                 </th>
                                 <th    
+                                    onClick={() => handleSort("paid_money")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Tiền đã trã
+                                        <SortIcon isActive={sortBy === "paid_money"} direction={sortBy === "paid_money" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th    
                                     onClick={() => handleSort("final_price")} 
                                     className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
                                 >
@@ -201,6 +212,15 @@ export default function AdminPage () {
                                     <div className="flex items-center gap-2">
                                         Trạng thái 
                                         <SortIcon isActive={sortBy === "status"} direction={sortBy === "status" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th    
+                                    onClick={() => handleSort("depart_date")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Ngày khởi hành
+                                        <SortIcon isActive={sortBy === "depart_date"} direction={sortBy === "depart_date" ? sortOrder : null} />
                                     </div>
                                 </th>
                                 <th 
@@ -239,6 +259,36 @@ export default function AdminPage () {
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        )}
+                                        {booking.status === "DEPOSIT" && (
+                                            <>
+                                                <button 
+                                                    className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                                                    onClick={ () => {
+                                                        setSelectedBookingId(booking.booking_id)
+                                                        setSelectedBookingCode(booking.booking_code)
+                                                        setIsOpenModalCancelBookingDeposit(true)
+                                                        }
+                                                    }
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                    </svg>
+                                                </button>
+                                                <button 
+                                                    className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                                                    onClick={ () => {
+                                                        setSelectedBookingId(booking.booking_id)
+                                                        setSelectedBookingCode(booking.booking_code)
+                                                        setIsOpenModalConfirmBookingDeposit(true)
+                                                        }
+                                                    }
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                     </svg>
                                                 </button>
                                             </>
@@ -327,6 +377,7 @@ export default function AdminPage () {
                                     </td>
                                     <td className="px-6 py-4">{booking.contact_email || "—"}</td>
                                     <td className="px-6 py-4">{booking.contact_phone || "—"}</td>
+                                    <td className="px-6 py-4">{formatPrice(booking.paid_money)|| "—"}</td>
                                     <td className="px-6 py-4">{formatPrice(booking.final_price)|| "—"}</td>
                                     <td className="px-6 py-4">
                                         <span
@@ -342,6 +393,8 @@ export default function AdminPage () {
                                                     ? "bg-green-100 text-green-800"
                                                     : booking.status === "CANCEL_PENDING"
                                                     ? "bg-orange-100 text-orange-800"
+                                                    : booking.status === "DEPOSIT"
+                                                    ? "bg-cyan-100 text-cyan-800"
                                                     : "bg-red-100 text-red-800"
                                             }`}
                                         >
@@ -356,11 +409,17 @@ export default function AdminPage () {
                                                     ? "Hoàn thành"
                                                     : booking.status === "CANCEL_PENDING"
                                                     ? "Chờ hủy"
+                                                    : booking.status === "DEPOSIT"
+                                                    ? "Đã đặt cọc"
                                                     : "Đã hủy"
                                             }
                                         </span>
                                     </td>
-
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        {booking.depart_date 
+                                            ? new Date(booking.depart_date).toLocaleDateString("vi-VN")
+                                            : "N/A"}
+                                    </td>
                                     <td className="px-6 py-4 text-sm ">
                                         {new Date(booking.created_at).toLocaleDateString("vi-VN")}
                                     </td>
@@ -512,6 +571,30 @@ export default function AdminPage () {
                     isOpen={isOpenModalCancelBookingCancelPending}
                     onClose={()=>{
                         setIsOpenModalCancelBookingCancelPending(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListBooking}
+                /> 
+            )}
+            {/* cancel booking cancel deposit */}
+            {isOpenModalCancelBookingDeposit && selectedBookingId &&(
+                <CancelBookingDepositPage
+                    isOpen={isOpenModalCancelBookingDeposit}
+                    onClose={()=>{
+                        setIsOpenModalCancelBookingDeposit(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListBooking}
+                /> 
+            )}
+            {/* confirm booking deposit */}
+            {isOpenModalConfirmBookingDeposit && selectedBookingId &&(
+                <ConfirmBookingDepositPage
+                    isOpen={isOpenModalConfirmBookingDeposit}
+                    onClose={()=>{
+                        setIsOpenModalConfirmBookingDeposit(false)
                         setSelectedBookingId(null);
                     }}
                     booking_id={selectedBookingId}
