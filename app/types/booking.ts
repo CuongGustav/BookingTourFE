@@ -12,16 +12,20 @@ export interface ReadBookingUser {
     total_price: number;
     discount_amount: number;
     final_price: number;
+    paid_money?: number;
+    is_full_payment?: number;
+    remaining_amount?: number;
     contact_name: string;
     contact_email: string;
     contact_phone: string;
     contact_address: string;
-    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCEL_PENDING' | 'PAID';
+    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCEL_PENDING' | 'PAID' | 'DEPOSIT';
     cancellation_reason: string;
     created_at: string;
     tour_title: string;
     special_request?: string;
     is_review?: boolean;
+    depart_date?: string;
 }
 
 export interface TourDetail {
@@ -49,6 +53,10 @@ export interface ReadBookingDetail {
     contact_address: string | null;
     passengers: ReadBookingPassenger[];
     total_price: number;
+    paid_money?: number;
+    is_full_payment?: number;
+    remaining_amount?: number;
+    status?: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CANCEL_PENDING' | 'PAID' | 'DEPOSIT';
     discount_amount: number;
     final_price: number;
     coupon?: CouponDetail;
@@ -58,6 +66,7 @@ export interface ReadBookingDetail {
     tour_title?:string;
     cancellation_reason?: string;
     is_review?: boolean;
+    depart_date?: string;
 }
 
 export interface BookingResponse {

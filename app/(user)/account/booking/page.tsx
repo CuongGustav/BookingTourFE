@@ -48,7 +48,7 @@ export default function BookingAccountPage () {
     const [sortBy, setSortBy] = useState<keyof ReadBookingUser>("created_at");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [page, setPage] = useState(1);
-    const pageSize = 3;
+    const pageSize = 4;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState<ReadBookingDetail|null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -169,18 +169,34 @@ export default function BookingAccountPage () {
                 );
             case "confirmed":
                 return (
-                    <button 
-                        className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
-                        onClick={() => {
-                            setIsOpenModalCanCelBookingConfirm(true)
-                            setSelectedBookingID(booking.booking_id)
-                            setSelectedBookingCode(booking.booking_code)
-                        }}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                    </button>
+                    <div className="flex gap-2">
+                        {booking.is_full_payment !== 1 && booking.remaining_amount && booking.remaining_amount > 0 && (
+                            <button 
+                                className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                                onClick={() => {
+                                    console.log('Thanh toán booking:', booking.booking_code);
+                                }}
+                                title="Thanh toán"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                                </svg>
+                            </button>
+                        )}
+                        <button 
+                            className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                            onClick={() => {
+                                setIsOpenModalCanCelBookingConfirm(true)
+                                setSelectedBookingID(booking.booking_id)
+                                setSelectedBookingCode(booking.booking_code)
+                            }}
+                            title="Hủy booking"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </button>
+                    </div>
                 );
             case "completed":
                 if (booking.is_review === true ) {
@@ -208,7 +224,7 @@ export default function BookingAccountPage () {
                     </button>
                 );
             default:
-                return <span className="text-gray-400 text-sm italic">Chức năng</span>;
+                return <span></span>;
         }
     };
 
@@ -248,6 +264,8 @@ export default function BookingAccountPage () {
                 coupon: booking.coupon_code ? { code: booking.coupon_code } : undefined,
                 tour_id: booking.tour_id, 
                 schedule_id: booking.schedule_id,
+                paid_money: booking.paid_money,
+                is_full_payment: booking.is_full_payment,
             };
 
             setSelectedBooking(mappedData);
@@ -261,210 +279,230 @@ export default function BookingAccountPage () {
     if (loading) return <div className="p-8 text-center text-lg">Đang tải danh sách booking...</div>;
 
     return (
-        <div className="flex flex-col gap-2 w-full max-w-full overflow-x-hidden">
-            <div className="flex gap-4 px-2 py-4 border-b">
-                <Link
-                    href="/account/booking"
-                    className={!status ? activeClass : normalClass}
-                >
-                    Tất cả
-                </Link>
+        <div className="max-w-4xl mx-auto relative h-[calc(100vh-128px)]">
+            <div className="w-full mx-auto">
+                {/* title */}
+                <div className="flex gap-4 px-2 py-4 border-b">
+                    <Link
+                        href="/account/booking"
+                        className={!status ? activeClass : normalClass}
+                    >
+                        Tất cả
+                    </Link>
 
-                <Link
-                    href="/account/booking?status=pending"
-                    className={status === "pending" ? activeClass : normalClass}
-                >
-                    Đang xử lý
-                </Link>
-                <Link
-                    href="/account/booking?status=paid"
-                    className={status === "paid" ? activeClass : normalClass}
-                >
-                    Đã thanh toán
-                </Link>
+                    <Link
+                        href="/account/booking?status=pending"
+                        className={status === "pending" ? activeClass : normalClass}
+                    >
+                        Chưa thanh toán
+                    </Link>
+                    <Link
+                        href="/account/booking?status=deposit"
+                        className={status === "deposit" ? activeClass : normalClass}
+                    >
+                        Đã đặt cọc
+                    </Link>
+                    <Link
+                        href="/account/booking?status=paid"
+                        className={status === "paid" ? activeClass : normalClass}
+                    >
+                        Đã thanh toán
+                    </Link>
+                    <Link
+                        href="/account/booking?status=confirmed"
+                        className={status === "confirmed" ? activeClass : normalClass}
+                    >
+                        Đã xác nhận
+                    </Link>
 
-                <Link
-                    href="/account/booking?status=confirmed"
-                    className={status === "confirmed" ? activeClass : normalClass}
-                >
-                    Đã xác nhận
-                </Link>
-
-                <Link
-                    href="/account/booking?status=completed"
-                    className={status === "completed" ? activeClass : normalClass}
-                >
-                    Đã hoàn thành
-                </Link>
-                <Link
-                    href="/account/booking?status=cancel_pending"
-                    className={status === "cancel_pending" ? activeClass : normalClass}
-                >
-                    Chờ hủy
-                </Link>                 
-                <Link
-                    href="/account/booking?status=cancelled"
-                    className={status === "cancelled" ? activeClass : normalClass}
-                >
-                    Đã hủy
-                </Link>
-            </div>
-
-            {/* content */}
-            <div className="py-2 w-full flex flex-col">
-                <div className="w-full px-2">
-                    {/* search section */}
-                    <div className="bg-white p-2 rounded-xl border border-gray-300 mb-4 shadow-sm">
-                        <input
-                            type="text"
-                            placeholder="Tìm điểm đến, khu vực, vùng miền, mô tả."
-                            value={search}
-                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                            className="w-full px-5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all"
-                        />
-                    </div>
-
-                    {/* table section*/}
-                    <div className="bg-white rounded-xl border border-gray-300 overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-[900px] border-collapse"> 
-                                <thead className="bg-gray-50 border-b border-gray-300">
-                                    <tr>
-                                        <th className="px-4 py-4 text-left font-semibold text-gray-700 w-[180px]">Hành động</th>
-                                        <th 
-                                            onClick={() => handleSort("booking_code")} 
-                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                CODE
-                                                <SortIcon isActive={sortBy === "booking_code"} direction={sortBy === "booking_code" ? sortOrder : null} />
-                                            </div>
-                                        </th>
-                                        <th 
-                                            onClick={() => handleSort("tour_title")} 
-                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Tên tour
-                                                <SortIcon isActive={sortBy === "tour_title"} direction={sortBy === "tour_title" ? sortOrder : null} />
-                                            </div>
-                                        </th>
-                                        <th 
-                                            onClick={() => handleSort("final_price")} 
-                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Giá cuối cùng
-                                                <SortIcon isActive={sortBy === "final_price"} direction={sortBy === "final_price" ? sortOrder : null} />
-                                            </div>
-                                        </th>
-                                        <th 
-                                            onClick={() => handleSort("created_at")} 
-                                            className="px-4 py-4 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Ngày tạo 
-                                                <SortIcon isActive={sortBy === "created_at"} direction={sortBy === "created_at" ? sortOrder : null} />
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </thead>  
-                                <tbody className="divide-y divide-gray-200">
-                                    {paginated.map(booking => (
-                                        <tr key={booking.booking_id} className="hover:bg-gray-50 transition">
-                                            <td className="px-4 py-4 align-middle">
-                                                {renderActions(booking)}
-                                            </td>
-                                            <td className="px-4 py-4 font-semibold text-gray-800">
-                                                <a 
-                                                    className="cursor-pointer hover:text-blue-600"
-                                                    onClick={() => handleOpenModal(booking.booking_id)}
-                                                >
-                                                    {booking.booking_code}
-                                                </a>
-                                            </td>  
-                                            <td className="px-4 py-4 max-w-[350px]">
-                                                <p className="line-clamp-2 text-sm text-gray-600" title={booking.tour_title}>
-                                                    {booking.tour_title || "—"}
-                                                </p>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-900">
-                                                {formatPrice(booking.final_price) || "0"}
-                                            </td>
-                                            <td className="px-4 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                                {new Date(booking.created_at).toLocaleDateString("vi-VN")}
-                                            </td>
-                                        </tr>    
-                                    ))}
-                                </tbody>
-                            </table>
+                    <Link
+                        href="/account/booking?status=completed"
+                        className={status === "completed" ? activeClass : normalClass}
+                    >
+                        Đã hoàn thành
+                    </Link>
+                    <Link
+                        href="/account/booking?status=cancel_pending"
+                        className={status === "cancel_pending" ? activeClass : normalClass}
+                    >
+                        Chờ hủy
+                    </Link>                 
+                    <Link
+                        href="/account/booking?status=cancelled"
+                        className={status === "cancelled" ? activeClass : normalClass}
+                    >
+                        Đã hủy
+                    </Link>
+                </div>
+                {/* search */}
+                <div className="bg-white p-2 rounded-xl border-1 border-gray-300 my-4">
+                    <input
+                        type="text"
+                        placeholder="Tìm theo booking code."
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        className="w-full px-5 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                </div>
+                {/* table */}
+                <div className="bg-white rounded-xl order-1 border-gray-300 overflow-x-auto">
+                    <table className="w-full min-w-max">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transitio ">
+                                </th>
+                                <th 
+                                    onClick={() => handleSort("booking_code")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        CODE
+                                        <SortIcon isActive={sortBy === "booking_code"} direction={sortBy === "booking_code" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th 
+                                    onClick={() => handleSort("tour_title")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Tên Tour
+                                        <SortIcon isActive={sortBy === "tour_title"} direction={sortBy === "tour_title" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th    
+                                    onClick={() => handleSort("paid_money")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Tiền đã trã
+                                        <SortIcon isActive={sortBy === "paid_money"} direction={sortBy === "paid_money" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th 
+                                    onClick={() => handleSort("final_price")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Giá cuối cùng
+                                        <SortIcon isActive={sortBy === "final_price"} direction={sortBy === "final_price" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th    
+                                    onClick={() => handleSort("depart_date")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Ngày khởi hành
+                                        <SortIcon isActive={sortBy === "depart_date"} direction={sortBy === "depart_date" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                                <th 
+                                    onClick={() => handleSort("created_at")} 
+                                    className="px-6 py-4 text-left font-semibold cursor-pointer hover:bg-gray-100 transition"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        Ngày tạo 
+                                        <SortIcon isActive={sortBy === "created_at"} direction={sortBy === "created_at" ? sortOrder : null} />
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {paginated.map(booking => (
+                            <tr key={booking.booking_id} className="hover:bg-gray-50 transition">
+                                <td className="px-2 py-4 font-medium flex gap-2">
+                                    {renderActions(booking)}
+                                </td>
+                                <td className="px-6 py-4 font-medium">
+                                    <a 
+                                        className="cursor-pointer hover:text-blue-600"
+                                        onClick={() => handleOpenModal(booking.booking_id)}
+                                    >
+                                        {booking.booking_code}
+                                    </a>
+                                </td>
+                                <td className="px-6 py-4 text-gray-600 max-w-[350px]">
+                                    <p className="line-clamp-2 text-sm text-gray-600">
+                                        {booking.tour_title || "—"}
+                                    </p>
+                                </td>
+                                <td className="px-6 py-4"> {formatPrice(booking.paid_money) || "0"}</td>
+                                <td className="px-6 py-4">{formatPrice(booking.final_price) || "0"}</td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                    {booking.depart_date 
+                                        ? new Date(booking.depart_date).toLocaleDateString("vi-VN")
+                                        : "N/A"}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                    {new Date(booking.created_at).toLocaleDateString("vi-VN")}
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                {/* navigation */}
+                <div className=" bottom-4 left-0 right-0">
+                    {totalPages > 1 && (
+                        <div className="mt-4 flex justify-center items-center gap-2 flex-wrap">
+                            {/* arrow left */}
+                            <button
+                                onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                                disabled={page === 1}
+                                className={`px-3 py-2 rounded-lg font-medium transition ${
+                                    page === 1 
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                        : "bg-gray-200 hover:bg-gray-300 cursor-pointer"
+                                }`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                </svg>
+                            </button>
+                            {/* number page */}
+                            {(() => {
+                                const maxVisible = 5;
+                                let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+                                const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                                
+                                // Điều chỉnh lại nếu không đủ 5 số
+                                if (endPage - startPage + 1 < maxVisible) {
+                                    startPage = Math.max(1, endPage - maxVisible + 1);
+                                }
+                                
+                                return Array.from(
+                                    { length: endPage - startPage + 1 }, 
+                                    (_, i) => startPage + i
+                                ).map(p => (
+                                    <button 
+                                        key={p} 
+                                        onClick={() => setPage(p)}
+                                        className={`px-5 py-2 rounded-lg font-medium transition cursor-pointer ${
+                                            page === p 
+                                                ? "bg-blue-600 text-white" 
+                                                : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
+                                    >
+                                        {p}
+                                    </button>
+                                ));
+                            })()}
+                            {/* arrow right */}
+                            <button
+                                onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={page === totalPages}
+                                className={`px-3 py-2 rounded-lg font-medium transition ${
+                                    page === totalPages 
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                        : "bg-gray-200 hover:bg-gray-300 cursor-pointer"
+                                }`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
                         </div>
-                    </div>
-
-                    {/* navigation section - Đã bỏ absolute để tránh lỗi layout */}
-                    <div className="mt-8 mb-6">
-                        {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-2 flex-wrap">
-                                {/* arrow left */}
-                                <button
-                                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
-                                    disabled={page === 1}
-                                    className={`px-3 py-2 rounded-lg font-medium transition ${
-                                        page === 1 
-                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                                            : "bg-gray-200 hover:bg-gray-300 cursor-pointer text-gray-700"
-                                    }`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                    </svg>
-                                </button>
-
-                                {/* number pages */}
-                                {(() => {
-                                    const maxVisible = 5;
-                                    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
-                                    const endPage = Math.min(totalPages, startPage + maxVisible - 1);
-                                    
-                                    if (endPage - startPage + 1 < maxVisible) {
-                                        startPage = Math.max(1, endPage - maxVisible + 1);
-                                    }
-                                    
-                                    return Array.from(
-                                        { length: endPage - startPage + 1 }, 
-                                        (_, i) => startPage + i
-                                    ).map(p => (
-                                        <button 
-                                            key={p} 
-                                            onClick={() => setPage(p)}
-                                            className={`px-4 py-2 rounded-lg font-bold transition cursor-pointer min-w-[45px] ${
-                                                page === p 
-                                                    ? "bg-blue-600 text-white shadow-md" 
-                                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                            }`}
-                                        >
-                                            {p}
-                                        </button>
-                                    ));
-                                })()}
-
-                                {/* arrow right */}
-                                <button
-                                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={page === totalPages}
-                                    className={`px-3 py-2 rounded-lg font-medium transition ${
-                                        page === totalPages 
-                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                                            : "bg-gray-200 hover:bg-gray-300 cursor-pointer text-gray-700"
-                                    }`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                    </svg>
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>   
             {selectedBooking && (
