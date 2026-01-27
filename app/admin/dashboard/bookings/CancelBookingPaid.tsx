@@ -58,6 +58,23 @@ export default function CancelBookingPaidPage ({isOpen, onClose, booking_id, onS
             </span>
         );
     };
+    const getBookingStatusBadge = (status: string) => {
+        const statusConfig = {
+            'PENDING': { text: 'Chờ xử lý', bg: 'bg-yellow-100', color: 'text-yellow-800' },
+            'PAID': { text: 'Đã thanh toán', bg: 'bg-purple-100', color: 'text-purple-800' },
+            'CONFIRMED': { text: 'Đã xác nhận', bg: 'bg-blue-100', color: 'text-blue-800' },
+            'DEPOSIT': { text: 'Đã đặt cọc', bg: 'bg-cyan-100', color: 'text-cyan-800' },
+            'COMPLETED': { text: 'Hoàn trả', bg: 'bg-green-100', color: 'text-green-800' },
+            'CANCEL_PENDING': { text: 'Hoàn trả', bg: 'bg-orange-100', color: 'text-orange-800' },
+            'CANCELLED': { text: 'Hoàn trả', bg: 'bg-red-100', color: 'text-red-800' },
+        };
+        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
+        return (
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.color}`}>
+                {config.text}
+            </span>
+        );
+    };
 
     const getPaymentMethodBadge = (method: string) => {
         if (method === "CASH") {
@@ -157,7 +174,12 @@ export default function CancelBookingPaidPage ({isOpen, onClose, booking_id, onS
                                     </div>
 
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Trạng thái:</span>
+                                        <span className="text-gray-600">Trạng thái booking:</span>
+                                        {getBookingStatusBadge(paymentData.status_booking || 'PENDING')}
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600">Trạng thái thanh toán:</span>
                                         {getStatusBadge(paymentData.status)}
                                     </div>
 
