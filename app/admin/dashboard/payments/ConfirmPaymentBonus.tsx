@@ -6,14 +6,14 @@ import Image from "next/image";
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 
-interface ConfirmBookingPaidProps {
+interface ConfirmPaymentBonusProps {
     isOpen: boolean;
     onClose: () => void;
     booking_id: string;
     onSuccess: () => void;
 }
 
-export default function ConfirmBookingPaidPage ({isOpen, onClose, booking_id, onSuccess}: ConfirmBookingPaidProps) {
+export default function ConfirmPaymentBonusPage ({isOpen, onClose, booking_id, onSuccess}: ConfirmPaymentBonusProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [paymentData, setPaymentData] = useState<ReadPaymentAdminInfo | null>(null);
@@ -89,9 +89,9 @@ export default function ConfirmBookingPaidPage ({isOpen, onClose, booking_id, on
 
         try {
             const res = await fetch(
-                `${API_URL}/booking/admin/confirm-booking-paid/${booking_id}`,
+                `${API_URL}/payment/admin/confirm-payment-bonus/${paymentData?.payment_id}`,
                 {
-                    method: "PATCH",
+                    method: "PUT",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
@@ -211,7 +211,7 @@ export default function ConfirmBookingPaidPage ({isOpen, onClose, booking_id, on
                             <div className="flex gap-3 justify-end">
                                 <button
                                     onClick={onClose}
-                                    className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+                                    className="px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition cursor-pointer"
                                     disabled={loading}
                                 >
                                     Đóng

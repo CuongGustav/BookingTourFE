@@ -46,7 +46,8 @@ export default function ReadPaymentAdminPage ({isOpen, onClose, payment_id} : Mo
             'PENDING': { text: 'Chờ xử lý', bg: 'bg-yellow-100', color: 'text-yellow-800' },
             'COMPLETED': { text: 'Hoàn thành', bg: 'bg-green-100', color: 'text-green-800' },
             'FAILED': { text: 'Thất bại', bg: 'bg-red-100', color: 'text-red-800' },
-            'REFUNDED': { text: 'Hoàn trả', bg: 'bg-blue-100', color: 'text-blue-800' }
+            'REFUNDED': { text: 'Hoàn trả', bg: 'bg-blue-100', color: 'text-blue-800' },
+            'BONUS': { text: 'Bổ sung', bg: 'bg-purple-100', color: 'text-purple-800' }, 
         };
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
         return (
@@ -109,7 +110,7 @@ export default function ReadPaymentAdminPage ({isOpen, onClose, payment_id} : Mo
                             </div>
 
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Phương thức:</span>
+                                <span className="text-gray-600">Phương thức thanh toán:</span>
                                 {getPaymentMethodBadge(paymentData.payment_method)}
                             </div>
 
@@ -121,7 +122,7 @@ export default function ReadPaymentAdminPage ({isOpen, onClose, payment_id} : Mo
                             </div>
 
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Trạng thái:</span>
+                                <span className="text-gray-600">Trạng thái thanh toán:</span>
                                 {getStatusBadge(paymentData.status)}
                             </div>
 

@@ -7,6 +7,7 @@ import { formatPrice } from "@/app/common";
 import ReadPaymentAdminPage from "./ReadPaymentDetail";
 import CancelBookingPaidPage from "../bookings/CancelBookingPaid";
 import ConfirmBookingPaidPage from "../bookings/ConfirmBookingPaid";
+import ConfirmPaymentBonusPage from "./ConfirmPaymentBonus";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
@@ -44,7 +45,8 @@ export default function AdminPage () {
     const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
     const [isOpenModalCancelBookingPaid, setIsOpenModalCancelBookingPaid] = useState(false);
     const [isOpenModalConfirmBookingPaid, setIsOpenModalConfirmBookingPaid] = useState(false);
-    
+    const [isOpenModalConfirmPaymentBonus, setIsOpenModalConfirmPaymentBonus] = useState(false);
+
 
     const fetchListPayment = async () => {
         try {
@@ -234,6 +236,33 @@ export default function AdminPage () {
                                                     </button>
                                                 </div>
                                             )}
+                                            {payment.status === "BONUS" && (
+                                                <div className="flex gap-2 items-center">
+                                                    <button 
+                                                        className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"                          
+                                                        onClick={ () => {
+                                                            console.log("Cannot cancel bonus payment")
+                                                        }
+                                                    }
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button 
+                                                        className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                                                        onClick={ () => {
+                                                            setSelectedBookingId(payment.booking_id)
+                                                            setIsOpenModalConfirmPaymentBonus(true)
+                                                        }
+                                                    }
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 font-medium max-w-[180px] overflow-hidden">
                                             <a
@@ -282,6 +311,8 @@ export default function AdminPage () {
                                                         ? "bg-green-100 text-green-800"
                                                         : payment.status === "FAILED"
                                                         ? "bg-orange-100 text-orange-800"
+                                                        : payment.status === "BONUS"
+                                                        ? "bg-purple-100 text-purple-800"
                                                         : "bg-red-100 text-red-800"
                                                 }`}
                                             >
@@ -293,6 +324,8 @@ export default function AdminPage () {
                                                     ? "Hoàn thành"
                                                     : payment.status === "FAILED"
                                                     ? "Thất bại"
+                                                    : payment.status === "BONUS"
+                                                    ? "Bổ sung"
                                                     : "Đã hủy"}
                                             </span>
                                         </td>
@@ -398,6 +431,18 @@ export default function AdminPage () {
                     isOpen={isOpenModalConfirmBookingPaid}
                     onClose={()=>{
                         setIsOpenModalConfirmBookingPaid(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListPayment}
+                /> 
+            )}
+            {/* confirm payment bonus */}
+            {isOpenModalConfirmPaymentBonus && selectedBookingId &&(
+                <ConfirmPaymentBonusPage
+                    isOpen={isOpenModalConfirmPaymentBonus}
+                    onClose={()=>{
+                        setIsOpenModalConfirmPaymentBonus(false)
                         setSelectedBookingId(null);
                     }}
                     booking_id={selectedBookingId}

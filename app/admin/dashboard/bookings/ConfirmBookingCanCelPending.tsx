@@ -61,7 +61,8 @@ export default function ConfirmBookingCancelPending ({isOpen, onClose, booking_i
             'PENDING': { text: 'Chờ xử lý', bg: 'bg-yellow-100', color: 'text-yellow-800' },
             'COMPLETED': { text: 'Hoàn thành', bg: 'bg-green-100', color: 'text-green-800' },
             'FAILED': { text: 'Thất bại', bg: 'bg-red-100', color: 'text-red-800' },
-            'REFUNDED': { text: 'Hoàn trả', bg: 'bg-blue-100', color: 'text-blue-800' }
+            'REFUNDED': { text: 'Hoàn trả', bg: 'bg-blue-100', color: 'text-blue-800' },
+            'BONUS': { text: 'Bổ sung', bg: 'bg-purple-100', color: 'text-purple-800' },
         };
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
         return (
