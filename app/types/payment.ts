@@ -6,7 +6,7 @@ export interface PaymentInfo{
     booking_code: string,
     payment_method: "CASH" | "BANK_TRANSFER",
     amount: number,
-    status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED",
+    status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED" | "BONUS",
     created_at: string,
 }
 
@@ -34,7 +34,7 @@ export interface ReadPaymentAdminInfo {
     booking_code: string,
     payment_method: "CASH" | "BANK_TRANSFER",
     amount: number,
-    status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED",
+    status: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED" | "BONUS",
     created_at: string,
     payment_images: PaymentImageInfo[],
     cancellation_reason?: string;

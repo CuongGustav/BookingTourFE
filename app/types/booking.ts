@@ -14,6 +14,7 @@ export interface ReadBookingUser {
     final_price: number;
     paid_money?: number;
     is_full_payment?: number;
+    is_bonus?: number;
     remaining_amount?: number;
     contact_name: string;
     contact_email: string;
@@ -67,6 +68,7 @@ export interface ReadBookingDetail {
     cancellation_reason?: string;
     is_review?: boolean;
     depart_date?: string;
+    is_bonus?: boolean;
 }
 
 export interface BookingResponse {

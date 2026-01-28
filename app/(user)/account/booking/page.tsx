@@ -171,12 +171,19 @@ export default function BookingAccountPage () {
                 return (
                     <div className="flex gap-2">
                         {!booking.is_full_payment && (
-                            <button 
-                                className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                            <button
+                                disabled={!!booking.is_bonus}
+                                className={`p-1 border-1 border-gray-400 rounded
+                                    ${booking.is_bonus
+                                    ? "cursor-not-allowed opacity-50"
+                                    : "cursor-pointer hover:bg-green-600 hover:text-white"}
+                                `}
                                 onClick={() => {
-                                    console.log('Thanh toán booking:', booking.booking_code);
+                                    if (!booking.is_bonus) {
+                                        router.push(`/payment/remaining/${booking.booking_id}`)
+                                    }
                                 }}
-                                title="Thanh toán"
+                                title={booking.is_bonus ? "Đang chờ xác nhận thanh toán" : "Thanh toán"}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
@@ -184,7 +191,12 @@ export default function BookingAccountPage () {
                             </button>
                         )}
                         <button 
-                            className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                            disabled={!!booking.is_bonus}
+                            className={`p-1 border-1 border-gray-400 rounded
+                                    ${booking.is_bonus
+                                    ? "cursor-not-allowed opacity-50"
+                                    : "cursor-pointer hover:bg-red-600 hover:text-white"}
+                                `}
                             onClick={() => {
                                 setIsOpenModalCanCelBookingConfirm(true)
                                 setSelectedBookingID(booking.booking_id)
