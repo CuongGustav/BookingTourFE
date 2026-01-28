@@ -170,7 +170,7 @@ export default function BookingAccountPage () {
             case "confirmed":
                 return (
                     <div className="flex gap-2">
-                        {booking.is_full_payment !== 1 && booking.remaining_amount && booking.remaining_amount > 0 && (
+                        {!booking.is_full_payment && (
                             <button 
                                 className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
                                 onClick={() => {
