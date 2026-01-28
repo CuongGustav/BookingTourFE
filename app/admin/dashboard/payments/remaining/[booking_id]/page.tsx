@@ -36,6 +36,7 @@ export default function RemainingPaymentsPage() {
     const router = useRouter()
     const params = useParams()
     const booking_id = params.booking_id as string;
+
     
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -181,6 +182,11 @@ export default function RemainingPaymentsPage() {
         setDragOver(false);
     };
 
+    const getPaymentMethodValue = (method: PaymentMethod) => {
+        if (method === "CASH") return "cash";
+        return "bank_transfer";
+    };
+
     const handleConfirmPayment = async () => {
         if (!imageFile || !booking) return;
 
@@ -190,13 +196,12 @@ export default function RemainingPaymentsPage() {
 
         const formData = new FormData();
         formData.append("booking_id", booking.booking_id);
-        formData.append("payment_method", method);
+        formData.append("payment_method", getPaymentMethodValue(method));
         formData.append("amount", booking.remaining_amount);
-        formData.append("payment_type", "REMAINING");
-        formData.append("image", imageFile);
+        formData.append("images", imageFile);
 
         try {
-            const res = await fetch(`${API_URL}/payment/admin/create`, {
+            const res = await fetch(`${API_URL}/payment/admin/create-remaining`, {
                 method: "POST",
                 credentials: "include",
                 body: formData,
@@ -241,7 +246,7 @@ export default function RemainingPaymentsPage() {
             
             <div className="mb-6 border rounded-lg p-6 bg-blue-50">
                 <h2 className="text-xl font-bold mb-4 text-blue-800">Thông tin Booking</h2>
-                <div className="flex flex-col gap-2">
+                <div className="gflex felx-col gap-2">
                     <div className="flex gap-2 items-center">
                         <p className="">Mã booking:</p>
                         <p className="font-semibold text-lg">{booking.booking_code}</p>
