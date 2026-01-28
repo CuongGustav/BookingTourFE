@@ -54,6 +54,8 @@ export default function ConfirmBookingCancelPending ({isOpen, onClose, booking_i
 
     if (!isOpen) return null;
 
+    const hasMultiplePayments = paymentData?.refund_info?.payment_count && paymentData.refund_info.payment_count > 1;
+
     const getStatusBadge = (status: string) => {
         const statusConfig = {
             'PENDING': { text: 'Chờ xử lý', bg: 'bg-yellow-100', color: 'text-yellow-800' },
@@ -129,8 +131,14 @@ export default function ConfirmBookingCancelPending ({isOpen, onClose, booking_i
             setError("Vui lòng nhập đầy đủ thông tin: lý do, phương thức hoàn trả, và upload ảnh.");
             return;
         }
-        if (!paymentData?.refund_info?.refund_amount) {
+        if (paymentData?.refund_info?.refund_amount === null || 
+            paymentData?.refund_info?.refund_amount === undefined) {
             setError("Không tìm thấy số tiền hoàn trả");
+            return;
+        }
+        const refundAmount = Number(paymentData.refund_info.refund_amount);
+        if (isNaN(refundAmount) || refundAmount < 0) {
+            setError("Số tiền hoàn trả không hợp lệ");
             return;
         }
 
@@ -141,10 +149,7 @@ export default function ConfirmBookingCancelPending ({isOpen, onClose, booking_i
             const formData = new FormData();
             formData.append("cancellation_reason", reason);
             formData.append("payment_method", refundMethod);
-            formData.append(
-                "amount",
-                paymentData.refund_info.refund_amount.toString()
-            );
+            formData.append("amount", refundAmount.toString());
 
             if (imageFile) {
                 formData.append("images", imageFile);
@@ -221,7 +226,10 @@ export default function ConfirmBookingCancelPending ({isOpen, onClose, booking_i
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600">Số tiền:</span>
                                         <span className="font-bold text-xl text-blue-900">
-                                            {formatPrice(Number(paymentData.amount))}
+                                            {hasMultiplePayments 
+                                                ? formatPrice(Number(paymentData.refund_info?.total_paid || 0))
+                                                : formatPrice(Number(paymentData.amount))
+                                            }
                                         </span>
                                     </div>
 
