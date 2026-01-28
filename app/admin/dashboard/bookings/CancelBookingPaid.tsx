@@ -64,9 +64,9 @@ export default function CancelBookingPaidPage ({isOpen, onClose, booking_id, onS
             'PAID': { text: 'Đã thanh toán', bg: 'bg-purple-100', color: 'text-purple-800' },
             'CONFIRMED': { text: 'Đã xác nhận', bg: 'bg-blue-100', color: 'text-blue-800' },
             'DEPOSIT': { text: 'Đã đặt cọc', bg: 'bg-cyan-100', color: 'text-cyan-800' },
-            'COMPLETED': { text: 'Hoàn trả', bg: 'bg-green-100', color: 'text-green-800' },
-            'CANCEL_PENDING': { text: 'Hoàn trả', bg: 'bg-orange-100', color: 'text-orange-800' },
-            'CANCELLED': { text: 'Hoàn trả', bg: 'bg-red-100', color: 'text-red-800' },
+            'COMPLETED': { text: 'Hoàn thành', bg: 'bg-green-100', color: 'text-green-800' },
+            'CANCEL_PENDING': { text: 'Chờ hủy', bg: 'bg-orange-100', color: 'text-orange-800' },
+            'CANCELLED': { text: 'Đã hủy', bg: 'bg-red-100', color: 'text-red-800' },
         };
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
         return (

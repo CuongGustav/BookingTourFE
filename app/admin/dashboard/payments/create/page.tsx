@@ -1,7 +1,6 @@
 'use client'
-
 import { useRouter } from "next/navigation"
-import { useState, useEffect, DragEvent } from "react"
+import { useState, useEffect, DragEvent, useCallback } from "react"
 import Select, { SingleValue } from "react-select"
 import { formatPrice } from "@/app/common"
 import Image from "next/image"
@@ -9,12 +8,15 @@ import Image from "next/image"
 const API_URL = process.env.NEXT_PUBLIC_URL_API;
 
 type PaymentMethod = "QR" | "TRANSFER" | "CASH";
+type PaymentType = "FULL" | "DEPOSIT";
 
 interface Booking {
     booking_id: string;
     booking_code: string;
     final_price: string;
     status: string;
+    is_full_payment: boolean;
+    remaining_amount: string;
 }
 
 interface BookingOption {
@@ -22,16 +24,19 @@ interface BookingOption {
     label: string;
 }
 
+interface BankInfo {
+    bank_name: string;
+    account_no: string;
+    account_name: string;
+    amount: number;
+    description: string;
+}
+
 interface QRCodeResponse {
     message: string;
     qr_code: string;
-    bank_info: {
-        bank_name: string;
-        account_no: string;
-        account_name: string;
-        amount: number;
-        description: string;
-    };
+    payment_type: string;
+    bank_info: BankInfo;
 }
 
 export default function CreatePaymentAdminPage () {
@@ -41,20 +46,22 @@ export default function CreatePaymentAdminPage () {
     const [bookings, setBookings] = useState<Booking[]>([])
     const [selectedBookingId, setSelectedBookingId] = useState<string>("")
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
-
+    
     // Payment states
     const [method, setMethod] = useState<PaymentMethod>("QR")
+    const [paymentType, setPaymentType] = useState<PaymentType>("FULL")
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [preview, setPreview] = useState<string>("")
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
     const [submitSuccess, setSubmitSuccess] = useState(false)
     const [dragOver, setDragOver] = useState(false)
-
+    
     // QR Code state
     const [qrCode, setQrCode] = useState<string | null>(null)
     const [qrLoading, setQrLoading] = useState(false)
     const [qrError, setQrError] = useState<string | null>(null)
+    const [qrBankInfo, setQrBankInfo] = useState<BankInfo | null>(null)
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -64,12 +71,12 @@ export default function CreatePaymentAdminPage () {
                 const res = await fetch(`${API_URL}/booking/admin/all`, {
                     credentials: "include",
                 })
-
                 if (!res.ok) throw new Error("Không thể tải danh sách booking")
-
                 const result = await res.json()
                 const filteredBookings = (result || []).filter(
-                    (b: Booking) => b.status === 'PENDING'
+                    (b: Booking) =>
+                        b.status === 'PENDING' ||
+                        (b.status === 'CONFIRMED' && b.is_full_payment === false)
                 )
                 setBookings(filteredBookings)
             } catch (err) {
@@ -79,26 +86,62 @@ export default function CreatePaymentAdminPage () {
                 setLoading(false)
             }
         }
-
         fetchBookings()
     }, [])
+
+    const getPayAmount = useCallback((booking: Booking | null): number => {
+        if (!booking) return 0;
+        
+        // Nếu là booking CONFIRMED và chưa thanh toán đủ -> trả số tiền còn lại
+        if (booking.status === "CONFIRMED" && !Boolean(booking.is_full_payment)) {
+            return Number(booking.remaining_amount);
+        }
+        
+        // Nếu là booking PENDING
+        if (booking.status === "PENDING") {
+            if (paymentType === "FULL") {
+                return Number(booking.final_price);
+            } else {
+                return Number(booking.final_price) * 0.4;
+            }
+        }
+        
+        return Number(booking.final_price);
+    }, [paymentType]);
+
+    const isRemainingPayment = (booking: Booking | null) => {
+        return booking?.status === "CONFIRMED" && !Boolean(booking.is_full_payment);
+    };
+
+    const isPendingBooking = (booking: Booking | null) => {
+        return booking?.status === "PENDING";
+    };
 
     // Fetch QR Code when booking selected and method is QR
     useEffect(() => {
         const fetchQRCode = async () => {
-            if (!selectedBookingId || method !== "QR") return;
+            if (!selectedBookingId || method !== "QR" || !selectedBooking) return;
+            
+            const amount = getPayAmount(selectedBooking);
             
             setQrLoading(true);
             setQrError(null);
             
             try {
-                const response = await fetch(`${API_URL}/payment/generate-qr/${selectedBookingId}`, {
+                // Nếu là PENDING booking, gửi payment_type
+                let url = `${API_URL}/payment/generate-qr/${selectedBookingId}?amount=${amount}`;
+                if (isPendingBooking(selectedBooking)) {
+                    url += `&payment_type=${paymentType}`;
+                }
+                
+                const response = await fetch(url, {
                     credentials: 'include',
                 });
                 
                 if (response.ok) {
                     const result: QRCodeResponse = await response.json();
                     setQrCode(result.qr_code);
+                    setQrBankInfo(result.bank_info);
                 } else {
                     const errorData = await response.json();
                     setQrError(errorData.message || "Không thể tạo mã QR");
@@ -112,12 +155,20 @@ export default function CreatePaymentAdminPage () {
         };
         
         fetchQRCode();
-    }, [selectedBookingId, method]);
+    }, [selectedBookingId, method, selectedBooking, paymentType, getPayAmount]);
 
-    const bookingOptions: BookingOption[] = bookings.map(booking => ({
-        value: booking.booking_id,
-        label: `${booking.booking_code} - ${formatPrice(Number(booking.final_price))} - Chờ xử lý`
-    }));
+    const bookingOptions: BookingOption[] = bookings.map(booking => {
+        let statusText = "Chờ xử lý";
+        let moneyText = formatPrice(Number(booking.final_price));
+        if (booking.status === "CONFIRMED" && !Boolean(booking.is_full_payment)) {
+            statusText = "Đã xác nhận đặt cọc";
+            moneyText = `Còn thiếu: ${formatPrice(Number(booking.remaining_amount))}`;
+        }
+        return {
+            value: booking.booking_id,
+            label: `${booking.booking_code} - ${moneyText} - ${statusText}`
+        };
+    });
 
     const handleBookingChange = (newValue: SingleValue<BookingOption>) => {
         const bookingId = newValue?.value || "";
@@ -127,10 +178,12 @@ export default function CreatePaymentAdminPage () {
         setSelectedBooking(booking || null);
         
         // Reset payment states
+        setPaymentType("FULL");
         setImageFile(null);
         setPreview("");
         setSubmitError(null);
         setSubmitSuccess(false);
+        setQrCode(null);
     };
 
     const setImage = (file: File) => {
@@ -171,25 +224,28 @@ export default function CreatePaymentAdminPage () {
 
     const handleConfirmPayment = async () => {
         if (!imageFile || !selectedBooking) return;
-
         setIsSubmitting(true);
         setSubmitError(null);
-
+        
+        const payAmount = getPayAmount(selectedBooking);
         const formData = new FormData();
         formData.append("booking_id", selectedBookingId);
         formData.append("payment_method", getPaymentMethodValue(method));
-        formData.append("amount", selectedBooking.final_price.toString());
+        formData.append("amount", payAmount.toString());
         formData.append("images", imageFile);
 
+        const isRemaining = isRemainingPayment(selectedBooking);
+        const endpoint = isRemaining
+            ? `${API_URL}/payment/admin/create-remaining`
+            : `${API_URL}/payment/admin/create`;
+
         try {
-            const response = await fetch(`${API_URL}/payment/admin/create`, {
+            const response = await fetch(endpoint, {
                 method: "POST",
                 body: formData,
                 credentials: 'include',
             });
-
             const result = await response.json();
-
             if (response.ok) {
                 setSubmitSuccess(true);
                 setTimeout(() => {
@@ -209,9 +265,11 @@ export default function CreatePaymentAdminPage () {
     if (loading) return <div className="text-center py-8">Đang tải dữ liệu...</div>;
     if (error) return <div className="text-center py-8 text-red-600">{error}</div>;
 
+    const paymentAmount = getPayAmount(selectedBooking);
+
     return (
         <div className="min-w-100 px-8 mx-auto py-6 h-98/100 overflow-y-auto relative">
-            <button 
+            <button
                 className="bg-white px-4 py-2 rounded-xl border-1 border-gray-300 mb-4 cursor-pointer hover:bg-gray-300 hover:text-white absolute top-4 left-8"
                 onClick={() => router.back()}
             >
@@ -219,6 +277,7 @@ export default function CreatePaymentAdminPage () {
                     <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
             </button>
+
             <div className="flex justify-center">
                 <h1 className="text-3xl font-bold mb-6 text-main">Tạo Thanh Toán</h1>
             </div>
@@ -238,13 +297,58 @@ export default function CreatePaymentAdminPage () {
 
             {selectedBooking && (
                 <div>
+                    {/* Payment Type Selection - Only show for PENDING bookings */}
+                    {isPendingBooking(selectedBooking) && (
+                        <div className="border rounded-lg p-6 bg-gray-50 mb-6">
+                            <h2 className="text-xl font-bold mb-4">Chọn hình thức thanh toán</h2>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Full Payment Option */}
+                                <button
+                                    onClick={() => setPaymentType("FULL")}
+                                    className={`cursor-pointer p-6 rounded-lg border-2 transition-all ${
+                                        paymentType === "FULL"
+                                            ? "border-blue-900 bg-blue-50 shadow-lg"
+                                            : "border-gray-300 hover:border-blue-400"
+                                    }`}
+                                >
+                                    <div className="text-center">
+                                        <h3 className="font-bold text-lg mb-2">Thanh toán 100%</h3>
+                                        <p className="text-3xl font-bold text-blue-900 mb-2">
+                                            {formatPrice(Number(selectedBooking.final_price))}
+                                        </p>
+                                        <p className="text-sm text-gray-600">Thanh toán toàn bộ ngay</p>
+                                    </div>
+                                </button>
+                                {/* Deposit Option */}
+                                <button
+                                    onClick={() => setPaymentType("DEPOSIT")}
+                                    className={`cursor-pointer p-6 rounded-lg border-2 transition-all ${
+                                        paymentType === "DEPOSIT"
+                                            ? "border-orange-600 bg-orange-50 shadow-lg"
+                                            : "border-gray-300 hover:border-orange-400"
+                                    }`}
+                                >
+                                    <div className="text-center">
+                                        <h3 className="font-bold text-lg mb-2">Đặt cọc 40%</h3>
+                                        <p className="text-3xl font-bold text-orange-600 mb-2">
+                                            {formatPrice(Number(selectedBooking.final_price) * 0.4)}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            Còn lại: {formatPrice(Number(selectedBooking.final_price) * 0.6)}
+                                        </p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Tabs */}
-                    <div className="flex gap-4 p-2 border-b border-t border-gray-400">
+                    <div className="flex gap-4 px-2 py-4 border-b">
                         <button
                             onClick={() => setMethod("TRANSFER")}
-                            className={`font-bold transition cursor-pointer ${
+                            className={`pb-2 font-bold transition cursor-pointer ${
                                 method === "TRANSFER"
-                                    ? "border-blue-900 text-blue-900"
+                                    ? "border-b-2 border-blue-900 text-blue-900"
                                     : "hover:text-blue-600"
                             }`}
                         >
@@ -252,9 +356,9 @@ export default function CreatePaymentAdminPage () {
                         </button>
                         <button
                             onClick={() => setMethod("QR")}
-                            className={`font-bold transition cursor-pointer ${
+                            className={`pb-2 font-bold transition cursor-pointer ${
                                 method === "QR"
-                                    ? "border-blue-900 text-blue-900"
+                                    ? "border-b-2 border-blue-900 text-blue-900"
                                     : "hover:text-blue-600"
                             }`}
                         >
@@ -262,9 +366,9 @@ export default function CreatePaymentAdminPage () {
                         </button>
                         <button
                             onClick={() => setMethod("CASH")}
-                            className={`font-bold transition cursor-pointer ${
+                            className={`pb-2 font-bold transition cursor-pointer ${
                                 method === "CASH"
-                                    ? "border-blue-900 text-blue-900"
+                                    ? "border-b-2 border-blue-900 text-blue-900"
                                     : "hover:text-blue-600"
                             }`}
                         >
@@ -273,7 +377,7 @@ export default function CreatePaymentAdminPage () {
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
+                    <div className="p-4 border rounded-lg">
                         <div className="flex gap-8 items-start">
                             {/* Payment Info */}
                             <div className="flex flex-col gap-2 w-1/2">
@@ -294,7 +398,9 @@ export default function CreatePaymentAdminPage () {
                                         </div>
                                         <div className="flex justify-between border-b-1 p-2">
                                             <span>Số tiền</span>
-                                            <span>{formatPrice(Number(selectedBooking.final_price))}</span>
+                                            <span className="font-bold text-lg text-blue-900">
+                                                {formatPrice(paymentAmount)}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between border-b-1 p-2">
                                             <span>Nội dung chuyển khoản</span>
@@ -306,30 +412,67 @@ export default function CreatePaymentAdminPage () {
                                     <div className="flex flex-col items-center gap-4">
                                         <h3 className="font-semibold mb-2">Thanh toán bằng QR</h3>
                                         {qrLoading && (
-                                            <div className="flex items-center justify-center h-64">
-                                                <p>Đang tạo mã QR...</p>
+                                            <div className="flex flex-col items-center justify-center h-64 gap-3">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+                                                <p className="text-gray-600">Đang tạo mã QR...</p>
                                             </div>
                                         )}
                                         {qrError && (
-                                            <div className="text-red-500 text-center">
+                                            <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 mx-auto mb-2">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                                </svg>
                                                 <p>{qrError}</p>
                                             </div>
                                         )}
                                         {qrCode && !qrLoading && (
                                             <div className="flex flex-col items-center gap-3">
-                                                <Image
-                                                    src={qrCode}
-                                                    alt="QR Code thanh toán"
-                                                    width={300}
-                                                    height={300}
-                                                    className="border-2 border-gray-200 rounded-lg"
-                                                />
-                                                <div className="text-sm text-center">
-                                                    <p className="font-semibold">Quét mã QR để chuyển khoản</p>
-                                                    <p className="mt-2">Tên tài khoản: NGUYEN QUOC CUONG</p>
-                                                    <p>Số tiền: {formatPrice(Number(selectedBooking.final_price))}</p>
-                                                    <p>Nội dung: {selectedBooking.booking_code}</p>
-                                                    <p className="text-orange-400">Nếu không có mã QR hãy chuyển sang tab chuyển khoản</p>
+                                                <div className="relative">
+                                                    <Image
+                                                        src={qrCode}
+                                                        alt="QR Code thanh toán"
+                                                        width={300}
+                                                        height={300}
+                                                        className="border-2 border-gray-200 rounded-lg shadow-lg"
+                                                    />
+                                                    {/* Badge showing payment type - Only for PENDING bookings */}
+                                                    {isPendingBooking(selectedBooking) && (
+                                                        <>
+                                                            {paymentType === "DEPOSIT" && (
+                                                                <div className="absolute -top-3 -right-3 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                                                    Đặt cọc 40%
+                                                                </div>
+                                                            )}
+                                                            {paymentType === "FULL" && (
+                                                                <div className="absolute -top-3 -right-3 bg-blue-900 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                                                    Thanh toán 100%
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                    {/* Badge for remaining payment */}
+                                                    {isRemainingPayment(selectedBooking) && (
+                                                        <div className="absolute -top-3 -right-3 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                                            Thanh toán phần còn lại
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-center bg-gray-50 p-4 rounded-lg w-full">
+                                                    <p className="font-semibold text-lg mb-3">Quét mã QR để chuyển khoản</p>
+                                                    {qrBankInfo && (
+                                                        <>
+                                                            <div className="space-y-1 text-gray-700">
+                                                                <p>Tên tài khoản: <span className="font-medium">{qrBankInfo.account_name}</span></p>
+                                                                <p className="font-bold text-2xl text-blue-900 my-2">
+                                                                    {formatPrice(qrBankInfo.amount)}
+                                                                </p>
+                                                                <p>Nội dung: <span className="font-medium">{qrBankInfo.description}</span></p>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                    <p className="text-orange-400 mt-3 text-xs">
+                                                        Nếu không quét được QR, hãy chuyển sang tab Chuyển khoản
+                                                    </p>
                                                 </div>
                                             </div>
                                         )}
@@ -340,7 +483,9 @@ export default function CreatePaymentAdminPage () {
                                         <h3 className="font-semibold mb-2">Thông tin thanh toán</h3>
                                         <div className="flex justify-between border-b-1 p-2">
                                             <span>Số tiền</span>
-                                            <span>{formatPrice(Number(selectedBooking.final_price))}</span>
+                                            <span className="font-bold text-lg text-blue-900">
+                                                {formatPrice(paymentAmount)}
+                                            </span>
                                         </div>
                                     </>
                                 )}
@@ -396,22 +541,22 @@ export default function CreatePaymentAdminPage () {
                             </div>
                         </div>
 
-                        <button 
+                        <button
                             onClick={handleConfirmPayment}
                             disabled={!imageFile || isSubmitting}
-                            className={`w-full py-3 px-2 border-b rounded-xl mt-4 transition ${
+                            className={`w-full py-4 px-2 rounded-xl mt-4 font-bold text-lg transition ${
                                 imageFile && !isSubmitting
-                                    ? "bg-blue-900 text-white cursor-pointer hover:bg-blue-800" 
+                                    ? "bg-blue-900 text-white cursor-pointer hover:bg-blue-800"
                                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
                         >
-                            {isSubmitting ? "Đang xử lý..." : "Xác nhận thanh toán"}
+                            {isSubmitting ? "Đang xử lý..." : `Xác nhận thanh toán ${formatPrice(paymentAmount)}`}
                         </button>
-                        {submitError && <p className="text-red-500 mt-2">{submitError}</p>}
-                        {submitSuccess && <p className="text-green-500 mt-2">Thanh toán thành công!</p>}
+                        {submitError && <p className="text-red-500 mt-2 text-center">{submitError}</p>}
+                        {submitSuccess && <p className="text-green-500 mt-2 text-center">Thanh toán thành công!</p>}
                     </div>
                 </div>
             )}
-        </div>    
+        </div>
     )
 }

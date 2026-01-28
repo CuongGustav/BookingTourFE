@@ -74,9 +74,9 @@ export default function CancelBookingConfirmPage ({isOpen, onClose, booking_id, 
             'PAID': { text: 'Đã thanh toán', bg: 'bg-purple-100', color: 'text-purple-800' },
             'CONFIRMED': { text: 'Đã xác nhận', bg: 'bg-blue-100', color: 'text-blue-800' },
             'DEPOSIT': { text: 'Đã đặt cọc', bg: 'bg-cyan-100', color: 'text-cyan-800' },
-            'COMPLETED': { text: 'Hoàn trả', bg: 'bg-green-100', color: 'text-green-800' },
-            'CANCEL_PENDING': { text: 'Hoàn trả', bg: 'bg-orange-100', color: 'text-orange-800' },
-            'CANCELLED': { text: 'Hoàn trả', bg: 'bg-red-100', color: 'text-red-800' },
+            'COMPLETED': { text: 'Hoàn thành', bg: 'bg-green-100', color: 'text-green-800' },
+            'CANCEL_PENDING': { text: 'Chờ hủy', bg: 'bg-orange-100', color: 'text-orange-800' },
+            'CANCELLED': { text: 'Đã hủy', bg: 'bg-red-100', color: 'text-red-800' },
         };
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
         return (
@@ -85,6 +85,8 @@ export default function CancelBookingConfirmPage ({isOpen, onClose, booking_id, 
             </span>
         );
     };
+
+    const hasMultiplePayments = paymentData?.refund_info?.payment_count && paymentData.refund_info.payment_count > 1;
 
     const getPaymentMethodBadge = (method: string) => {
         if (method === "CASH") {
@@ -221,7 +223,10 @@ export default function CancelBookingConfirmPage ({isOpen, onClose, booking_id, 
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600">Số tiền:</span>
                                         <span className="font-bold text-xl text-blue-900">
-                                            {formatPrice(Number(paymentData.amount))}
+                                            {hasMultiplePayments 
+                                                ? formatPrice(Number(paymentData.refund_info?.total_paid || 0))
+                                                : formatPrice(Number(paymentData.amount))
+                                            }
                                         </span>
                                     </div>
 

@@ -10,12 +10,22 @@ export interface PaymentInfo{
     created_at: string,
 }
 
+export interface PaymentBreakdown {
+    payment_id: string;
+    amount: number;
+    payment_method: string;
+    created_at: string;
+}
+
 export interface RefundInfo {
     cancellation_date: string;        
     days_before_departure: number;    
     departure_date: string;           
     refund_amount: number;             
-    refund_percentage: number;         
+    refund_percentage: number;     
+    total_paid?: number;
+    payment_count?: number;
+    payment_breakdown?: PaymentBreakdown[];    
 }
 
 export interface ReadPaymentAdminInfo {
