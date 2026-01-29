@@ -43,6 +43,7 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
     const [numAdults, setNumAdults] = useState(1);
     const [numChildren, setNumChildren] = useState(0);
     const [numInfants, setNumInfants] = useState(0);
+    const [duplicateIdErrors, setDuplicateIdErrors] = useState<number[]>([]);
 
     const [adultPassengers, setAdultPassengers] = useState<CreateBookingPassenger[]>([
         {
@@ -253,13 +254,28 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
             const hasAdultErrors = adultErrors.some(e => e.full_name || e.date_of_birth || e.id_number || e.gender);
             const hasChildErrors = childErrors.some(e => e.full_name || e.date_of_birth || e.gender);
             const hasInfantErrors = infantErrors.some(e => e.full_name || e.date_of_birth || e.gender);
-            return isAdultsFilled && isChildrenFilled && isInfantsFilled && 
-                !hasAdultErrors && !hasChildErrors && !hasInfantErrors;
+
+            const idNumbers = adultPassengers.map(p => p.id_number.trim());
+            const duplicates: number[] = [];
+            idNumbers.forEach((id, index) => {
+                if (id !== "" && idNumbers.indexOf(id) !== index) {
+                    // Nếu tìm thấy một id đã xuất hiện trước đó
+                    const firstIndex = idNumbers.indexOf(id);
+                    if (!duplicates.includes(firstIndex)) duplicates.push(firstIndex);
+                    duplicates.push(index);
+                }
+            });
+            setDuplicateIdErrors(duplicates);
+
+                return isAdultsFilled && isChildrenFilled && isInfantsFilled && 
+                !hasAdultErrors && !hasChildErrors && !hasInfantErrors && 
+                duplicates.length === 0;
         };
+
         if (onValidityChange) {
             onValidityChange(validateAll());
         }
-    }, [adultPassengers, childPassengers, infantPassengers, adultErrors, childErrors, infantErrors, onValidityChange]); 
+    }, [adultPassengers, childPassengers, infantPassengers, adultErrors, childErrors, infantErrors, onValidityChange]);
 
     //response --> update 
     const [isInitialLoaded, setIsInitialLoaded] = useState(false);
@@ -397,6 +413,9 @@ export default function BookingPassenger({singleRoomSurCharge, onNumPassengerCha
                                     onBlur={() => validateAdult(index)}
                                 />
                                 {adultErrors[index]?.id_number && <p className="text-red-600 text-sm">{adultErrors[index].id_number}</p>}
+                                {duplicateIdErrors.includes(index) && !adultErrors[index]?.id_number && (
+                                    <p className="text-red-600 text-sm">Số CCCD này đã bị trùng</p>
+                                )}
                             </div>
                             <div>
                                 <div className="flex gap-1">

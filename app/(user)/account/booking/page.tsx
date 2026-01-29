@@ -263,7 +263,7 @@ export default function BookingAccountPage () {
                     single_room_surcharge: booking.single_room_surcharge || 0,
                 },
                 schedule: {
-                    departure_date: booking.departure_date || new Date().toISOString(),
+                    departure_date: booking.depart_date,
                 },
                 contact_name: booking.contact_name,
                 contact_email: booking.contact_email,

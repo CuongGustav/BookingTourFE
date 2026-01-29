@@ -1,5 +1,3 @@
-// Fixed File: app/admin/booking/create/BookingPassengerAdmin.tsx
-
 'use client'
 
 import { useState, useEffect } from "react"
@@ -233,13 +231,24 @@ export default function BookingPassengerAdmin({singleRoomSurCharge, onNumPasseng
 
     useEffect(() => {
         if (onValidityChange) {
-            const isValid = 
+            const hasNoFieldErrors = 
                 adultErrors.every(e => Object.values(e).every(err => !err)) &&
                 childErrors.every(e => Object.values(e).every(err => !err)) &&
                 infantErrors.every(e => Object.values(e).every(err => !err));
+
+            const isAdultFilled = adultPassengers.every(p => p.full_name.trim() !== '' && p.id_number.trim() !== '');
+
+            //check id_number
+            const idNumbers = adultPassengers
+                .map(p => p.id_number.trim())
+                .filter(id => id !== ""); 
+            
+            const hasDuplicateId = new Set(idNumbers).size !== idNumbers.length;
+            const isValid = hasNoFieldErrors && isAdultFilled && !hasDuplicateId;
+            
             onValidityChange(isValid);
         }
-    }, [adultErrors, childErrors, infantErrors, onValidityChange]);
+    }, [adultErrors, childErrors, infantErrors, adultPassengers, onValidityChange]);
 
     return (
         <div className="mt-4">
@@ -286,6 +295,18 @@ export default function BookingPassengerAdmin({singleRoomSurCharge, onNumPasseng
                         </button>
                     </div>
                 </div>
+                {(() => {
+                    const idNumbers = adultPassengers.map(p => p.id_number.trim()).filter(id => id !== "");
+                    const isDuplicate = new Set(idNumbers).size !== idNumbers.length;
+                    if (isDuplicate) {
+                        return (
+                            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded mb-4 text-sm font-medium">
+                                Phát hiện số CCCD trùng lặp giữa các hành khách. Vui lòng kiểm tra lại!
+                            </div>
+                        );
+                    }
+                    return null;
+                })()}
                 {/* have adults */}
                 {adultPassengers.map((passenger, index) => (
                     <div key={`adult-${index}`} className="pb-4">
