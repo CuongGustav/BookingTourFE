@@ -110,11 +110,11 @@ export default function GeneralStaticsPage() {
     if (loading) return <div className="p-8 text-center text-lg">Đang tải thống kê...</div>;
 
     return (
-        <div className="bg-white rounded-lg pt-6 px-6">
+        <div className="bg-white rounded-lg pt-6 pb-3 px-6">
             <h2 className="text-2xl font-bold mb-6 text-gray-800">Thống kê doanh thu</h2>
             
             {/* Filter Controls */}
-            <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex flex-wrap gap-4 mb-3">
                 <div className="flex gap-2">
                     <button
                         onClick={() => {
