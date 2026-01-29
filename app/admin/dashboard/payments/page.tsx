@@ -8,6 +8,7 @@ import ReadPaymentAdminPage from "./ReadPaymentDetail";
 import CancelBookingPaidPage from "../bookings/CancelBookingPaid";
 import ConfirmBookingPaidPage from "../bookings/ConfirmBookingPaid";
 import ConfirmPaymentBonusPage from "./ConfirmPaymentBonus";
+import CancelPaymentBonusPage from "./CancelPaymentBonus";
 
 const API_URL = process.env.NEXT_PUBLIC_URL_API
 
@@ -46,6 +47,8 @@ export default function AdminPage () {
     const [isOpenModalCancelBookingPaid, setIsOpenModalCancelBookingPaid] = useState(false);
     const [isOpenModalConfirmBookingPaid, setIsOpenModalConfirmBookingPaid] = useState(false);
     const [isOpenModalConfirmPaymentBonus, setIsOpenModalConfirmPaymentBonus] = useState(false);
+    const [isOpenModalCancelPaymentBonus, setIsOpenModalCancelPaymentBonus] = useState(false);
+
 
 
     const fetchListPayment = async () => {
@@ -241,7 +244,8 @@ export default function AdminPage () {
                                                     <button 
                                                         className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"                          
                                                         onClick={ () => {
-                                                            console.log("Cannot cancel bonus payment")
+                                                            setSelectedBookingId(payment.booking_id)
+                                                            setIsOpenModalCancelPaymentBonus(true)
                                                         }
                                                     }
                                                     >
@@ -443,6 +447,18 @@ export default function AdminPage () {
                     isOpen={isOpenModalConfirmPaymentBonus}
                     onClose={()=>{
                         setIsOpenModalConfirmPaymentBonus(false)
+                        setSelectedBookingId(null);
+                    }}
+                    booking_id={selectedBookingId}
+                    onSuccess={fetchListPayment}
+                /> 
+            )}
+            {/* cancel payment bonus */}
+            {isOpenModalCancelPaymentBonus && selectedBookingId &&(
+                <CancelPaymentBonusPage
+                    isOpen={isOpenModalCancelPaymentBonus}
+                    onClose={()=>{
+                        setIsOpenModalCancelPaymentBonus(false)
                         setSelectedBookingId(null);
                     }}
                     booking_id={selectedBookingId}

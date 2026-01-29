@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { ReadTourSchedule } from '@/app/types/tour_schedule'
 import { formatPriceK } from '@/app/common'
 
@@ -11,15 +11,13 @@ interface TourScheduleProps {
 }
 
 export default function TourSchedule({ schedules, onScheduleSelect, selectedSchedule }: TourScheduleProps) {
-    const today = new Date()
-
-    const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1)
-    const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear())
-
+    // Tính toán monthYearList trước
     const monthYearList = useMemo(() => {
         const map = new Map<string, { month: number; year: number }>()
         schedules.forEach(item => {
-            const d = new Date(item.departure_date)
+            // Fix: Parse date properly to avoid timezone issues
+            const [year, month, day] = item.departure_date.split('-').map(Number)
+            const d = new Date(year, month - 1, day)
             const key = `${d.getMonth() + 1}-${d.getFullYear()}`
             if (!map.has(key)) map.set(key, { month: d.getMonth() + 1, year: d.getFullYear() })
         })
@@ -28,6 +26,22 @@ export default function TourSchedule({ schedules, onScheduleSelect, selectedSche
             return a.month - b.month
         })
     }, [schedules])
+
+    // Khởi tạo với tháng đầu tiên có tour, hoặc tháng hiện tại nếu không có tour
+    const today = new Date()
+    const initialMonth = monthYearList.length > 0 ? monthYearList[0].month : today.getMonth() + 1
+    const initialYear = monthYearList.length > 0 ? monthYearList[0].year : today.getFullYear()
+
+    const [selectedMonth, setSelectedMonth] = useState<number>(initialMonth)
+    const [selectedYear, setSelectedYear] = useState<number>(initialYear)
+
+    // Update selected month/year when schedules change
+    useEffect(() => {
+        if (monthYearList.length > 0) {
+            setSelectedMonth(monthYearList[0].month)
+            setSelectedYear(monthYearList[0].year)
+        }
+    }, [monthYearList])
 
     const scheduleByDate = useMemo(() => {
         const map = new Map<string, ReadTourSchedule>()
@@ -138,7 +152,12 @@ export default function TourSchedule({ schedules, onScheduleSelect, selectedSche
                         {calendarDays.map((item, index) => {
                             if (!item.date) return <div key={index} className="h-16" />
 
-                            const dateStr = item.date.toISOString().split('T')[0]
+                            // Fix: Format date properly to match departure_date format (YYYY-MM-DD)
+                            const year = item.date.getFullYear()
+                            const month = String(item.date.getMonth() + 1).padStart(2, '0')
+                            const day = String(item.date.getDate()).padStart(2, '0')
+                            const dateStr = `${year}-${month}-${day}`
+                            
                             const schedule = scheduleByDate.get(dateStr)
                             const isWeekend = item.date.getDay() === 0 || item.date.getDay() === 6
                             const isActive = selectedSchedule?.departure_date === dateStr

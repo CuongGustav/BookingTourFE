@@ -324,7 +324,12 @@ export default function AdminPage () {
                                         {booking.status === "CONFIRMED" && (
                                             <>
                                                 <button 
-                                                    className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-red-600 hover:text-white"
+                                                    disabled={!!booking.is_bonus}
+                                                    className={`p-1 border-1 border-gray-400 rounded
+                                                        ${booking.is_bonus
+                                                        ? "cursor-not-allowed opacity-50"
+                                                        : "cursor-pointer hover:bg-red-600 hover:text-white"}
+                                                    `}
                                                         onClick={ () => {
                                                             setSelectedBookingId(booking.booking_id)
                                                             setIsOpenModalCancelBookingConfirm(true)
@@ -337,7 +342,12 @@ export default function AdminPage () {
                                                 </button>
                                                 {!booking.is_full_payment && (
                                                     <button 
-                                                        className="p-1 border-1 border-gray-400 rounded cursor-pointer hover:bg-green-600 hover:text-white"
+                                                        disabled={!!booking.is_bonus}
+                                                        className={`p-1 border-1 border-gray-400 rounded
+                                                            ${booking.is_bonus
+                                                            ? "cursor-not-allowed opacity-50"
+                                                            : "cursor-pointer hover:bg-green-600 hover:text-white"}
+                                                        `}
                                                         onClick={() => router.push(`/admin/dashboard/payments/remaining/${booking.booking_id}`)}
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">

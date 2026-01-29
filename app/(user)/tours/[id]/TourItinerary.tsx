@@ -54,14 +54,12 @@ export default function TourItinerary({ itineraries }: TourItineraryProps) {
                             onClick={() => toggleDay(index)}
                             className="cursor-pointer w-full px-6 py-2 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors text-left"
                         >
-                            <div className="flex gap-2 items-center justify-center">
-                                <h3 className="text-base font-bold text-blue-900">
-                                    Ngày {day.display_order}: {day.title}
-                                </h3>
-                                <span className="text-sm font-medium">
+                            <h3 className="text-base font-bold text-blue-900">
+                                Ngày {day.display_order}: {day.title}
+                                <span className="text-sm font-medium ml-1 text-black">
                                     ( {day.meals} )
                                 </span>
-                            </div>
+                            </h3>
 
                             {expandedDays.has(index) ? (
                             <ChevronUp className="w-6 h-6 text-blue-900" />
