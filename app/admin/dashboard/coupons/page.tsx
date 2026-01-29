@@ -128,7 +128,7 @@ export default function CouponPage () {
                     <div className="bg-white p-2 rounded-xl border-1 border-gray-300 mb-4 flex-1">
                         <input
                             type="text"
-                            placeholder="Tìm điểm đến, khu vực, vùng miền, mô tả."
+                            placeholder="Tìm code, mô tả."
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                             className="w-full px-5 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"

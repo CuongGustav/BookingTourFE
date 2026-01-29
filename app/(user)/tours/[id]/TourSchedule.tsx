@@ -88,7 +88,7 @@ export default function TourSchedule({ schedules, onScheduleSelect, selectedSche
                                         setSelectedMonth(month)
                                         setSelectedYear(year)
                                     }}
-                                    className={`w-full py-3 rounded-lg font-medium transition
+                                    className={`w-full py-3 rounded-lg font-medium transition cursor-pointer
                                         ${active ? "bg-blue-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-blue-100"}`}
                                 >
                                     {month.toString().padStart(2, '0')}/{year}

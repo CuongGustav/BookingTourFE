@@ -37,7 +37,7 @@ export default function AdminPage () {
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     // const [selectedTour, setSelectedTour] = useState<TourInfo | null>(null)
     const [page, setPage] = useState(1);
-    const pageSize = 6;
+    const pageSize = 5;
     const [selectedTour, setSelectedTour] = useState<TourInfo | null>(null)
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
